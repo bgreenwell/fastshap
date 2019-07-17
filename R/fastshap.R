@@ -1,4 +1,6 @@
 #' @keywords internal
+#' 
+#' @useDynLib fastshap, .registration = TRUE
 shapley_column <- function(object, X, column, pred_wrapper) {
   
   # Find column position if feature name given
@@ -22,6 +24,9 @@ shapley_column <- function(object, X, column, pred_wrapper) {
   
   # Generate "Frankenstein" instances from X and W (in one fell swoop)
   #
+  # Modified from the ALgorithm in Section 5.8.3.3 of Christoph Molnar's IML 
+  # book: https://christophm.github.io/interpretable-ml-book/shapley.html
+  #
   # The first data frame (B1) are the instances of interest, but all values in 
   # the order before and including value of feature j are replaced by feature 
   # values from the shuffled observations in W.
@@ -38,14 +43,15 @@ shapley_column <- function(object, X, column, pred_wrapper) {
 }
 
 
-#' Shapley values
+#' Fast approximate Shapley values
 #' 
 #' Compute fast (approximate) Shapley values for a set of features.
 #' 
 #' @param object A fitted model object (e.g., a \code{"randomForest"} object).
 #'
 #' @param feature_names Character string giving the names of the predictor
-#' variables (i.e., features) of interest.
+#' variables (i.e., features) of interest. If \code{NULL} (default) they will be
+#' taken from the column names of \code{X}.
 #'
 #' @param X A matrix-like R object (e.g., a data frame or matrix) containing 
 #' ONLY the feature columns from the training data.
@@ -69,7 +75,11 @@ shapley_column <- function(object, X, column, pred_wrapper) {
 #' \code{\link[plyr]{laply}}.
 #' 
 #' @export
-fastshap <- function(object, feature_names, X, pred_wrapper, nsim = 1, ...) {
+fastshap <- function(object, feature_names = NULL, X, pred_wrapper, nsim = 1, 
+                     ...) {
+  if (is.null(feature_names)) {
+    feature_names = colnames(X)
+  }
   res <- plyr::laply(feature_names, .fun = function(x) {
     apply(replicate(nsim, {
       shapley_column(object, X = X, column = x, pred_wrapper = pred_wrapper)
@@ -102,9 +112,11 @@ fastshap <- function(object, feature_names, X, pred_wrapper, nsim = 1, ...) {
 #' 
 #' @param ... Additional optional arguemnts. (Currently ignored.)
 #' 
-#' @importFrom ggplot2 aes autoplot coord_flip geom_col geom_point geom_smooth
+#' @importFrom ggplot2 aes_string autoplot coord_flip geom_col geom_point
 #' 
-#' @importFrom ggplot2 xlab ylab
+#' @importFrom ggplot2 geom_smooth ggplot xlab ylab
+#' 
+#' @importFrom stats reorder
 #'
 #' @export
 autoplot.fastshap <- function(object, type = c("importance", "dependence"),
@@ -112,10 +124,10 @@ autoplot.fastshap <- function(object, type = c("importance", "dependence"),
   type <- match.arg(type)
   if (type == "importance") {
     shap_imp <- data.frame(
-      Variable = names(shap),
-      Importance = apply(shap, MARGIN = 2, FUN = function(x) sum(abs(x)))
+      Variable = names(object),
+      Importance = apply(object, MARGIN = 2, FUN = function(x) sum(abs(x)))
     )
-    ggplot(shap_imp, aes(reorder(Variable, Importance), Importance)) +
+    ggplot(shap_imp, aes_string("reorder(Variable, Importance)", "Importance")) +
       geom_col() +
       coord_flip() +
       xlab("") +
@@ -128,7 +140,7 @@ autoplot.fastshap <- function(object, type = c("importance", "dependence"),
       x = X[, feature, drop = TRUE], 
       y = object[, feature, drop = TRUE]
     )
-    ggplot(shap_dep, aes(x = x, y = y)) +
+    ggplot(shap_dep, aes_string(x = "x", y = "y")) +
       geom_point(alpha = 0.3) +
       geom_smooth() +
       xlab(feature) +

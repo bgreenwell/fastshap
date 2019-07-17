@@ -4,7 +4,7 @@
 \alias{autoplot.fastshap}
 \title{Plotting Shapley values}
 \usage{
-autoplot.fastshap(object, type = c("importance", "dependence"),
+\method{autoplot}{fastshap}(object, type = c("importance", "dependence"),
   feature = NULL, X, ...)
 }
 \arguments{

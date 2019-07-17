@@ -59,7 +59,7 @@ system.time({  # estimate run time
                    nsim = 10)
 })
 #>    user  system elapsed 
-#>  94.905   4.392  20.342
+#>  90.515   4.075  19.135
 
 # Results are returned as a tibble (with the additional "shap" class)
 shap
@@ -151,17 +151,41 @@ registerDoParallel(5)
 fastshap(rfo, feature_names = names(X), X = X, pred_wrapper = pfun, nsim = 10, 
          .parallel = TRUE)
 #> # A tibble: 3,000 x 10
-#>       x.1    x.2    x.3    x.4    x.5      x.6      x.7      x.8      x.9
-#>     <dbl>  <dbl>  <dbl>  <dbl>  <dbl>    <dbl>    <dbl>    <dbl>    <dbl>
-#>  1 -0.545  0.600 -0.914 -2.59  -0.429 -0.0196  -0.0131   0.0189   6.22e-2
-#>  2 -4.18   1.89   0.495  0.233  0.772  0.00141 -0.0376  -0.0211   3.26e-2
-#>  3  3.05   1.16  -0.591 -1.81  -1.41   0.0633  -0.158   -0.00274  2.79e-2
-#>  4  0.572 -3.84  -0.430  2.75   0.703 -0.0401  -0.00472 -0.0124   5.72e-2
-#>  5 -3.03  -0.981 -0.397  2.77   0.758 -0.00675  0.0836   0.00981 -1.51e-2
-#>  6  0.243  0.613 -1.18  -1.47   1.18  -0.0767  -0.0999   0.0461  -1.60e-1
-#>  7  1.92   0.344  1.14  -3.43  -1.17  -0.00435 -0.0810  -0.102   -2.91e-4
-#>  8 -0.456 -1.07   0.281  4.21   0.205  0.0996  -0.00499  0.0352   6.19e-2
-#>  9  1.63   1.51  -0.800  4.29  -1.37   0.00633 -0.102    0.0127   1.13e-1
-#> 10  1.44  -2.20  -0.200 -2.65   1.64   0.0309  -0.0110   0.0840  -2.19e-1
+#>        x.1   x.2     x.3    x.4     x.5      x.6      x.7      x.8      x.9
+#>      <dbl> <dbl>   <dbl>  <dbl>   <dbl>    <dbl>    <dbl>    <dbl>    <dbl>
+#>  1 -1.18    1.75 -0.833  -2.31   0.0473 -0.0408   0.0800  -0.151   -0.00714
+#>  2 -4.26    1.66  1.13    0.322  1.17    0.00213  0.146    0.0702   0.0889 
+#>  3  1.55    1.06 -0.433  -3.44  -0.800   0.00814 -0.111   -0.00643  0.0401 
+#>  4  0.734  -1.37 -0.279   5.11   1.05   -0.00355  0.0959  -0.0375   0.0432 
+#>  5 -2.69   -2.95 -0.711   0.879  0.971  -0.171    0.0680  -0.0131  -0.00264
+#>  6 -1.16    1.25 -0.824  -0.375  0.887   0.166    0.0174  -0.0811  -0.131  
+#>  7  0.135   1.91  1.13   -2.72  -1.02   -0.0431  -0.00177  0.00323  0.0242 
+#>  8 -0.0843 -1.16 -0.0792  3.85  -0.614   0.00486  0.144   -0.00763 -0.0163 
+#>  9  1.14    1.89 -0.316   5.14  -1.87    0.0847  -0.155   -0.111    0.0886 
+#> 10  1.41   -2.63 -0.302  -3.57   0.823   0.0212   0.0111  -0.130   -0.00542
 #> # … with 2,990 more rows, and 1 more variable: x.10 <dbl>
 ```
+
+## Comparison with TreeSHAP/TreeExplainer for XGBoost models
+
+You can compute the contributions of each feature for XGBoost models in
+an efficient way using the methods described in (Lundberg 2017). These
+are available through the `predict()` function for **xgboost** models;
+see `?xgboost::predict.xgb.Booster` for details. Below we compute the
+contributions for each feature using both methods and compare the
+results using a Shapley-based dependence plot on feature `x.3`, the
+results are quite surprising (**no parallel processing was used to
+obtain the **fastshap** results**). And remember, **fastshap** can be
+used with any prediction model in R. You can see the code that generated
+these benchmarks in the `slowtests/xgboost.R` file
+[here](https://github.com/bgreenwell/fastshap/blob/master/slowtests/xgboost.R).
+
+![](slowtests/treeshap-comparison.png)
+
+## References
+
+Scott M. Lundberg, Su-In Lee, “A Unified Approach to Interpreting Model
+Predictions”, NIPS Proceedings 2017, <https://arxiv.org/abs/1705.07874>
+
+Scott M. Lundberg, Su-In Lee, “Consistent feature attribution for tree
+ensembles”, <https://arxiv.org/abs/1706.06060>

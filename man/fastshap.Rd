@@ -2,15 +2,16 @@
 % Please edit documentation in R/fastshap.R
 \name{fastshap}
 \alias{fastshap}
-\title{Shapley values}
+\title{Fast approximate Shapley values}
 \usage{
-fastshap(object, feature_names, X, pred_wrapper, nsim = 1, ...)
+fastshap(object, feature_names = NULL, X, pred_wrapper, nsim = 1, ...)
 }
 \arguments{
 \item{object}{A fitted model object (e.g., a \code{"randomForest"} object).}
 
 \item{feature_names}{Character string giving the names of the predictor
-variables (i.e., features) of interest.}
+variables (i.e., features) of interest. If \code{NULL} (default) they will be
+taken from the column names of \code{X}.}
 
 \item{X}{A matrix-like R object (e.g., a data frame or matrix) containing 
 ONLY the feature columns from the training data.}

@@ -121,3 +121,16 @@ registerDoParallel(5)
 fastshap(rfo, feature_names = names(X), X = X, pred_wrapper = pfun, nsim = 10, 
          .parallel = TRUE)
 ```
+
+## Comparison with TreeSHAP/TreeExplainer for XGBoost models
+
+You can compute the contributions of each feature for XGBoost models in an efficient way using the methods described in (Lundberg 2017). These are available through the `predict()` function for **xgboost** models; see `?xgboost::predict.xgb.Booster` for details. Below we compute the contributions for each feature using both methods and compare the results using a Shapley-based dependence plot on feature `x.3`, the results are quite surprising (__no parallel processing was used to obtain the **fastshap** results__). And remember, **fastshap** can be used with any prediction model in R. You can see the code that generated these benchmarks in the `slowtests/xgboost.R` file [here](https://github.com/bgreenwell/fastshap/blob/master/slowtests/xgboost.R).
+
+![](slowtests/treeshap-comparison.png)
+
+
+## References
+
+Scott M. Lundberg, Su-In Lee, "A Unified Approach to Interpreting Model Predictions", NIPS Proceedings 2017, https://arxiv.org/abs/1705.07874
+
+Scott M. Lundberg, Su-In Lee, "Consistent feature attribution for tree ensembles", https://arxiv.org/abs/1706.06060

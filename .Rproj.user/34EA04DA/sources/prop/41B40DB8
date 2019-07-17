@@ -1,4 +1,5 @@
 {
-    "cursorPosition" : "102,64",
-    "scrollLine" : "99"
+    "cursorPosition" : "128,27",
+    "ignored_words" : "TreeSHAP,Shapley,fastshap,nsim,Lundberg,Su,https,arxiv,md,Rmd,GitHub,Shap,plyr,backend,foreach,TreeExplainer,XGBoost,xgboost\n",
+    "scrollLine" : "107"
 }
