@@ -19,7 +19,7 @@ knitr::opts_chunk$set(
 
 The goal of **fastshap** is to provide an efficient way to compute the approximate Shapley values discussed in [Section 5.8.3.3 of Christoph Molnar's IML book](https://christophm.github.io/interpretable-ml-book/shapley.html). 
 
-**WARNING:** This package is a work in progress and the speed is likely to improve further over time.
+**WARNING:** This package is a work in progress and the speed is likely to improve further over time (`r emo::ji("crossed fingers")`).
 
 ## Installation
 
@@ -100,7 +100,7 @@ ggplot(shap_dep_x3, aes(x3, shap)) +
 
 You can also use `autoplot()` to construct simple plots:
 
-```{r shap-autoplot, fig.width=6, fig.asp=0.618, out.width="70%"}
+```{r shap-autoplot, cache=TRUE, fig.width=6, fig.asp=0.618, out.width="70%"}
 p1 <- autoplot(shap)
 p2 <- autoplot(shap, type = "dependence", feature = "x.3", X = X)
 gridExtra::grid.arrange(p1, p2, nrow = 1)
