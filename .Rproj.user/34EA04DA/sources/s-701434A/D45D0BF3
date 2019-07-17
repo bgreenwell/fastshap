@@ -5,15 +5,15 @@
     "dirty" : false,
     "encoding" : "UTF-8",
     "folds" : "",
-    "hash" : "2760138190",
+    "hash" : "0",
     "id" : "D45D0BF3",
-    "lastKnownWriteTime" : 1563373176,
-    "last_content_update" : 1563373176361,
+    "lastKnownWriteTime" : 1563374329,
+    "last_content_update" : 1563374329367,
     "path" : "~/Desktop/devel/fastshap/README.Rmd",
     "project_path" : "README.Rmd",
     "properties" : {
-        "cursorPosition" : "21,13",
-        "scrollLine" : "0"
+        "cursorPosition" : "102,64",
+        "scrollLine" : "99"
     },
     "read_only" : false,
     "read_only_alternatives" : [

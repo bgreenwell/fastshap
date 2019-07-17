@@ -7,6 +7,7 @@ Authors@R: person("Brandon", "Greenwell", email = "greenwell.brandon@gmail.com",
 Description: Computes fast approximate Shapley values for any supervised learning model.
 License: GPL (>= 2)
 Imports: 
+    ggplot2,
     plyr,
     Rcpp (>= 1.0.1),
     tibble

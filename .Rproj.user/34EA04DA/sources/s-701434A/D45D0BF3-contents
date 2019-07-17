@@ -98,6 +98,14 @@ ggplot(shap_dep_x3, aes(x3, shap)) +
   ylab("Shapley value")
 ```
 
+You can also use `autoplot()` to construct simple plots:
+
+```{r shap-autoplot, fig.width=6, fig.asp=0.618, out.width="70%"}
+p1 <- autoplot(shap)
+p2 <- autoplot(shap, type = "dependence", feature = "x.3", X = X)
+gridExtra::grid.arrange(p1, p2, nrow = 1)
+```
+
 ### Parallel execution
 
 Since **fastshap** uses the **plyr** package under the hood, you can use any parallel backend supported by the **foreach** package. This is illustrated in the code chunk below.

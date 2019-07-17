@@ -59,7 +59,7 @@ system.time({  # estimate run time
                    nsim = 10)
 })
 #>    user  system elapsed 
-#>  99.448   4.989  22.108
+#>  94.905   4.392  20.342
 
 # Results are returned as a tibble (with the additional "shap" class)
 shap
@@ -120,6 +120,17 @@ ggplot(shap_dep_x3, aes(x3, shap)) +
 
 <img src="man/figures/README-shap-dependence-1.png" width="70%" />
 
+You can also use `autoplot()` to construct simple plots:
+
+``` r
+p1 <- autoplot(shap)
+p2 <- autoplot(shap, type = "dependence", feature = "x.3", X = X)
+gridExtra::grid.arrange(p1, p2, nrow = 1)
+#> `geom_smooth()` using method = 'gam' and formula 'y ~ s(x, bs = "cs")'
+```
+
+<img src="man/figures/README-shap-autoplot-1.png" width="70%" />
+
 ### Parallel execution
 
 Since **fastshap** uses the **plyr** package under the hood, you can use
@@ -140,17 +151,17 @@ registerDoParallel(5)
 fastshap(rfo, feature_names = names(X), X = X, pred_wrapper = pfun, nsim = 10, 
          .parallel = TRUE)
 #> # A tibble: 3,000 x 10
-#>       x.1   x.2    x.3    x.4    x.5      x.6      x.7     x.8      x.9
-#>     <dbl> <dbl>  <dbl>  <dbl>  <dbl>    <dbl>    <dbl>   <dbl>    <dbl>
-#>  1 -0.521  1.00 -1.06  -0.744 -0.175 -0.0377  -0.0339  -0.0625 -0.0218 
-#>  2 -5.74   1.99  0.882  0.349  1.21  -0.0121   0.0201   0.0180  0.0376 
-#>  3  1.64   1.44 -1.17  -3.40  -2.14   0.00256  0.0401  -0.113   0.0238 
-#>  4  0.181 -2.76 -0.478  3.83   0.781  0.0178  -0.0570  -0.0364  0.0539 
-#>  5 -2.33  -2.32 -0.625  2.02   0.408  0.0283   0.101   -0.0446 -0.0316 
-#>  6 -0.830  1.35 -0.514 -2.73   1.01   0.0133  -0.0407  -0.0357  0.0800 
-#>  7  2.40   1.37  1.52  -4.14  -0.422 -0.00286  0.0221   0.0821  0.00653
-#>  8  0.487 -3.19 -0.223  3.80   0.340  0.0925   0.00127 -0.0265  0.0671 
-#>  9  1.43   3.11 -1.46   3.37  -1.56   0.00926 -0.0276  -0.0884 -0.0548 
-#> 10  0.623 -3.65 -1.56  -4.53   0.582  0.0120  -0.00302 -0.0505 -0.482  
+#>       x.1    x.2    x.3    x.4    x.5      x.6      x.7      x.8      x.9
+#>     <dbl>  <dbl>  <dbl>  <dbl>  <dbl>    <dbl>    <dbl>    <dbl>    <dbl>
+#>  1 -0.545  0.600 -0.914 -2.59  -0.429 -0.0196  -0.0131   0.0189   6.22e-2
+#>  2 -4.18   1.89   0.495  0.233  0.772  0.00141 -0.0376  -0.0211   3.26e-2
+#>  3  3.05   1.16  -0.591 -1.81  -1.41   0.0633  -0.158   -0.00274  2.79e-2
+#>  4  0.572 -3.84  -0.430  2.75   0.703 -0.0401  -0.00472 -0.0124   5.72e-2
+#>  5 -3.03  -0.981 -0.397  2.77   0.758 -0.00675  0.0836   0.00981 -1.51e-2
+#>  6  0.243  0.613 -1.18  -1.47   1.18  -0.0767  -0.0999   0.0461  -1.60e-1
+#>  7  1.92   0.344  1.14  -3.43  -1.17  -0.00435 -0.0810  -0.102   -2.91e-4
+#>  8 -0.456 -1.07   0.281  4.21   0.205  0.0996  -0.00499  0.0352   6.19e-2
+#>  9  1.63   1.51  -0.800  4.29  -1.37   0.00633 -0.102    0.0127   1.13e-1
+#> 10  1.44  -2.20  -0.200 -2.65   1.64   0.0309  -0.0110   0.0840  -2.19e-1
 #> # … with 2,990 more rows, and 1 more variable: x.10 <dbl>
 ```
