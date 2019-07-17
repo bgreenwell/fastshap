@@ -1,0 +1,25 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1563367828669.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "1084903287",
+    "id" : "4EA3F6DD",
+    "lastKnownWriteTime" : 1563372822,
+    "last_content_update" : 1563372822416,
+    "path" : "~/Desktop/devel/fastshap/R/fastshap.R",
+    "project_path" : "R/fastshap.R",
+    "properties" : {
+        "cursorPosition" : "77,26",
+        "scrollLine" : "45"
+    },
+    "read_only" : false,
+    "read_only_alternatives" : [
+    ],
+    "relative_order" : 4,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_source"
+}

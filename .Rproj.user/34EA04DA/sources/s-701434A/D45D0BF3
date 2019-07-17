@@ -1,0 +1,25 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1563370186596.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "2760138190",
+    "id" : "D45D0BF3",
+    "lastKnownWriteTime" : 1563373176,
+    "last_content_update" : 1563373176361,
+    "path" : "~/Desktop/devel/fastshap/README.Rmd",
+    "project_path" : "README.Rmd",
+    "properties" : {
+        "cursorPosition" : "21,13",
+        "scrollLine" : "0"
+    },
+    "read_only" : false,
+    "read_only_alternatives" : [
+    ],
+    "relative_order" : 7,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_markdown"
+}

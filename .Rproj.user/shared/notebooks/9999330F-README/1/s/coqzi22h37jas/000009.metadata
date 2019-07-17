@@ -1,0 +1,1 @@
+{"conditions":[[0,"`geom_smooth()` using method = 'gam' and formula 'y ~ s(x, bs = \"cs\")'\n"]],"height":4.200000000000000,"size_behavior":1,"width":7.000000000000000}

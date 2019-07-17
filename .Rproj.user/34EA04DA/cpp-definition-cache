@@ -1,0 +1,17 @@
+[
+    {
+        "definitions" : [
+            {
+                "column" : 15,
+                "file" : "/Users/b780620/Desktop/devel/fastshap/src/fastshap.cpp",
+                "kind" : 6,
+                "line" : 5,
+                "name" : "genOMat(DataFrame)",
+                "parent_name" : "",
+                "usr" : "c:@F@genOMat#$@N@Rcpp@S@DataFrame_Impl>#@N@Rcpp@ST>1#T@PreserveStorage#"
+            }
+        ],
+        "file" : "/Users/b780620/Desktop/devel/fastshap/src/fastshap.cpp",
+        "file_last_write" : 1563367756.000000
+    }
+]

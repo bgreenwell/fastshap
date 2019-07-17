@@ -1,0 +1,115 @@
+---
+output: github_document
+---
+
+<!-- README.md is generated from README.Rmd. Please edit that file -->
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.path = "man/figures/README-",
+  out.width = "100%"
+)
+```
+# fastshap
+
+<!-- badges: start -->
+<!-- badges: end -->
+
+The goal of **fastshap** is to provide an efficient way to compute the approximate Shapley values discussed in [Section 5.8.3.3 of Christoph Molnar's IML book](https://christophm.github.io/interpretable-ml-book/shapley.html). 
+
+**WARNING:** This package is a work in progress and the speed is likely to improve further over time.
+
+## Installation
+
+You can install the development version of **fastshap** from GitHub:
+
+``` r
+if (!requireNamespace("remotes")) {
+  install.packages("remotes")
+}
+remotes::install_github("bgreenwell/fastshap")
+```
+
+## Example
+
+The following example demonstrates the basic usage of the **fastshap** package.
+
+```{r compute-shap, cache=TRUE}
+# Load required packages
+library(fastshap)  # for fast (approximate) Shapley values
+library(mlbench)   # for Friedman 1 benchmark data set
+library(ranger)    # for fast random forest algorithm
+
+# Simulate training data
+set.seed(101)
+trn <- as.data.frame(mlbench.friedman1(3000))
+X <- subset(trn, select = -y)  # feature columns only
+
+# Fit a random forest
+set.seed(102)
+rfo <- ranger(y ~ ., data =  trn)
+
+# Prediction wrapper
+pfun <- function(object, newdata) {
+  predict(object, data = newdata)$predictions
+}
+
+# Compute fast (approximate) Shapley values using 10 Monte Carlo repititions
+system.time({  # estimate run time
+  set.seed(5038)
+  shap <- fastshap(rfo, feature_names = names(X), X = X, pred_wrapper = pfun, 
+                   nsim = 10)
+})
+
+# Results are returned as a tibble (with the additional "shap" class)
+shap
+```
+
+You can use the results to interpret the model in many different ways. For example, in the code chunk below we take the sum of the absolute value of the Shapley values within each feature to construct a Shap-based feature variable importance plot:
+
+```{r shap-importance, fig.width=6, fig.asp=0.618, out.width="70%"}
+# Load required packages
+library(ggplot2)
+theme_set(theme_bw())
+
+# Aggregate Shapley values
+shap_imp <- data.frame(
+  Variable = names(shap),
+  Importance = apply(shap, MARGIN = 2, FUN = function(x) sum(abs(x)))
+)
+
+# Plot Shap-based variable importance
+ggplot(shap_imp, aes(reorder(Variable, Importance), Importance)) +
+  geom_col() +
+  coord_flip() +
+  xlab("") +
+  ylab("mean(|Shapley value|)")
+```
+
+We can also plot the Shapley values for each feature to construct Shap-based dependence plots:
+
+```{r shap-dependence, fig.width=6, fig.asp=0.618, out.width="70%"}
+shap_dep_x3 <- data.frame(x3 = X[["x.3"]], shap = shap[["x.3"]])
+ggplot(shap_dep_x3, aes(x3, shap)) +
+  geom_point(alpha = 0.3) +
+  geom_smooth() +
+  ylab("Shapley value")
+```
+
+### Parallel execution
+
+Since **fastshap** uses the **plyr** package under the hood, you can use any parallel backend supported by the **foreach** package. This is illustrated in the code chunk below.
+
+```{r shap-parallel, cache=TRUE}
+# Load required packages
+library(doParallel)
+
+# Set up parallel backend
+registerDoParallel(5)
+
+# Compute Shapley values in parallel
+fastshap(rfo, feature_names = names(X), X = X, pred_wrapper = pfun, nsim = 10, 
+         .parallel = TRUE)
+```
