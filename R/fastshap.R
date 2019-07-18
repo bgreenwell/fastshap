@@ -15,10 +15,10 @@ shapley_column <- function(object, X, column, pred_wrapper, newdata = NULL) {
   # Generate original and sampled feature instances
   if (is.null(newdata)) {
     W <- X[sample(n), ]  # shuffle rows
-    O <- genOMat(X)
+    O <- genOMat(n, p)
   } else {
     W <- X[sample(n, size = nrow(newdata)), , drop = FALSE]  # randomly sample rows from full X
-    O <- genOMat(X)[sample(n, size = nrow(newdata)), , drop = FALSE]
+    O <- genOMat(n, p)[sample(n, size = nrow(newdata)), , drop = FALSE]
     X <- newdata  # observations of interest
   }
 
@@ -138,7 +138,7 @@ fastshap <- function(object, feature_names = NULL, X, nsim = 1, pred_wrapper,
       mean(reps)
     }
   }, ...)
-  res <- if (is.null(dim(res))) {
+  res <- if (length(feature_names) == 1L) {
     tibble::enframe(res, name = NULL)
   } else {
     res <- tibble::as_tibble(t(res))

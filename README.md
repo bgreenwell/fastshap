@@ -61,11 +61,10 @@ pfun <- function(object, newdata) {
 # Compute fast (approximate) Shapley values using 10 Monte Carlo repititions
 system.time({  # estimate run time
   set.seed(5038)
-  shap <- fastshap(rfo, feature_names = names(X), X = X, pred_wrapper = pfun, 
-                   nsim = 10)
+  shap <- fastshap(rfo, X = X, pred_wrapper = pfun, nsim = 10)
 })
 #>    user  system elapsed 
-#>  93.127   3.955  19.635
+#>  92.115   4.065  19.856
 
 # Results are returned as a tibble (with the additional "shap" class)
 shap
@@ -149,7 +148,7 @@ that is, computing only a handful of Shapley values for a few instances
 ``` r
 # Explanations for first observation; technically `drop = FALSE` isn't necessary 
 # here since X is a data frame
-fastshap(rfo, feature_names = names(X), X = X, pred_wrapper = pfun, nsim = 10,
+fastshap(rfo, X = X, pred_wrapper = pfun, nsim = 10,
          newdata = X[1, , drop = FALSE])
 #> # A tibble: 1 x 10
 #>     x.1   x.2    x.3   x.4    x.5    x.6   x.7     x.8     x.9    x.10
@@ -157,7 +156,7 @@ fastshap(rfo, feature_names = names(X), X = X, pred_wrapper = pfun, nsim = 10,
 #> 1 0.856  1.28 -0.722 -1.67 -0.140 -0.124 0.105 -0.0352 -0.0433 -0.0395
 
 # Explanations for first three observations
-fastshap(rfo, feature_names = names(X), X = X, pred_wrapper = pfun, nsim = 10,
+fastshap(rfo, X = X, pred_wrapper = pfun, nsim = 10,
          newdata = X[1:3, ])
 #> # A tibble: 3 x 10
 #>      x.1   x.2    x.3    x.4    x.5     x.6     x.7     x.8     x.9
@@ -188,18 +187,18 @@ registerDoParallel(5)
 fastshap(rfo, feature_names = names(X), X = X, pred_wrapper = pfun, nsim = 10, 
          .parallel = TRUE)
 #> # A tibble: 3,000 x 10
-#>       x.1    x.2    x.3    x.4    x.5      x.6      x.7      x.8      x.9
-#>     <dbl>  <dbl>  <dbl>  <dbl>  <dbl>    <dbl>    <dbl>    <dbl>    <dbl>
-#>  1 -0.221  0.734 -1.06  -2.50   0.232  0.0866  -0.0749  -0.0514  -0.0395 
-#>  2 -2.08   0.162  1.03  -0.937  1.60   0.0621   0.0103  -0.0407   0.0889 
-#>  3  2.03   2.02  -0.398 -1.74  -1.13   0.0225  -0.0104  -0.0427  -0.0669 
-#>  4  1.09  -3.41  -0.221  6.33   0.819  0.0381   0.119    0.0191  -0.0749 
-#>  5 -3.19  -1.39  -0.561  2.31   1.39   0.0173   0.0186   0.00871 -0.0242 
-#>  6 -0.626  1.75  -0.693 -1.01   1.13  -0.0249  -0.00738 -0.0245  -0.127  
-#>  7  2.07   2.95   1.41  -4.99  -0.982  0.00295  0.0539  -0.0432  -0.0377 
-#>  8  0.916 -1.46   0.171  4.57  -1.08  -0.0274   0.0441   0.0461  -0.0883 
-#>  9  2.08   1.13  -0.724  4.84  -1.39   0.0156  -0.0392   0.0116   0.00519
-#> 10  2.82  -1.90  -0.139 -4.25   0.270 -0.0638  -0.0437  -0.0137  -0.0455 
+#>        x.1    x.2     x.3   x.4    x.5      x.6     x.7     x.8      x.9
+#>      <dbl>  <dbl>   <dbl> <dbl>  <dbl>    <dbl>   <dbl>   <dbl>    <dbl>
+#>  1 -0.580   2.16  -0.0954 -2.94 -0.172 -0.0680  -0.0450 -0.0797 -0.0978 
+#>  2 -2.09    1.19   0.601  -1.31  0.649  0.0142   0.0562  0.0537  0.109  
+#>  3  1.36    1.65  -1.69   -4.53 -1.26  -0.0793   0.0438 -0.0422  0.0856 
+#>  4  2.24   -3.30   0.0673  3.10  0.334  0.0188  -0.0743  0.0353 -0.0237 
+#>  5 -1.22   -1.48  -0.294   4.63  1.30  -0.0165  -0.0242  0.0437  0.0666 
+#>  6 -1.62    0.995 -0.543  -1.28  1.81  -0.00611 -0.0103  0.107  -0.199  
+#>  7  1.96    1.77   1.68   -5.77 -0.482  0.0909   0.0653 -0.0759  0.0214 
+#>  8  0.0904 -2.74   0.312   3.31  0.224  0.0224   0.145   0.0658 -0.0573 
+#>  9  0.631   1.97  -0.833   4.53 -0.707 -0.0154   0.0170 -0.0599 -0.00543
+#> 10  0.658  -2.92  -1.16   -4.88  1.64  -0.0959   0.0220 -0.157  -0.283  
 #> # … with 2,990 more rows, and 1 more variable: x.10 <dbl>
 ```
 

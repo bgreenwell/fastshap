@@ -6,19 +6,20 @@
 using namespace Rcpp;
 
 // genOMat
-LogicalMatrix genOMat(DataFrame x);
-RcppExport SEXP _fastshap_genOMat(SEXP xSEXP) {
+LogicalMatrix genOMat(int num_rows, int num_cols);
+RcppExport SEXP _fastshap_genOMat(SEXP num_rowsSEXP, SEXP num_colsSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< DataFrame >::type x(xSEXP);
-    rcpp_result_gen = Rcpp::wrap(genOMat(x));
+    Rcpp::traits::input_parameter< int >::type num_rows(num_rowsSEXP);
+    Rcpp::traits::input_parameter< int >::type num_cols(num_colsSEXP);
+    rcpp_result_gen = Rcpp::wrap(genOMat(num_rows, num_cols));
     return rcpp_result_gen;
 END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
-    {"_fastshap_genOMat", (DL_FUNC) &_fastshap_genOMat, 1},
+    {"_fastshap_genOMat", (DL_FUNC) &_fastshap_genOMat, 2},
     {NULL, NULL, 0}
 };
 
