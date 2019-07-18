@@ -2,6 +2,6 @@
 # Generator token: 10BE3573-1514-4C36-9D1C-5A225CD40393
 
 genOMat <- function(x) {
-    .Call('_fastshap_genOMat', PACKAGE = 'fastshap', x)
+    .Call(`_fastshap_genOMat`, x)
 }
 

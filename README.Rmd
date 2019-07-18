@@ -32,6 +32,11 @@ if (!requireNamespace("remotes")) {
 remotes::install_github("bgreenwell/fastshap")
 ```
 
+## General comments
+
+* The `fastshap()` function was built for efficiency column-wise (in other words, it is not currently optimized if all you need are the Shapley values for a few rows)
+
+
 ## Example
 
 The following example demonstrates the basic usage of the **fastshap** package.
@@ -59,8 +64,7 @@ pfun <- function(object, newdata) {
 # Compute fast (approximate) Shapley values using 10 Monte Carlo repititions
 system.time({  # estimate run time
   set.seed(5038)
-  shap <- fastshap(rfo, feature_names = names(X), X = X, pred_wrapper = pfun, 
-                   nsim = 10)
+  shap <- fastshap(rfo, X = X, pred_wrapper = pfun, nsim = 10)
 })
 
 # Results are returned as a tibble (with the additional "shap" class)
@@ -105,6 +109,21 @@ p1 <- autoplot(shap)
 p2 <- autoplot(shap, type = "dependence", feature = "x.3", X = X)
 gridExtra::grid.arrange(p1, p2, nrow = 1)
 ```
+
+By default, `fastshap()` computes approximate Shapley values for all rows in the training data. If you want Shapley values for new instances (or a subset of the training set), they must be supplied via the `newdata` argument. This functionalaity is demonstrated in the code chunk below. (**Note:** `fastshap()` is not yet optimized for this case; that is, computing only a handful of Shapley values for a few instances (in this case, at least for now, consider using the **iml** function `Shapley()`).)
+
+```{r shap-newdata, cache=TRUE}
+# Explanations for first observation; technically `drop = FALSE` isn't necessary 
+# here since X is a data frame
+fastshap(rfo, X = X, pred_wrapper = pfun, nsim = 10,
+         newdata = X[1, , drop = FALSE])
+
+# Explanations for first three observations
+fastshap(rfo, X = X, pred_wrapper = pfun, nsim = 10,
+         newdata = X[1:3, ])
+```
+
+
 
 ### Parallel execution
 

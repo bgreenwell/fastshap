@@ -26,6 +26,12 @@ if (!requireNamespace("remotes")) {
 remotes::install_github("bgreenwell/fastshap")
 ```
 
+## General comments
+
+  - The `fastshap()` function was built for efficiency column-wise (in
+    other words, it is not currently optimized if all you need are the
+    Shapley values for a few rows)
+
 ## Example
 
 The following example demonstrates the basic usage of the **fastshap**
@@ -59,7 +65,7 @@ system.time({  # estimate run time
                    nsim = 10)
 })
 #>    user  system elapsed 
-#>  91.795   4.401  20.192
+#>  93.127   3.955  19.635
 
 # Results are returned as a tibble (with the additional "shap" class)
 shap
@@ -131,6 +137,37 @@ gridExtra::grid.arrange(p1, p2, nrow = 1)
 
 <img src="man/figures/README-shap-autoplot-1.png" width="70%" />
 
+By default, `fastshap()` computes approximate Shapley values for all
+rows in the training data. If you want Shapley values for new instances
+(or a subset of the training set), they must be supplied via the
+`newdata` argument. This functionalaity is demonstrated in the code
+chunk below. (**Note:** `fastshap()` is not yet optimized for this case;
+that is, computing only a handful of Shapley values for a few instances
+(in this case, at least for now, consider using the **iml** function
+`Shapley()`).)
+
+``` r
+# Explanations for first observation; technically `drop = FALSE` isn't necessary 
+# here since X is a data frame
+fastshap(rfo, feature_names = names(X), X = X, pred_wrapper = pfun, nsim = 10,
+         newdata = X[1, , drop = FALSE])
+#> # A tibble: 1 x 10
+#>     x.1   x.2    x.3   x.4    x.5    x.6   x.7     x.8     x.9    x.10
+#>   <dbl> <dbl>  <dbl> <dbl>  <dbl>  <dbl> <dbl>   <dbl>   <dbl>   <dbl>
+#> 1 0.856  1.28 -0.722 -1.67 -0.140 -0.124 0.105 -0.0352 -0.0433 -0.0395
+
+# Explanations for first three observations
+fastshap(rfo, feature_names = names(X), X = X, pred_wrapper = pfun, nsim = 10,
+         newdata = X[1:3, ])
+#> # A tibble: 3 x 10
+#>      x.1   x.2    x.3    x.4    x.5     x.6     x.7     x.8     x.9
+#>    <dbl> <dbl>  <dbl>  <dbl>  <dbl>   <dbl>   <dbl>   <dbl>   <dbl>
+#> 1 -0.137 0.846 -1.15  -2.36  -0.592 -0.0762 -0.0130 -0.0213 -0.0420
+#> 2 -3.06  2.00   1.31  -0.475  0.846 -0.0266  0.0127 -0.0183 -0.0557
+#> 3  1.24  0.894 -0.690 -3.28  -0.829  0.0215  0.0197 -0.0204  0.0337
+#> # … with 1 more variable: x.10 <dbl>
+```
+
 ### Parallel execution
 
 Since **fastshap** uses the **plyr** package under the hood, you can use
@@ -151,18 +188,18 @@ registerDoParallel(5)
 fastshap(rfo, feature_names = names(X), X = X, pred_wrapper = pfun, nsim = 10, 
          .parallel = TRUE)
 #> # A tibble: 3,000 x 10
-#>       x.1    x.2    x.3    x.4    x.5      x.6      x.7     x.8     x.9
-#>     <dbl>  <dbl>  <dbl>  <dbl>  <dbl>    <dbl>    <dbl>   <dbl>   <dbl>
-#>  1  0.381  0.905 -0.617 -1.00  -0.605 -0.154    2.79e-2 -0.0270  0.0741
-#>  2 -4.80   1.44   0.798  0.289  1.49   0.136   -4.63e-2  0.0989  0.0971
-#>  3  1.47   0.910 -0.565 -3.36  -1.64  -0.103   -5.38e-2 -0.0114  0.0352
-#>  4  2.55  -2.46   0.125  4.49   0.392  0.0267  -4.02e-2  0.245   0.0285
-#>  5 -2.50  -0.900 -0.160  2.95   1.34  -0.00282  4.41e-3 -0.0367 -0.0415
-#>  6 -1.16   1.47  -0.864 -2.98   0.493 -0.0314   1.65e-4 -0.0306  0.228 
-#>  7  1.12   1.31   1.25  -4.52  -1.13   0.155    4.34e-3  0.0131  0.0259
-#>  8 -0.488 -1.57  -0.266  3.61   0.193  0.00506  3.28e-2  0.0149  0.0126
-#>  9  1.86   0.360 -0.435  3.52  -1.13  -0.00690 -3.45e-2  0.0626 -0.0441
-#> 10  2.40  -1.77  -0.484 -3.45   0.787 -0.0756  -2.66e-2 -0.0545 -0.371 
+#>       x.1    x.2    x.3    x.4    x.5      x.6      x.7      x.8      x.9
+#>     <dbl>  <dbl>  <dbl>  <dbl>  <dbl>    <dbl>    <dbl>    <dbl>    <dbl>
+#>  1 -0.221  0.734 -1.06  -2.50   0.232  0.0866  -0.0749  -0.0514  -0.0395 
+#>  2 -2.08   0.162  1.03  -0.937  1.60   0.0621   0.0103  -0.0407   0.0889 
+#>  3  2.03   2.02  -0.398 -1.74  -1.13   0.0225  -0.0104  -0.0427  -0.0669 
+#>  4  1.09  -3.41  -0.221  6.33   0.819  0.0381   0.119    0.0191  -0.0749 
+#>  5 -3.19  -1.39  -0.561  2.31   1.39   0.0173   0.0186   0.00871 -0.0242 
+#>  6 -0.626  1.75  -0.693 -1.01   1.13  -0.0249  -0.00738 -0.0245  -0.127  
+#>  7  2.07   2.95   1.41  -4.99  -0.982  0.00295  0.0539  -0.0432  -0.0377 
+#>  8  0.916 -1.46   0.171  4.57  -1.08  -0.0274   0.0441   0.0461  -0.0883 
+#>  9  2.08   1.13  -0.724  4.84  -1.39   0.0156  -0.0392   0.0116   0.00519
+#> 10  2.82  -1.90  -0.139 -4.25   0.270 -0.0638  -0.0437  -0.0137  -0.0455 
 #> # … with 2,990 more rows, and 1 more variable: x.10 <dbl>
 ```
 
