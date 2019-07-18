@@ -119,8 +119,8 @@ fastshap(rfo, X = X, pred_wrapper = pfun, nsim = 10,
          newdata = X[1, , drop = FALSE])
 
 # Explanations for first three observations
-fastshap(rfo, X = X, pred_wrapper = pfun, nsim = 10,
-         newdata = X[1:3, ])
+fastshap(rfo, X = X, feature_names = c("x.1", "x.10"), pred_wrapper = pfun, 
+         nsim = 10, newdata = X[1:3, ])
 ```
 
 
@@ -137,8 +137,7 @@ library(doParallel)
 registerDoParallel(5)
 
 # Compute Shapley values in parallel
-fastshap(rfo, feature_names = names(X), X = X, pred_wrapper = pfun, nsim = 10, 
-         .parallel = TRUE)
+fastshap(rfo, X = X, pred_wrapper = pfun, nsim = 10, .parallel = TRUE)
 ```
 
 ## Comparison with TreeSHAP/TreeExplainer for XGBoost models
