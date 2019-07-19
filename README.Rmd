@@ -213,7 +213,7 @@ for (i in 1:nsim) {
 }
 ```
 
-```{r fastshap-comparison, cache=TRUE, fig.width=7, fig.asp=1, out.width="100%"}
+```{r fastshap-comparison, cache=TRUE, echo=FALSE, fig.width=7, fig.asp=1, out.width="100%"}
 # Compare plots
 par(mfrow = c(2, 2), mar = c(4, 4, 2, 2) + 0.1) 
 plot(X[, 3], tree_shap[, 3, drop = TRUE], main = "TreeSHAP (exact); ~ 0.024 sec",
@@ -236,7 +236,7 @@ lines(lowess(X[, 3], shap50[, 3, drop = TRUE]), lwd = 2, col = "red2")
 
 We can also check that **fastshap** converges to the true Shapley values by comparing the results to TreeSHAP while varying the number of Monte Carlo repetitions:
 
-```{r fastshap-convergence, cache=TRUE, fig.width=7, fig.asp=1, out.width="100%"}
+```{r fastshap-convergence, cache=TRUE, echo=FALSE, fig.width=7, fig.asp=1, out.width="100%"}
 # Plot results for a random sample of rows
 set.seed(2840)  # for reproducibility
 par(mfrow = c(2, 2)) 

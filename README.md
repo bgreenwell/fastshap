@@ -213,51 +213,12 @@ used with any prediction model in R. You can see the code that generated
 these benchmarks in the `slowtests/xgboost.R` file
 [here](https://github.com/bgreenwell/fastshap/blob/master/slowtests/xgboost.R).
 
-``` r
-# Compare plots
-par(mfrow = c(2, 2), mar = c(4, 4, 2, 2) + 0.1) 
-plot(X[, 3], tree_shap[, 3, drop = TRUE], main = "TreeSHAP (exact); ~ 0.024 sec",
-     xlab = expression(X[3]), ylab = "Shapley value", 
-     col = adjustcolor("black", alpha.f = 0.5))
-lines(lowess(X[, 3], tree_shap[, 3, drop = TRUE]), lwd = 2, col = "red2")
-plot(X[, 3], shap1[, 3, drop = TRUE], main = "fastshap; ~ 0.468 sec",
-     xlab = expression(X[3]), ylab = "Shapley value", 
-     col = adjustcolor("black", alpha.f = 0.5))
-lines(lowess(X[, 3], shap1[, 3, drop = TRUE]), lwd = 2, col = "red2")
-plot(X[, 3], shap10[, 3, drop = TRUE], main = "fastshap (nsim = 10); ~ 3.820 sec",
-     xlab = expression(X[3]), ylab = "Shapley value", 
-     col = adjustcolor("black", alpha.f = 0.5))
-lines(lowess(X[, 3], shap10[, 3, drop = TRUE]), lwd = 2, col = "red2")
-plot(X[, 3], shap50[, 3, drop = TRUE], main = "fastshap (nsim = 50); ~ 18.378 sec",
-     xlab = expression(X[3]), ylab = "Shapley value", 
-     col = adjustcolor("black", alpha.f = 0.5))
-lines(lowess(X[, 3], shap50[, 3, drop = TRUE]), lwd = 2, col = "red2")
-```
-
 <img src="man/figures/README-fastshap-comparison-1.png" width="100%" style="display: block; margin: auto;" />
 
 We can also check that **fastshap** converges to the true Shapley values
 by comparing the results to TreeSHAP while varying the number of Monte
-Carlo repetitions:
-
-``` r
-# Plot results for a random sample of rows
-set.seed(2840)  # for reproducibility
-par(mfrow = c(2, 2)) 
-for (i in sample(nrow(tree_shap), size = 4)) {
-  plot(
-    res[i, ], 
-    type = "l", 
-    main = paste("Results for row", i),
-    xlab = "# Monte Carlo reps", 
-    ylab = expression(paste("Shapley value for ", X[3])),
-    las = 1
-  )
-  abline(h = tree_shap[i, 3], lwd = 2)
-  legend("bottomright", lwd = c(2, 1), inset = 0.01, bty = "n", cex = 0.8,
-         legend = c("Exact (TreeSHAP)", "Approximate (fastshap)"))
-}
-```
+Carlo
+repetitions:
 
 <img src="man/figures/README-fastshap-convergence-1.png" width="100%" style="display: block; margin: auto;" />
 
