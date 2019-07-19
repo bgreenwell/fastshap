@@ -3,3 +3,5 @@
 ^README\.Rmd$
 ^README_cache$
 ^slowtests$
+^\.travis\.yml$
+^codecov\.yml$

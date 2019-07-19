@@ -5,6 +5,10 @@
 
 <!-- badges: start -->
 
+[![Travis build
+status](https://travis-ci.org/bgreenwell/fastshap.svg?branch=master)](https://travis-ci.org/bgreenwell/fastshap)
+[![Codecov test
+coverage](https://codecov.io/gh/bgreenwell/fastshap/branch/master/graph/badge.svg)](https://codecov.io/gh/bgreenwell/fastshap?branch=master)
 <!-- badges: end -->
 
 The goal of **fastshap** is to provide an efficient way to compute the

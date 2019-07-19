@@ -2,14 +2,17 @@ Package: fastshap
 Type: Package
 Title: Fast Approximate Shapley Values
 Version: 0.0.1
-Authors@R: person("Brandon", "Greenwell", email = "greenwell.brandon@gmail.com",
-  role = c("aut", "cre"), comment = c(ORCID = "0000-0002-8120-0084"))
-Description: Computes fast approximate Shapley values for any supervised learning model.
+Authors@R: person("Brandon", "Greenwell", email = "greenwell.brandon@gmail.com", role =
+         c("aut", "cre"), comment = c(ORCID = "0000-0002-8120-0084"))
+Description: Computes fast approximate Shapley values for any supervised 
+    learning model. Shapely values help to explain the predictions any "black box" model using ideas 
+    from game theory; see Strumbel and Kononenko (2014) <doi.org/10.1007/s10115-013-0679-x> for details.
 License: GPL (>= 2)
-Imports: 
-    ggplot2,
-    plyr,
-    Rcpp (>= 1.0.1),
-    tibble
+Imports: ggplot2, plyr, Rcpp (>= 1.0.1), tibble
 LinkingTo: Rcpp
 RoxygenNote: 6.1.1
+Suggests: 
+    earth,
+    mlbench,
+    tinytest,
+    covr
