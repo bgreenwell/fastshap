@@ -9,7 +9,10 @@ knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>",
   fig.path = "man/figures/README-",
-  out.width = "100%"
+  fig.align = "center",
+  out.width = "100%",
+  message = FALSE,
+  warning = FALSE
 )
 ```
 # fastshap <img src='man/figures/logo.png' align="right" height="139" />
@@ -65,7 +68,7 @@ pfun <- function(object, newdata) {
   predict(object, data = newdata)$predictions
 }
 
-# Compute fast (approximate) Shapley values using 10 Monte Carlo repititions
+# Compute fast (approximate) Shapley values using 10 Monte Carlo repetitions
 system.time({  # estimate run time
   set.seed(5038)
   shap <- fastshap(rfo, X = X, pred_wrapper = pfun, nsim = 10)
@@ -148,12 +151,109 @@ fastshap(rfo, X = X, pred_wrapper = pfun, nsim = 10, .parallel = TRUE)
 
 You can compute the contributions of each feature for XGBoost models in an efficient way using the methods described in (Lundberg 2017). These are available through the `predict()` function for **xgboost** models; see `?xgboost::predict.xgb.Booster` for details. Below we compute the contributions for each feature using both methods and compare the results using a Shapley-based dependence plot on feature `x.3`, the results are quite surprising (__no parallel processing was used to obtain the **fastshap** results__). And remember, **fastshap** can be used with any prediction model in R. You can see the code that generated these benchmarks in the `slowtests/xgboost.R` file [here](https://github.com/bgreenwell/fastshap/blob/master/slowtests/xgboost.R).
 
-![](slowtests/treeshap-comparison.png)
+```{r fastshap-vs-treeshap, cache=TRUE, echo=FALSE}
+# Load required packages
+library(xgboost)
 
+# Ames housing data
+set.seed(101)
+trn <- as.data.frame(mlbench::mlbench.friedman1(3000))
+X <- subset(trn, select = -y)  # feature columns only
 
-We can also check that **fastshap** converges to the true Shapley values by comparing the results to TreeSHAP while varying the number of Monte Carlo repititions:
+# # Use 5-fold CV to tune an XGBoost model
+# set.seed(102)
+# bst.cv <- xgb.cv(data = data.matrix(X), label = trn$y,
+#                  max_depth = 2, eta = 0.3, nround = 1000, 
+#                  nfold = 5, objective = "reg:linear")
+# plot(test_rmse_mean ~ iter, data = bst.cv$evaluation_log)
+# best_iter <- which.min(bst.cv$evaluation_log$test_rmse_mean)
 
-![](slowtests/convergence.png)
+# Fit an XGBoost model
+set.seed(103)
+bst <- xgboost(data = data.matrix(X), label = trn$y,
+               max_depth = 2, eta = 0.3, nround = 300, 
+               objective = "reg:linear", verbose = 0)
+
+# Use built-in SHAP functionality
+time1 <- system.time({
+  set.seed(104)
+  tree_shap <- predict(bst, newdata = data.matrix(X), predcontrib = TRUE,
+                      approxcontrib = FALSE)
+})
+
+# Remove BIAS column
+tree_shap <- tree_shap[, setdiff(colnames(tree_shap), "BIAS")]
+
+# USe fastshap package
+pfun <- function(object, newdata) {
+  predict(object, newdata = data.matrix(newdata))
+}
+time2 <- system.time({
+  set.seed(105)
+  shap1 <- fastshap(bst, X = X, pred_wrapper = pfun)
+})
+time3 <- system.time({
+  set.seed(107)
+  shap10 <- fastshap(bst, X = X, pred_wrapper = pfun, nsim = 10)
+})
+time4 <- system.time({
+  set.seed(108)
+  shap50 <- fastshap(bst, X = X, pred_wrapper = pfun, nsim = 50)
+})
+
+# Simulate results for X3 using fastshap with various iterations
+set.seed(6292)  # for reproducibility
+res <- NULL
+nsim <- 100
+for (i in 1:nsim) {
+  # message("Iter ", i, " of ", nsim, "...")
+  shap <- fastshap(bst, feature_names = "x.3", X = X, pred_wrapper = pfun, 
+                   nsim = i)
+  res <- cbind(res, data.matrix(shap))
+}
+```
+
+```{r fastshap-comparison, cache=TRUE, fig.width=7, fig.asp=1, out.width="100%"}
+# Compare plots
+par(mfrow = c(2, 2), mar = c(4, 4, 2, 2) + 0.1) 
+plot(X[, 3], tree_shap[, 3, drop = TRUE], main = "TreeSHAP (exact); ~ 0.024 sec",
+     xlab = expression(X[3]), ylab = "Shapley value", 
+     col = adjustcolor("black", alpha.f = 0.5))
+lines(lowess(X[, 3], tree_shap[, 3, drop = TRUE]), lwd = 2, col = "red2")
+plot(X[, 3], shap1[, 3, drop = TRUE], main = "fastshap; ~ 0.468 sec",
+     xlab = expression(X[3]), ylab = "Shapley value", 
+     col = adjustcolor("black", alpha.f = 0.5))
+lines(lowess(X[, 3], shap1[, 3, drop = TRUE]), lwd = 2, col = "red2")
+plot(X[, 3], shap10[, 3, drop = TRUE], main = "fastshap (nsim = 10); ~ 3.820 sec",
+     xlab = expression(X[3]), ylab = "Shapley value", 
+     col = adjustcolor("black", alpha.f = 0.5))
+lines(lowess(X[, 3], shap10[, 3, drop = TRUE]), lwd = 2, col = "red2")
+plot(X[, 3], shap50[, 3, drop = TRUE], main = "fastshap (nsim = 50); ~ 18.378 sec",
+     xlab = expression(X[3]), ylab = "Shapley value", 
+     col = adjustcolor("black", alpha.f = 0.5))
+lines(lowess(X[, 3], shap50[, 3, drop = TRUE]), lwd = 2, col = "red2")
+```
+
+We can also check that **fastshap** converges to the true Shapley values by comparing the results to TreeSHAP while varying the number of Monte Carlo repetitions:
+
+```{r fastshap-convergence, cache=TRUE, fig.width=7, fig.asp=1, out.width="100%"}
+# Plot results for a random sample of rows
+set.seed(2840)  # for reproducibility
+par(mfrow = c(2, 2)) 
+for (i in sample(nrow(tree_shap), size = 4)) {
+  plot(
+    res[i, ], 
+    type = "l", 
+    main = paste("Results for row", i),
+    xlab = "# Monte Carlo reps", 
+    ylab = expression(paste("Shapley value for ", X[3])),
+    las = 1
+  )
+  abline(h = tree_shap[i, 3], lwd = 2)
+  legend("bottomright", lwd = c(2, 1), inset = 0.01, bty = "n", cex = 0.8,
+         legend = c("Exact (TreeSHAP)", "Approximate (fastshap)"))
+}
+```
 
 
 ## References

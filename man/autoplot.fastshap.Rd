@@ -22,7 +22,7 @@ be used to construct the plot.}
 \item{X}{A matrix-like R object (e.g., a data frame or matrix) containing 
 ONLY the feature columns from the training data.}
 
-\item{...}{Additional optional arguemnts. (Currently ignored.)}
+\item{...}{Additional optional arguments. (Currently ignored.)}
 }
 \description{
 Construct Shap-based importance plots or Shap-based dependence plots.

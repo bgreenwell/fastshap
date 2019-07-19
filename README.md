@@ -48,7 +48,6 @@ package.
 library(fastshap)  # for fast (approximate) Shapley values
 library(mlbench)   # for Friedman 1 benchmark data set
 library(ranger)    # for fast random forest algorithm
-#> Warning: package 'ranger' was built under R version 3.5.2
 
 # Simulate training data
 set.seed(101)
@@ -64,13 +63,13 @@ pfun <- function(object, newdata) {
   predict(object, data = newdata)$predictions
 }
 
-# Compute fast (approximate) Shapley values using 10 Monte Carlo repititions
+# Compute fast (approximate) Shapley values using 10 Monte Carlo repetitions
 system.time({  # estimate run time
   set.seed(5038)
   shap <- fastshap(rfo, X = X, pred_wrapper = pfun, nsim = 10)
 })
 #>    user  system elapsed 
-#>  94.672   4.059  20.177
+#>  94.205   4.382  20.149
 
 # Results are returned as a tibble (with the additional "shap" class)
 shap
@@ -98,7 +97,6 @@ Shap-based feature variable importance plot:
 ``` r
 # Load required packages
 library(ggplot2)
-#> Warning: package 'ggplot2' was built under R version 3.5.2
 theme_set(theme_bw())
 
 # Aggregate Shapley values
@@ -115,7 +113,7 @@ ggplot(shap_imp, aes(reorder(Variable, Importance), Importance)) +
   ylab("mean(|Shapley value|)")
 ```
 
-<img src="man/figures/README-shap-importance-1.png" width="70%" />
+<img src="man/figures/README-shap-importance-1.png" width="70%" style="display: block; margin: auto;" />
 
 We can also plot the Shapley values for each feature to construct
 Shap-based dependence plots:
@@ -126,10 +124,9 @@ ggplot(shap_dep_x3, aes(x3, shap)) +
   geom_point(alpha = 0.3) +
   geom_smooth() +
   ylab("Shapley value")
-#> `geom_smooth()` using method = 'gam' and formula 'y ~ s(x, bs = "cs")'
 ```
 
-<img src="man/figures/README-shap-dependence-1.png" width="70%" />
+<img src="man/figures/README-shap-dependence-1.png" width="70%" style="display: block; margin: auto;" />
 
 You can also use `autoplot()` to construct simple plots:
 
@@ -137,10 +134,9 @@ You can also use `autoplot()` to construct simple plots:
 p1 <- autoplot(shap)
 p2 <- autoplot(shap, type = "dependence", feature = "x.3", X = X)
 gridExtra::grid.arrange(p1, p2, nrow = 1)
-#> `geom_smooth()` using method = 'gam' and formula 'y ~ s(x, bs = "cs")'
 ```
 
-<img src="man/figures/README-shap-autoplot-1.png" width="70%" />
+<img src="man/figures/README-shap-autoplot-1.png" width="70%" style="display: block; margin: auto;" />
 
 By default, `fastshap()` computes approximate Shapley values for all
 rows in the training data. If you want Shapley values for new instances
@@ -181,9 +177,6 @@ illustrated in the code chunk below.
 ``` r
 # Load required packages
 library(doParallel)
-#> Loading required package: foreach
-#> Loading required package: iterators
-#> Loading required package: parallel
 
 # Set up parallel backend
 registerDoParallel(5)
@@ -191,18 +184,18 @@ registerDoParallel(5)
 # Compute Shapley values in parallel
 fastshap(rfo, X = X, pred_wrapper = pfun, nsim = 10, .parallel = TRUE)
 #> # A tibble: 3,000 x 10
-#>       x.1    x.2    x.3    x.4    x.5     x.6      x.7      x.8      x.9
-#>     <dbl>  <dbl>  <dbl>  <dbl>  <dbl>   <dbl>    <dbl>    <dbl>    <dbl>
-#>  1  1.59   1.20  -1.03  -2.56   0.307 -0.0612 -0.0759   0.0206  -0.0149 
-#>  2 -3.17   1.09   0.197  0.254  1.06  -0.0196  0.0382  -0.00437  0.0919 
-#>  3  1.06   1.92  -0.760 -2.47  -1.38   0.0597  0.00346  0.0108  -0.0188 
-#>  4  1.22  -3.40  -0.455  4.27   1.56  -0.0313 -0.0215   0.0561   0.00103
-#>  5 -1.48  -0.650 -0.637  2.38   1.46  -0.0159  0.175    0.00629  0.0535 
-#>  6 -2.18   1.49  -0.943 -1.54   1.27  -0.0965 -0.112   -0.0719  -0.0921 
-#>  7  0.755  1.49   0.811 -4.17  -0.684 -0.0396  0.0209   0.0215   0.0135 
-#>  8  0.455 -2.71  -0.129  2.42  -0.155  0.0391  0.0957  -0.0353  -0.0139 
-#>  9  2.03   1.02  -0.314  3.39  -1.16  -0.0620 -0.0222   0.0614  -0.0327 
-#> 10  1.89  -1.56  -0.935 -2.68   0.821 -0.0363  0.0218  -0.0361  -0.0885 
+#>       x.1    x.2     x.3    x.4    x.5      x.6      x.7      x.8      x.9
+#>     <dbl>  <dbl>   <dbl>  <dbl>  <dbl>    <dbl>    <dbl>    <dbl>    <dbl>
+#>  1 -0.999  1.46  -1.38   -2.68  -0.243  1.21e-2 -0.0120  -4.85e-2  0.0970 
+#>  2 -3.25   2.04   0.330   0.754  1.23   9.64e-2  0.195   -5.46e-2 -0.0251 
+#>  3  1.26   1.04  -1.44   -3.07  -1.77  -4.99e-3 -0.0502  -9.60e-2 -0.0453 
+#>  4  1.60  -1.30  -0.0646  3.78   0.702  1.03e-1  0.0436  -3.01e-4  0.0362 
+#>  5 -2.06  -1.81  -0.213   3.47   1.08  -1.12e-2 -0.00622 -9.22e-3  0.106  
+#>  6  0.189  2.54  -1.54   -0.793  1.68   9.02e-2  0.0480  -3.12e-2 -0.532  
+#>  7  1.69   2.20   1.19   -2.82  -0.626  2.63e-4  0.00911 -3.19e-2 -0.0271 
+#>  8  1.39  -0.600  0.0137  2.53   0.219 -1.71e-2  0.0506  -3.71e-2  0.0455 
+#>  9  1.45   0.854 -1.01    3.30  -0.754  4.85e-3  0.0206  -2.18e-2 -0.00183
+#> 10  1.47  -0.944 -0.437  -3.80   1.00   2.28e-2 -0.0362  -6.68e-2 -0.0562 
 #> # … with 2,990 more rows, and 1 more variable: x.10 <dbl>
 ```
 
@@ -220,13 +213,53 @@ used with any prediction model in R. You can see the code that generated
 these benchmarks in the `slowtests/xgboost.R` file
 [here](https://github.com/bgreenwell/fastshap/blob/master/slowtests/xgboost.R).
 
-![](slowtests/treeshap-comparison.png)
+``` r
+# Compare plots
+par(mfrow = c(2, 2), mar = c(4, 4, 2, 2) + 0.1) 
+plot(X[, 3], tree_shap[, 3, drop = TRUE], main = "TreeSHAP (exact); ~ 0.024 sec",
+     xlab = expression(X[3]), ylab = "Shapley value", 
+     col = adjustcolor("black", alpha.f = 0.5))
+lines(lowess(X[, 3], tree_shap[, 3, drop = TRUE]), lwd = 2, col = "red2")
+plot(X[, 3], shap1[, 3, drop = TRUE], main = "fastshap; ~ 0.468 sec",
+     xlab = expression(X[3]), ylab = "Shapley value", 
+     col = adjustcolor("black", alpha.f = 0.5))
+lines(lowess(X[, 3], shap1[, 3, drop = TRUE]), lwd = 2, col = "red2")
+plot(X[, 3], shap10[, 3, drop = TRUE], main = "fastshap (nsim = 10); ~ 3.820 sec",
+     xlab = expression(X[3]), ylab = "Shapley value", 
+     col = adjustcolor("black", alpha.f = 0.5))
+lines(lowess(X[, 3], shap10[, 3, drop = TRUE]), lwd = 2, col = "red2")
+plot(X[, 3], shap50[, 3, drop = TRUE], main = "fastshap (nsim = 50); ~ 18.378 sec",
+     xlab = expression(X[3]), ylab = "Shapley value", 
+     col = adjustcolor("black", alpha.f = 0.5))
+lines(lowess(X[, 3], shap50[, 3, drop = TRUE]), lwd = 2, col = "red2")
+```
+
+<img src="man/figures/README-fastshap-comparison-1.png" width="100%" style="display: block; margin: auto;" />
 
 We can also check that **fastshap** converges to the true Shapley values
 by comparing the results to TreeSHAP while varying the number of Monte
-Carlo repititions:
+Carlo repetitions:
 
-![](slowtests/convergence.png)
+``` r
+# Plot results for a random sample of rows
+set.seed(2840)  # for reproducibility
+par(mfrow = c(2, 2)) 
+for (i in sample(nrow(tree_shap), size = 4)) {
+  plot(
+    res[i, ], 
+    type = "l", 
+    main = paste("Results for row", i),
+    xlab = "# Monte Carlo reps", 
+    ylab = expression(paste("Shapley value for ", X[3])),
+    las = 1
+  )
+  abline(h = tree_shap[i, 3], lwd = 2)
+  legend("bottomright", lwd = c(2, 1), inset = 0.01, bty = "n", cex = 0.8,
+         legend = c("Exact (TreeSHAP)", "Approximate (fastshap)"))
+}
+```
+
+<img src="man/figures/README-fastshap-convergence-1.png" width="100%" style="display: block; margin: auto;" />
 
 ## References
 

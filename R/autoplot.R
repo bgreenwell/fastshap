@@ -16,7 +16,7 @@
 #' @param X A matrix-like R object (e.g., a data frame or matrix) containing 
 #' ONLY the feature columns from the training data.
 #' 
-#' @param ... Additional optional arguemnts. (Currently ignored.)
+#' @param ... Additional optional arguments. (Currently ignored.)
 #' 
 #' @importFrom ggplot2 aes_string autoplot coord_flip geom_col geom_point
 #' 
