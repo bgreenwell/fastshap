@@ -10,3 +10,6 @@ coverage:
       default:
         target: auto
         threshold: 1%
+
+after_success:
+  - Rscript -e 'covr::codecov()'
