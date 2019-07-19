@@ -213,14 +213,14 @@ used with any prediction model in R. You can see the code that generated
 these benchmarks in the `slowtests/xgboost.R` file
 [here](https://github.com/bgreenwell/fastshap/blob/master/slowtests/xgboost.R).
 
-<img src="man/figures/README-fastshap-comparison-1.png" width="100%" style="display: block; margin: auto;" />
+<img src="man/figures/README-fastshap-comparison-1.png" width="70%" style="display: block; margin: auto;" />
 
 We can also check that **fastshap** converges to the true Shapley values
 by comparing the results to TreeSHAP while varying the number of Monte
 Carlo
 repetitions:
 
-<img src="man/figures/README-fastshap-convergence-1.png" width="100%" style="display: block; margin: auto;" />
+<img src="man/figures/README-fastshap-convergence-1.png" width="70%" style="display: block; margin: auto;" />
 
 ## References
 

@@ -111,7 +111,7 @@ ggplot(shap_dep_x3, aes(x3, shap)) +
 
 You can also use `autoplot()` to construct simple plots:
 
-```{r shap-autoplot, cache=TRUE, fig.width=6, fig.asp=0.618, out.width="70%"}
+```{r shap-autoplot, cache=TRUE, fig.width=6, fig.asp=0.5, out.width="70%"}
 p1 <- autoplot(shap)
 p2 <- autoplot(shap, type = "dependence", feature = "x.3", X = X)
 gridExtra::grid.arrange(p1, p2, nrow = 1)
@@ -213,7 +213,7 @@ for (i in 1:nsim) {
 }
 ```
 
-```{r fastshap-comparison, cache=TRUE, echo=FALSE, fig.width=7, fig.asp=1, out.width="100%"}
+```{r fastshap-comparison, cache=TRUE, echo=FALSE, fig.width=7, fig.asp=0.9, out.width="70%"}
 # Compare plots
 par(mfrow = c(2, 2), mar = c(4, 4, 2, 2) + 0.1) 
 plot(X[, 3], tree_shap[, 3, drop = TRUE], main = "TreeSHAP (exact); ~ 0.024 sec",
@@ -236,7 +236,7 @@ lines(lowess(X[, 3], shap50[, 3, drop = TRUE]), lwd = 2, col = "red2")
 
 We can also check that **fastshap** converges to the true Shapley values by comparing the results to TreeSHAP while varying the number of Monte Carlo repetitions:
 
-```{r fastshap-convergence, cache=TRUE, echo=FALSE, fig.width=7, fig.asp=1, out.width="100%"}
+```{r fastshap-convergence, cache=TRUE, echo=FALSE, fig.width=7, fig.asp=0.9, out.width="70%"}
 # Plot results for a random sample of rows
 set.seed(2840)  # for reproducibility
 par(mfrow = c(2, 2)) 
