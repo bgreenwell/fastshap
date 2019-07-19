@@ -12,6 +12,8 @@ approximate Shapley values discussed in [Section 5.8.3.3 of Christoph
 Molnar’s IML
 book](https://christophm.github.io/interpretable-ml-book/shapley.html).
 
+![](https://media.giphy.com/media/26AHLNr8en8J3ovOo/giphy.gif)
+
 **WARNING:** This package is a work in progress and the speed is likely
 to improve further over time (🤞).
 

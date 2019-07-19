@@ -17,7 +17,7 @@ greys <- RColorBrewer::brewer.pal(9, "Greys")
 
 # Hexagon logo
 hex_logo <- ggplot() +
-  geom_polygon(data = hex, aes(x, y), color = "#351D7D", fill = greys[1L],
+  geom_polygon(data = hex, aes(x, y), color = "#351D7D", fill = "white",
                size = 2) +
   annotation_custom(img, xmin = -Inf, xmax = Inf, ymin = -Inf, ymax = Inf) +
   annotate(geom = "text", label = "fastshap", x = -0.4, y = -0.15,
@@ -39,7 +39,7 @@ hex_logo <- ggplot() +
         panel.border = element_blank(),
         panel.grid.major = element_blank(),
         panel.grid.minor = element_blank())
-print(g)
+print(hex_logo)
 
 # Function to save sticker
 save_sticker <- function(filename, sticker = last_plot(), ...) {
