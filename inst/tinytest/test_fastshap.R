@@ -57,9 +57,32 @@ expect_identical(
   target = c(1L, 5L)
 )
 
+# Check approximate Shapley values for a single feature
+set.seed(104)
+shap_single <- fastshap(mars, feature_names = "x.3", X = X, pred_wrapper = pfun)
+
+# Check dimensions
+expect_identical(
+  current = dim(shap_single),
+  target = c(nrow(X), 1L)
+)
+
+# Check column names
+expect_identical(
+  current = names(shap_single),
+  target = "x.3"
+)
+
+# Check class 
+expect_identical(
+  current = class(shap_single),
+  target = c("tbl_df", "tbl", "data.frame", "fastshap")
+)
+
 # Check Shapley-based importance plot and Shapley-based dependence plot
 p1 <- autoplot(shap_all)
 p2 <- autoplot(shap_all, type = "dependence", feature = "x.3", X = X)
+p3 <- autoplot(shap_all, type = "dependence", X = X)
 
 # Check plots
 expect_identical(
@@ -78,7 +101,20 @@ expect_identical(
   current = dim(p2$data),
   target = c(nrow(X), 2L)
 )
+expect_identical(
+  current = class(p3),
+  target = c("gg", "ggplot")
+)
+expect_identical(
+  current = dim(p3$data),
+  target = c(nrow(X), 2L)
+)
+expect_identical(
+  current = p3$data$x,
+  target = X$x.1
+)
 
 # Inspect plots
 p1
 p2
+p3
