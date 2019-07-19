@@ -112,7 +112,7 @@ p2 <- autoplot(shap, type = "dependence", feature = "x.3", X = X)
 gridExtra::grid.arrange(p1, p2, nrow = 1)
 ```
 
-By default, `fastshap()` computes approximate Shapley values for all rows in the training data. If you want Shapley values for new instances (or a subset of the training set), they must be supplied via the `newdata` argument. This functionalaity is demonstrated in the code chunk below. (**Note:** `fastshap()` is not yet optimized for this case; that is, computing only a handful of Shapley values for a few instances (in this case, at least for now, consider using the **iml** function `Shapley()`).)
+By default, `fastshap()` computes approximate Shapley values for all rows in the training data. If you want Shapley values for new instances (or a subset of the training set), they must be supplied via the `newdata` argument. This functionality is demonstrated in the code chunk below. (**Note:** `fastshap()` is not yet optimized for this case; that is, computing only a handful of Shapley values for a few instances (in this case, at least for now, consider using the **iml** function `Shapley()`).)
 
 ```{r shap-newdata, cache=TRUE}
 # Explanations for first observation; technically `drop = FALSE` isn't necessary 
@@ -147,6 +147,11 @@ fastshap(rfo, X = X, pred_wrapper = pfun, nsim = 10, .parallel = TRUE)
 You can compute the contributions of each feature for XGBoost models in an efficient way using the methods described in (Lundberg 2017). These are available through the `predict()` function for **xgboost** models; see `?xgboost::predict.xgb.Booster` for details. Below we compute the contributions for each feature using both methods and compare the results using a Shapley-based dependence plot on feature `x.3`, the results are quite surprising (__no parallel processing was used to obtain the **fastshap** results__). And remember, **fastshap** can be used with any prediction model in R. You can see the code that generated these benchmarks in the `slowtests/xgboost.R` file [here](https://github.com/bgreenwell/fastshap/blob/master/slowtests/xgboost.R).
 
 ![](slowtests/treeshap-comparison.png)
+
+
+We can also check that **fastshap** converges to the true Shapley values by comparing the results to TreeSHAP while varying the number of Monte Carlo repititions:
+
+![](slowtests/convergence.png)
 
 
 ## References

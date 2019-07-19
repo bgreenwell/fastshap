@@ -17,7 +17,7 @@ taken from the column names of \code{X}.}
 \item{X}{A matrix-like R object (e.g., a data frame or matrix) containing 
 ONLY the feature columns from the training data.}
 
-\item{nsim}{The number of Monte Carlo repititions to use for estimating each 
+\item{nsim}{The number of Monte Carlo repetitions to use for estimating each 
 Shapley value. Default is 1.}
 
 \item{pred_wrapper}{Prediction function that requires two arguments,

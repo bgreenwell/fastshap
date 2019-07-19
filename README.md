@@ -141,10 +141,10 @@ gridExtra::grid.arrange(p1, p2, nrow = 1)
 By default, `fastshap()` computes approximate Shapley values for all
 rows in the training data. If you want Shapley values for new instances
 (or a subset of the training set), they must be supplied via the
-`newdata` argument. This functionalaity is demonstrated in the code
-chunk below. (**Note:** `fastshap()` is not yet optimized for this case;
-that is, computing only a handful of Shapley values for a few instances
-(in this case, at least for now, consider using the **iml** function
+`newdata` argument. This functionality is demonstrated in the code chunk
+below. (**Note:** `fastshap()` is not yet optimized for this case; that
+is, computing only a handful of Shapley values for a few instances (in
+this case, at least for now, consider using the **iml** function
 `Shapley()`).)
 
 ``` r
@@ -217,6 +217,12 @@ these benchmarks in the `slowtests/xgboost.R` file
 [here](https://github.com/bgreenwell/fastshap/blob/master/slowtests/xgboost.R).
 
 ![](slowtests/treeshap-comparison.png)
+
+We can also check that **fastshap** converges to the true Shapley values
+by comparing the results to TreeSHAP while varying the number of Monte
+Carlo repititions:
+
+![](slowtests/convergence.png)
 
 ## References
 
