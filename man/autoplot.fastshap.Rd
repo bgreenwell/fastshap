@@ -5,7 +5,9 @@
 \title{Plotting Shapley values}
 \usage{
 \method{autoplot}{fastshap}(object, type = c("importance", "dependence"),
-  feature = NULL, X, ...)
+  feature = NULL, X, color_by = NULL, smooth = FALSE,
+  smooth_color = "red", smooth_linetype = "solid", smooth_size = 1,
+  smooth_alpha = 1, ...)
 }
 \arguments{
 \item{object}{An object of class \code{"fastshap"}.}
@@ -22,7 +24,31 @@ be used to construct the plot.}
 \item{X}{A matrix-like R object (e.g., a data frame or matrix) containing 
 ONLY the feature columns from the training data.}
 
-\item{...}{Additional optional arguments. (Currently ignored.)}
+\item{color_by}{Character string specifying an optional feature column in 
+\code{X} to use for coloring whenever \code{type = "dependence"}.}
+
+\item{smooth}{Logical indicating whether or not to add a smoother to the
+scatterplot whenever \code{type = "dependence"}. Default is \code{TRUE}.}
+
+\item{smooth_color}{The color to use for the smoother whenever 
+\code{smooth = TRUE}. The default is \code{"black"}; see 
+\code{\link[ggplot2]{geom_smooth}} for details.}
+
+\item{smooth_linetype}{The type of line to use for the smoother whenever 
+\code{smooth = TRUE}. The default is \code{"solid"}; see 
+\code{\link[ggplot2]{geom_smooth}} for details.}
+
+\item{smooth_size}{The size to use for the smoother whenever 
+\code{smooth = TRUE}. The default is \code{1}; see 
+\code{\link[ggplot2]{geom_smooth}} for details.}
+
+\item{smooth_alpha}{The transparency to use for the smoother whenever 
+\code{smooth = TRUE}. The default is \code{1}; see 
+\code{\link[ggplot2]{geom_smooth}} for details.}
+
+\item{...}{Additional optional arguments to be passed onto 
+\code{\link[ggplot2]{geom_col}} (if \code{type = "importance"}) or 
+\code{\link[ggplot2]{geom_point}} (if \code{type = "dependence"}).}
 }
 \description{
 Construct Shap-based importance plots or Shap-based dependence plots.

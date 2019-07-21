@@ -132,7 +132,9 @@ You can also use `autoplot()` to construct simple plots:
 
 ``` r
 p1 <- autoplot(shap)
-p2 <- autoplot(shap, type = "dependence", feature = "x.3", X = X)
+p2 <- autoplot(shap, type = "dependence", feature = "x.3", X = X, alpha = 0.5,
+               color_by = "x.2", smooth = TRUE, smooth_color = "black") +
+        scale_color_viridis_c()
 gridExtra::grid.arrange(p1, p2, nrow = 1)
 ```
 
