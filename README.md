@@ -12,9 +12,8 @@ coverage](https://codecov.io/gh/bgreenwell/fastshap/branch/master/graph/badge.sv
 <!-- badges: end -->
 
 The goal of **fastshap** is to provide an efficient way to compute the
-approximate Shapley values discussed in [Section 5.8.3.3 of Christoph
-Molnar’s IML
-book](https://christophm.github.io/interpretable-ml-book/shapley.html).
+approximate Shapley values discussed in [Molnar
+(2019)](https://christophm.github.io/interpretable-ml-book/shapley.html).
 
 ![](https://media.giphy.com/media/26AHLNr8en8J3ovOo/giphy.gif)
 
@@ -204,16 +203,16 @@ fastshap(rfo, X = X, pred_wrapper = pfun, nsim = 10, .parallel = TRUE)
 ## Comparison with TreeSHAP/TreeExplainer for XGBoost models
 
 You can compute the contributions of each feature for XGBoost models in
-an efficient way using the methods described in (Lundberg 2017). These
-are available through the `predict()` function for **xgboost** models;
-see `?xgboost::predict.xgb.Booster` for details. Below we compute the
+an efficient way using the methods described in
+[(Lundberg 2017)](https://arxiv.org/abs/1705.07874). These are available
+through the `predict()` function for **xgboost** models; see
+`?xgboost::predict.xgb.Booster` for details. Below we compute the
 contributions for each feature using both methods and compare the
 results using a Shapley-based dependence plot on feature `x.3`, the
 results are quite surprising (**no parallel processing was used to
 obtain the **fastshap** results**). And remember, **fastshap** can be
-used with any prediction model in R. You can see the code that generated
-these benchmarks in the `slowtests/xgboost.R` file
-[here](https://github.com/bgreenwell/fastshap/blob/master/slowtests/xgboost.R).
+used with any prediction model in
+R.
 
 <img src="man/figures/README-fastshap-comparison-1.png" width="70%" style="display: block; margin: auto;" />
 
@@ -227,7 +226,10 @@ repetitions:
 ## References
 
 Scott M. Lundberg, Su-In Lee, “A Unified Approach to Interpreting Model
-Predictions”, NIPS Proceedings 2017, <https://arxiv.org/abs/1705.07874>
+Predictions”, NIPS Proceedings 2017, <https://arxiv.org/abs/1705.07874>.
 
 Scott M. Lundberg, Su-In Lee, “Consistent feature attribution for tree
-ensembles”, <https://arxiv.org/abs/1706.06060>
+ensembles”, <https://arxiv.org/abs/1706.06060>.
+
+Christoph Molnar, *Interpretable Machine Learning*. 2019.
+<https://christophm.github.io/interpretable-ml-> book/.
