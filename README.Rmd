@@ -218,19 +218,19 @@ for (i in 1:nsim) {
 ```{r fastshap-comparison, cache=TRUE, echo=FALSE, fig.width=7, fig.asp=0.9, out.width="70%"}
 # Compare plots
 par(mfrow = c(2, 2), mar = c(4, 4, 2, 2) + 0.1) 
-plot(X[, 3], tree_shap[, 3, drop = TRUE], main = "TreeSHAP (exact); ~ 0.024 sec",
+plot(X[, 3], tree_shap[, 3, drop = TRUE], main = "TreeSHAP (exact); ~ 0.025 sec",
      xlab = expression(X[3]), ylab = "Shapley value", 
      col = adjustcolor("black", alpha.f = 0.5))
 lines(lowess(X[, 3], tree_shap[, 3, drop = TRUE]), lwd = 2, col = "red2")
-plot(X[, 3], shap1[, 3, drop = TRUE], main = "fastshap; ~ 0.468 sec",
+plot(X[, 3], shap1[, 3, drop = TRUE], main = "fastshap; ~ 0.449 sec",
      xlab = expression(X[3]), ylab = "Shapley value", 
      col = adjustcolor("black", alpha.f = 0.5))
 lines(lowess(X[, 3], shap1[, 3, drop = TRUE]), lwd = 2, col = "red2")
-plot(X[, 3], shap10[, 3, drop = TRUE], main = "fastshap (nsim = 10); ~ 3.820 sec",
+plot(X[, 3], shap10[, 3, drop = TRUE], main = "fastshap (nsim = 10); ~ 3.121 sec",
      xlab = expression(X[3]), ylab = "Shapley value", 
      col = adjustcolor("black", alpha.f = 0.5))
 lines(lowess(X[, 3], shap10[, 3, drop = TRUE]), lwd = 2, col = "red2")
-plot(X[, 3], shap50[, 3, drop = TRUE], main = "fastshap (nsim = 50); ~ 18.378 sec",
+plot(X[, 3], shap50[, 3, drop = TRUE], main = "fastshap (nsim = 50); ~ 15.600 sec",
      xlab = expression(X[3]), ylab = "Shapley value", 
      col = adjustcolor("black", alpha.f = 0.5))
 lines(lowess(X[, 3], shap50[, 3, drop = TRUE]), lwd = 2, col = "red2")
