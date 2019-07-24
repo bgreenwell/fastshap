@@ -54,17 +54,30 @@ for (feature in names(X)) {
 mod <- Predictor$new(rfo, data = X, predict.fun = pfun)
 
 # Compute (approximate) Shapley values (uses 10 Monte Carlo repititions)
+shapley <- Shapley$new(mod, x.interest = X[1, ], sample.size = 10)
 system.time({
-  shapley_iml <- NULL
-  # for (i in 1:10) {
-  for (i in seq_len(nrow(X))) {
-    message("Computing Shapley values for row ", i, "...")
-    shapley_iml <- rbind(
-      shapley_iml,
-      Shapley$new(mod, x.interest = X[i, ], sample.size = 10)$results$phi
-    )
-  }
+  shap_iml <- plyr::ldply(
+    .data = seq_len(nrow(X)), 
+    .progress = "text", 
+    .fun = function(i) {
+      shapley$explain(X[i, ]); shapley$results$phi
+  })
 })
+
+
+
+# # Compute (approximate) Shapley values (uses 10 Monte Carlo repititions)
+# system.time({
+#   shapley_iml <- NULL
+#   # for (i in 1:10) {
+#   for (i in seq_len(nrow(X))) {
+#     message("Computing Shapley values for row ", i, "...")
+#     shapley_iml <- rbind(
+#       shapley_iml,
+#       Shapley$new(mod, x.interest = X[i, ], sample.size = 10)$results$phi
+#     )
+#   }
+# })
 
 par(mfrow = c(2, 5))
 for (i in 1:10) {

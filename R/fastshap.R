@@ -120,6 +120,17 @@ shapley_column <- function(object, X, column, pred_wrapper, newdata = NULL) {
 #' }
 fastshap <- function(object, feature_names = NULL, X, nsim = 1, pred_wrapper,
                      newdata = NULL, ...) {
+  
+  # TODO:
+  #
+  #   1. Correct sum of SHAP values to equal the predicted output of the model
+  #      minus the average prediction.
+  #
+  #   2. Feature grouping. For assessing the importance of groups of features
+  #      without assuming independence between them; see
+  #      https://github.com/slundberg/ShapleyValues.jl for an implementation in
+  #      Julia.
+  
   if (is.null(feature_names)) {
     feature_names = colnames(X)
   }

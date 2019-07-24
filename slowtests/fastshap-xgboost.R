@@ -100,3 +100,24 @@ for (i in sample(nrow(tree_shap), size = 4)) {
          legend = c("Exact (TreeSHAP)", "Approximate (fastshap)"))
 }
 dev.off()
+
+
+# Check convergence of sum of approximate Shapley values
+avg_yhat <- mean(pfun(bst, newdata = X))
+set.seed(8337)  # for reproducibility
+res <- NULL
+nsim <- 100
+for (i in 1:nsim) {
+  message("Iter ", i, " of ", nsim, "...")
+  shap <- fastshap(bst, X = X, pred_wrapper = pfun, nsim = i, newdata = X[3L, ])
+  res <- rbind(res, data.matrix(shap))
+}
+
+plot(
+  apply(res, MARGIN = 1, FUN = sum) - (pfun(bst, newdata = X[3L, ]) - avg_yhat),
+  type = "o", 
+  pch = 19,
+  xlab = "Number of Monte Carlo reps",
+  ylab = expression("Sum of Shapley contributions")
+)
+abline(h = 0, lty = "dashed", col = "red2")

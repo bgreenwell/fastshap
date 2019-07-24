@@ -4,10 +4,10 @@
 \alias{autoplot.fastshap}
 \title{Plotting Shapley values}
 \usage{
-\method{autoplot}{fastshap}(object, type = c("importance", "dependence"),
-  feature = NULL, X, color_by = NULL, smooth = FALSE,
-  smooth_color = "red", smooth_linetype = "solid", smooth_size = 1,
-  smooth_alpha = 1, ...)
+\method{autoplot}{fastshap}(object, type = c("importance", "dependence",
+  "contribution"), feature = NULL, X, color_by = NULL,
+  smooth = FALSE, smooth_color = "red", smooth_linetype = "solid",
+  smooth_size = 1, smooth_alpha = 1, row_num = NULL, ...)
 }
 \arguments{
 \item{object}{An object of class \code{"fastshap"}.}

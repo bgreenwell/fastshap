@@ -49,11 +49,21 @@
 #' @importFrom stats reorder
 #'
 #' @export
-autoplot.fastshap <- function(object, type = c("importance", "dependence"),
-                              feature = NULL, X, color_by = NULL, 
-                              smooth = FALSE, smooth_color = "red", 
-                              smooth_linetype = "solid", smooth_size = 1, 
-                              smooth_alpha = 1, ...) {
+autoplot.fastshap <- function(
+  object, 
+  type = c("importance", "dependence", "contribution"),
+  feature = NULL, 
+  X, 
+  color_by = NULL, 
+  smooth = FALSE, 
+  smooth_color = "red", 
+  smooth_linetype = "solid", 
+  smooth_size = 1, 
+  smooth_alpha = 1, 
+  row_num = NULL,
+  ...
+) {
+
   type <- match.arg(type)
   if (type == "importance") {
     
@@ -71,7 +81,7 @@ autoplot.fastshap <- function(object, type = c("importance", "dependence"),
       xlab("") +
       ylab("mean(|Shapley value|)")
     
-  } else {
+  } else if (type == "dependence") {
     
     # Construct data to plot
     if (is.null(feature)) {
@@ -100,6 +110,27 @@ autoplot.fastshap <- function(object, type = c("importance", "dependence"),
                            linetype = smooth_linetype, size = smooth_size,
                            alpha = smooth_alpha)
     }
+  
+  } else {
+    
+    # Construct data to plot
+    if (is.null(row_num)) {
+      row_num <- 1L
+    }
+    shap_con <- data.frame(
+      Variable = names(object),
+      Shapley = t(object[row_num, , drop = TRUE])
+    )
+    
+    # Construct plot
+    x_string <- "reorder(Variable, Shapley)"
+    p <- ggplot(shap_con, aes_string(x = x_string, y = "Shapley", 
+                                     color = "Shapley", fill = "Shapley")) +
+      geom_col(...) +
+      coord_flip() +
+      xlab("") +
+      ylab("Shapley value")
+    
   }
   
   # Return plot
