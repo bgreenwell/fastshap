@@ -18,29 +18,30 @@ LogicalMatrix genOMat(int num_rows, int num_cols) {
   
   // Inititalize variables to store results
   LogicalMatrix O(num_rows, num_cols - 1);
-  NumericVector probs;
+  NumericVector probs(2);
   
   // Inititalize logical vector to sample from in each row of output
   LogicalVector bools = LogicalVector::create(1, 0);
-
+  
   // Simulate the number of features that appear before the feature of interest
   // in each random permutation; note that each element can range from 0 to 
   // (num_cols - 1) with equal probability
   IntegerVector num_feat = sample(num_cols, num_rows, true) - 1;
-
+  
   // Build up logical matrix row by row (essentially, a true indicates that the
   // corresponding feature appears before the feature of interest in that 
   // particular random permutation)
   for (int i = 0; i < num_rows; i++) {
     
     // Generate sampling probabilities to use for row i
-    probs = NumericVector::create(num_feat[i] / (num_cols - 1.0), 
-                                  1.0 - num_feat[i] / (num_cols - 1.0));
-
+    probs[0] = num_feat[i] / (num_cols - 1.0);  // Pr(drawing a true) 
+    probs[1] = 1.0 - probs[0]; //1.0 - num_feat[i] / (num_cols - 1.0);
+    
     // Construct row i of O by sampling from the vector {true, false} with the
     // probability weights stored in probs
     O(i, _) = sample(bools, num_cols - 1, true, probs);
-
+    //        sample(const Vector x, int size, bool replace, NumericVector probs)
+    
   }
   
   // FIXME: For some reason we tend to get more extremes in the matrix below 
@@ -56,7 +57,7 @@ LogicalMatrix genOMat(int num_rows, int num_cols) {
   
   // Return results
   return O;
-
+  
 }
 
 
