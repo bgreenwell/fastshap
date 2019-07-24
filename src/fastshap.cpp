@@ -42,6 +42,10 @@ LogicalMatrix genOMat(int num_rows, int num_cols) {
 
   }
   
+  // FIXME: For some reason we tend to get more extremes in the matrix below 
+  // (i.e., more occurences of 0 true's and (p-1) true's) when the number of 
+  // trues in any row should be uniform between 0 and (num_cols - 1).
+  
   // Return results
   return O;
 
