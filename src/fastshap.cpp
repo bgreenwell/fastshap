@@ -2,7 +2,7 @@
 using namespace Rcpp;
 
 // [[Rcpp::export]]
-LogicalMatrix genOMat2(int num_rows, int num_cols) {
+LogicalMatrix genOMat(int num_rows, int num_cols) {
   LogicalMatrix O(num_rows, num_cols - 1);
   LogicalVector bools = LogicalVector::create(1, 0);
   IntegerVector pos = sample(num_cols - 1, num_rows, true);  // approximate position

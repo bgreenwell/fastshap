@@ -6,34 +6,20 @@
 using namespace Rcpp;
 
 // genOMat
-LogicalMatrix genOMat(int num_rows, int num_cols, int col);
-RcppExport SEXP _fastshap_genOMat(SEXP num_rowsSEXP, SEXP num_colsSEXP, SEXP colSEXP) {
+LogicalMatrix genOMat(int num_rows, int num_cols);
+RcppExport SEXP _fastshap_genOMat(SEXP num_rowsSEXP, SEXP num_colsSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< int >::type num_rows(num_rowsSEXP);
     Rcpp::traits::input_parameter< int >::type num_cols(num_colsSEXP);
-    Rcpp::traits::input_parameter< int >::type col(colSEXP);
-    rcpp_result_gen = Rcpp::wrap(genOMat(num_rows, num_cols, col));
-    return rcpp_result_gen;
-END_RCPP
-}
-// genOMat2
-LogicalMatrix genOMat2(int num_rows, int num_cols);
-RcppExport SEXP _fastshap_genOMat2(SEXP num_rowsSEXP, SEXP num_colsSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< int >::type num_rows(num_rowsSEXP);
-    Rcpp::traits::input_parameter< int >::type num_cols(num_colsSEXP);
-    rcpp_result_gen = Rcpp::wrap(genOMat2(num_rows, num_cols));
+    rcpp_result_gen = Rcpp::wrap(genOMat(num_rows, num_cols));
     return rcpp_result_gen;
 END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
-    {"_fastshap_genOMat", (DL_FUNC) &_fastshap_genOMat, 3},
-    {"_fastshap_genOMat2", (DL_FUNC) &_fastshap_genOMat2, 2},
+    {"_fastshap_genOMat", (DL_FUNC) &_fastshap_genOMat, 2},
     {NULL, NULL, 0}
 };
 
