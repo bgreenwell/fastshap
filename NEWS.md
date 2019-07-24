@@ -4,6 +4,8 @@
 
 * `autoplot.fastshap()` gained some useful new arguments:
 
+    - You can now specify `type = "contribution"` to plot the explanation for a single instance (controlled by the `row_num` argument).
+
     - `color_by` for specifying an additional feature to color by for dependence plots (i.e., whenever `type = "dependence"`);
     - `smooth`, `smooth_color`, `smooth_linetype`, `smooth_size`, and `smooth_alpha` for adding/controlling a smoother in dependence plots (i.e., whenever `type = "dependence"`).
     - `...` which can be used to pass on additional parameters to `geom_col()` (when `type = "importance"`) or `geom_point()` (when `type = "dependence"`).

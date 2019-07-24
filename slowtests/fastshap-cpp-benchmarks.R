@@ -4,7 +4,7 @@
 # using namespace Rcpp;
 # 
 # // [[Rcpp::export]]
-# LogicalMatrix genOMat(int num_rows, int num_cols, int col) {
+# LogicalMatrix genOMat2(int num_rows, int num_cols, int col) {
 #   LogicalMatrix O(num_rows, num_cols);
 #   LogicalVector Orow(num_cols - 1);
 #   LogicalVector bools = LogicalVector::create(1, 0);
@@ -19,12 +19,12 @@
 #   }
 #   return O;
 # }
-fun1 <- function(m, p, column = 3) {
-  fastshap:::genOMat(m, p, column)
+fun2 <- function(m, p, column = 3) {
+  fastshap:::genOMat2(m, p, column)
 }
 
-fun2 <- function(m, p, column = 3) {
-  O <- fastshap:::genOMat2(m, p)
+fun1 <- function(m, p, column = 3) {
+  O <- fastshap:::genOMat(m, p)
   O <- if (column == 1) {  # case 1
     cbind(TRUE, O)
   } else if (column == p) {  # case 2

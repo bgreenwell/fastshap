@@ -38,6 +38,10 @@
 #' \code{smooth = TRUE}. The default is \code{1}; see 
 #' \code{\link[ggplot2]{geom_smooth}} for details.
 #' 
+#' @param row_num Integer specifying a single row/instance in \code{object} to
+#' plot the explanation when \code{type = "contribution"}. If \code{NULL} (the 
+#' default) the explanation for the first row/instance will be used.
+#' 
 #' @param ... Additional optional arguments to be passed onto 
 #' \code{\link[ggplot2]{geom_col}} (if \code{type = "importance"}) or 
 #' \code{\link[ggplot2]{geom_point}} (if \code{type = "dependence"}).

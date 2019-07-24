@@ -118,6 +118,6 @@ plot(
   type = "o", 
   pch = 19,
   xlab = "Number of Monte Carlo reps",
-  ylab = expression("Sum of Shapley contributions")
+  ylab = expression("Sum of Shapley contributions minus difference")
 )
 abline(h = 0, lty = "dashed", col = "red2")
