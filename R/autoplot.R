@@ -1,3 +1,7 @@
+# TODO: 
+#
+#   1. Add \code{type = "beeswarm"}.
+
 #' Plotting Shapley values
 #' 
 #' Construct Shap-based importance plots or Shap-based dependence plots.

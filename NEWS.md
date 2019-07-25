@@ -13,7 +13,9 @@
 
 ## Bug fixes
 
-* Fixed a bug in the C++ source where doubles were incorrectly being converted to integers.
+* Fixed a bug in the C++ source that gave more weight to extreme permutations.
+
+* Fixed a bug in the C++ source that caused doubles to be incorrectly converted to integers.
 
 * Fixed a bug in `autoplot.fastshap()` when `type = "importance"`; in particular, the function incorrectly used `sum(|SHapley value|)` instead of `mean(|SHapley value|)`.
 

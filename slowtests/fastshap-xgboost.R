@@ -31,7 +31,7 @@ time1 <- system.time({
 # Remove BIAS column
 shap_xgb <- shap_xgb[, setdiff(colnames(shap_xgb), "BIAS")]
 
-# USe fastshap package
+# Use fastshap package
 pfun <- function(object, newdata) {
   predict(object, newdata = data.matrix(newdata))
 }
@@ -47,6 +47,7 @@ time4 <- system.time({
   set.seed(108)
   shap50 <- fastshap(bst, X = X, pred_wrapper = pfun, nsim = 50)
 })
+rbind(time1, time2, time3, time4)
 
 # Compare plots
 par(mfrow = c(2, 2), mar = c(4, 4, 2, 2) + 0.1) 
@@ -83,8 +84,6 @@ for (i in 1:nsim) {
 }
 
 # Plot results for a random sample of rows
-png("slowtests/convergence.png", width = 700, height = 500)
-set.seed(2840)  # for reproducibility
 par(mfrow = c(2, 2)) 
 for (i in sample(nrow(tree_shap), size = 4)) {
   plot(
@@ -99,7 +98,6 @@ for (i in sample(nrow(tree_shap), size = 4)) {
   legend("bottomright", lwd = c(2, 1), inset = 0.01, bty = "n", cex = 0.8,
          legend = c("Exact (TreeSHAP)", "Approximate (fastshap)"))
 }
-dev.off()
 
 
 # Check convergence of sum of approximate Shapley values

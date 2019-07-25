@@ -3,6 +3,16 @@ library(earth)    # for fitting MARS models
 library(ggplot2)  # for autoplot() generic
 library(mlbench)  # for ML benchmark data sets
 
+# Check C++ function
+num_rows <- 100000
+num_cols <- 10
+set.seed(888)
+O <- fastshap:::genOMat(num_rows, num_cols)
+tab <- table(apply(O, MARGIN = 1, FUN = sum))
+expect_true(
+  all(round(tab / num_rows, digits = 2) == 1 / num_cols)
+)
+
 # Generate training data from the Friedman 1 benchmark problem
 set.seed(101)  # for reproducibility
 trn <- as.data.frame(mlbench.friedman1(500))
