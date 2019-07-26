@@ -146,7 +146,7 @@ fastshap <- function(object, feature_names = NULL, X, nsim = 1, pred_wrapper,
   # TODO:
   #
   #   1. Correct sum of SHAP values to equal the predicted output of the model
-  #      minus the average prediction.
+  #      minus the average prediction?
   #
   #   2. Feature grouping. For assessing the importance of groups of features
   #      without assuming independence between them; see
@@ -157,10 +157,6 @@ fastshap <- function(object, feature_names = NULL, X, nsim = 1, pred_wrapper,
     feature_names = colnames(X)
   }
   res <- plyr::laply(feature_names, .fun = function(x) {
-    # apply(replicate(nsim, {
-    #   shapley_column(object, X = X, column = x, pred_wrapper = pred_wrapper,
-    #                  newdata = newdata)
-    # }), MARGIN = 1, FUN = mean)
     reps <- replicate(nsim, {
       shapley_column(object, X = X, column = x, pred_wrapper = pred_wrapper,
                      newdata = newdata)

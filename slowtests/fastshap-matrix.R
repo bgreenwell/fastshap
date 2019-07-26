@@ -33,6 +33,43 @@ system.time({  # estimate run time
                     nsim = 10)
 })
 
+# Use forking approach
+library(doParallel)
+registerDoParallel(cores = 8)
+system.time({  # estimate run time
+  set.seed(5038)
+  shap3 <- fastshap(rfo, feature_names = names(X), X = X2, pred_wrapper = pfun, 
+                    nsim = 10, .parallel = TRUE)
+})
+
+# Use socket approach
+cl <- makeCluster(8)
+registerDoParallel(cl)
+system.time({  # estimate run time
+  set.seed(5038)
+  shap4 <- fastshap(rfo, feature_names = names(X), X = X2, pred_wrapper = pfun, 
+                    nsim = 10, .parallel = TRUE,
+                    .paropts = list(.packages = "ranger", .export = c("X2", "pfun")))
+})
+stopCluster(cl)
+
+library(parallel)
+cl <- makeCluster(5, type = "PSOCK")  
+clusterExport(cl, c("fastshap", "X2", "pfun", "rfo"))
+clusterEvalQ(cl, {
+  library(ranger)
+})
+system.time({
+  res <- parLapply(
+    cl,
+    X = names(X),
+    fun = function(x) {
+      fastshap(rfo, feature_names = x, X = X2, pred_wrapper = pfun, nsim = 10)
+    }
+  )
+})
+stopCluster(cl)
+
 # Benchmark
 fun1 <- function() {
   fastshap(rfo, feature_names = "x.3", X = X, pred_wrapper = pfun)
