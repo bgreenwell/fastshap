@@ -1,6 +1,6 @@
-#include <Rcpp.h>
+#include <RcppArmadillo.h>
 using namespace Rcpp;
-
+// [[Rcpp::depends(RcppArmadillo)]]
 
 // [[Rcpp::export]]
 LogicalMatrix genOMat(int num_rows, int num_cols) {
@@ -44,5 +44,38 @@ LogicalMatrix genOMat(int num_rows, int num_cols) {
   
   // Return results
   return O;
+  
+}
+
+
+// [[Rcpp::export]]
+List genFrankensteinMatrices(arma::mat X, arma::mat W, arma::umat O, int feature) {
+  
+  // Inititialize variables to store results
+  List out(2); 
+  arma::mat B1 = X;
+  arma::mat B2 = X;
+  
+  // Create a copy of O and replace column identified by the feature argument 
+  // with all zeros
+  arma::umat O2 = O;
+  O2.col(feature - 1).fill( 0 );
+  
+  // Convert logical matrices to element vectors for subsetting X and W
+  arma::umat u = find( O );
+  arma::umat u2 = find( O2 );
+  arma::umat notu = find( 1 - O );
+  arma::umat notu2 = find( 1 - O2 );
+  
+  // Swap elements according to permutations specified in O and O2
+  B1.elem( u ) = X.elem( u );
+  B1.elem( notu ) = W.elem( notu );
+  B2.elem( u2 ) = X.elem( u2 );
+  B2.elem( notu2 ) = W.elem( notu2 );
+  
+  // Return list of results
+  out(0) = B1;
+  out(1) = B2;
+  return out;
   
 }

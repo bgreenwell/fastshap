@@ -55,5 +55,5 @@ default) the explanation for the first row/instance will be used.}
 \code{\link[ggplot2]{geom_point}} (if \code{type = "dependence"}).}
 }
 \description{
-Construct Shap-based importance plots or Shap-based dependence plots.
+Construct Shapley-based importance plots or Shap-based dependence plots.
 }

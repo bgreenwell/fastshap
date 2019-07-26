@@ -8,7 +8,8 @@ fastshap(object, feature_names = NULL, X, nsim = 1, pred_wrapper,
   newdata = NULL, ...)
 }
 \arguments{
-\item{object}{A fitted model object (e.g., a \code{"randomForest"} object).}
+\item{object}{A fitted model object (e.g., a 
+\code{\link[randomForest]{randomForest}} object).}
 
 \item{feature_names}{Character string giving the names of the predictor
 variables (i.e., features) of interest. If \code{NULL} (default) they will be
@@ -51,12 +52,14 @@ row for each observation in \code{X}).
 Compute fast (approximate) Shapley values for a set of features.
 }
 \examples{
-\dontrun{
 #
-# A projection pursuit regression example
+# A projection pursuit regression (PPR) example
 #
 
-# Load the sample data
+# Load required packages
+library(ggplot2)
+
+# Load the sample data; ?datasets::mtcars for details
 data(mtcars)
 
 # Fit a projection pursuit regression model
@@ -73,4 +76,8 @@ library(ggplot2)
 autoplot(shap)  # Shapley-based importance plot
 autoplot(shap, type = "dependence", feature = "wt", X = mtcars)
 }
+\seealso{
+You can find more examples (with larger and more realistic data 
+sets) on the \strong{fastshap} GitHub repository: 
+\url{https://github.com/bgreenwell/fastshap}.
 }

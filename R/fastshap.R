@@ -21,10 +21,11 @@ shapley_column <- function(object, X, column, pred_wrapper, newdata = NULL) {
     O <- genOMat(n, p)[sample(n, size = nrow(newdata)), , drop = FALSE]
     X <- newdata  # observations of interest
   }
-
-  # Generate "Frankenstein" matrix; same dimension as X and W. Here we expand O, 
-  # which currently has p-1 columns, to have p columns and set the feature 
-  # column of interest to `TRUE`
+  
+  # Finish building logical matrix that resembles the random permutation order 
+  # to use for each row of X and W (a TRUE indicates that the corresponding
+  # feature appeared before the feature of interest in the associated 
+  # permutation)
   O <- if (column == 1) {  # case 1
     cbind(TRUE, O)
   } else if (column == p) {  # case 2
@@ -37,16 +38,30 @@ shapley_column <- function(object, X, column, pred_wrapper, newdata = NULL) {
     )
   }
   
-  # Generate "Frankenstein" instances from X and W (in one fell swoop)
-  B1 <- B2 <- X
-  B1[O] <- X[O]
-  B1[!O] <- W[!O]
-  O[, column] <- FALSE
-  B2[O] <- X[O]
-  B2[!O] <- W[!O]
+  # Generate list of "Frankenstein" matrices (in one fell swoop). Essentially,
+  # each rows in B[[1L]] and B[[2L]] is a combination of feature values from X
+  # and W
+  if (is.matrix(X)) {
+    
+    # Use RcppArmadillo for slight performance gain
+    B <- genFrankensteinMatrices(X, W, O, feature = column)
+    colnames(B[[1L]]) <- colnames(B[[2L]]) <- colnames(X)
+
+  } else {
+    
+    # Use base R's logical subsetting
+    B <- list(X, X)
+    B[[1L]][O] <- X[O]
+    B[[1L]][!O] <- W[!O]
+    O[, column] <- FALSE
+    B[[2L]][O] <- X[O]
+    B[[2L]][!O] <- W[!O]
+    
+  }
   
   # Return differences in predictions
-  pred_wrapper(object, newdata = B1) - pred_wrapper(object, newdata = B2)
+  pred_wrapper(object, newdata = B[[1L]]) - 
+    pred_wrapper(object, newdata = B[[2L]])  
   
 }
 
@@ -55,7 +70,8 @@ shapley_column <- function(object, X, column, pred_wrapper, newdata = NULL) {
 #' 
 #' Compute fast (approximate) Shapley values for a set of features.
 #' 
-#' @param object A fitted model object (e.g., a \code{"randomForest"} object).
+#' @param object A fitted model object (e.g., a 
+#' \code{\link[randomForest]{randomForest}} object).
 #'
 #' @param feature_names Character string giving the names of the predictor
 #' variables (i.e., features) of interest. If \code{NULL} (default) they will be
@@ -93,15 +109,22 @@ shapley_column <- function(object, X, column, pred_wrapper, newdata = NULL) {
 #' in \code{newdata} (if \code{newdata = NULL}, the default, there will be one
 #' row for each observation in \code{X}). 
 #' 
+#' @seealso You can find more examples (with larger and more realistic data 
+#' sets) on the \strong{fastshap} GitHub repository: 
+#' \url{https://github.com/bgreenwell/fastshap}.
+#' 
+#' 
 #' @export
 #' 
 #' @examples 
-#' \dontrun{
 #' #
-#' # A projection pursuit regression example
+#' # A projection pursuit regression (PPR) example
 #' #
 #' 
-#' # Load the sample data
+#' # Load required packages
+#' library(ggplot2)
+#' 
+#' # Load the sample data; ?datasets::mtcars for details
 #' data(mtcars)
 #' 
 #' # Fit a projection pursuit regression model
@@ -117,7 +140,6 @@ shapley_column <- function(object, X, column, pred_wrapper, newdata = NULL) {
 #' library(ggplot2)
 #' autoplot(shap)  # Shapley-based importance plot
 #' autoplot(shap, type = "dependence", feature = "wt", X = mtcars)
-#' }
 fastshap <- function(object, feature_names = NULL, X, nsim = 1, pred_wrapper,
                      newdata = NULL, ...) {
   

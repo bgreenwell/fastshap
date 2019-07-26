@@ -4,7 +4,7 @@
 
 #' Plotting Shapley values
 #' 
-#' Construct Shap-based importance plots or Shap-based dependence plots.
+#' Construct Shapley-based importance plots or Shap-based dependence plots.
 #' 
 #' @param object An object of class \code{"fastshap"}.
 #' 

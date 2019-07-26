@@ -28,6 +28,14 @@ system.time({  # estimate run time
 })
 
 # Compute fast (approximate) Shapley values using 10 Monte Carlo repititions
+X2 <- data.matrix(X)
+system.time({  # estimate run time
+  set.seed(5038)
+  shap2 <- fastshap(rfo, feature_names = names(X), X = X2, pred_wrapper = pfun, 
+                    nsim = 10, .progress = "text")
+})
+
+# Compute fast (approximate) Shapley values using 10 Monte Carlo repititions
 library(doParallel)
 registerDoParallel(cores = 5)
 system.time({  # estimate run time
