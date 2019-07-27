@@ -7,12 +7,15 @@
         "-I/Library/Developer/CommandLineTools/usr/include",
         "-I/usr/include",
         "-I/Users/b780620/Library/R/3.5/library/Rcpp/include",
+        "-I/Library/Frameworks/R.framework/Versions/3.5/Resources/library/RcppArmadillo/include",
+        "-std=gnu++11",
         "-I/Library/Frameworks/R.framework/Resources/include",
         "-DNDEBUG",
         "-I/usr/local/include",
+        "-DARMA_DONT_USE_OPENMP",
         "-fPIC"
     ],
-    "hash" : "1563748390",
+    "hash" : "156415964715641603441564159647",
     "is_cpp" : true,
     "pch" : "Rcpp"
 }

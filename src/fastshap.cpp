@@ -55,17 +55,13 @@ List genFrankensteinMatrices(arma::mat X, arma::mat W, arma::umat O, int feature
   List out(2); 
   arma::mat B1 = X;
   arma::mat B2 = X;
-  
-  // Create a copy of O and replace column identified by the feature argument 
-  // with all zeros
-  arma::umat O2 = O;
-  O2.col(feature - 1).fill( 0 );
-  
+
   // Convert logical matrices to element vectors for subsetting X and W
   arma::umat u = find( O );
-  arma::umat u2 = find( O2 );
   arma::umat notu = find( 1 - O );
-  arma::umat notu2 = find( 1 - O2 );
+  O.col(feature - 1).fill( 0 );
+  arma::umat notu2 = find( 1 - O );
+  arma::umat u2 = find( O );
   
   // Swap elements according to permutations specified in O and O2
   B1.elem( u ) = X.elem( u );
