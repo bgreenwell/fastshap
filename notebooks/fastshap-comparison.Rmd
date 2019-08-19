@@ -1,0 +1,291 @@
+---
+title: "Comparing **fastshap** with other implementations"
+author: "Brandon M. Greenwell"
+date: "`r format(Sys.Date(), format = '%B %d, %Y')`"
+output: html_document
+bibliography: bibliography.bib
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  cache = TRUE,
+  fig.align = "center",
+  message = FALSE,
+  warning = FALSE,
+  error = FALSE
+)
+```
+
+This notebook provides provides example code comparing [fastshap](https://github.com/bgreenwell/fastshap) against other available implementations in R; in particular:
+
+* The [iml](https://github.com/christophM/iml) function `Shapley()`.
+* The [iBreakDown](https://github.com/ModelOriented/iBreakDown) function `shap()`.
+
+All of these implementations employ the same Monte Carlo technique for computing the approximate Shapley (ApproxSHAP) values described in @strumbelj-2014-explaining; in particular, see **Algorithm 1**.
+
+
+## TL;DR
+
+* As we increase the number of Monte Carlo repetitions ($B$), ApproxSHAP $\rightarrow$ TreeSHAP (or ExactSHAP in general).
+
+* The above bullet point implies that ApproxSHAP values will not sum to the difference between the true prediction(s) for the observations to be explained (in this case, `new_obs`) and the average of all the training data predictions. Though, this holds in the limit as $B \rightarrow \infty$.
+
+* The convergence of ApproxSHAP $\rightarrow$ TreeSHAP depends on the variability in the training data features.
+
+* **fastshap** works on an entire column of training data at a time; hence, is more efficient at computing ApproxSHAP values for larger sets of training data (i.e., when you want SHAP-based variable importance plots, SHAP dependence plots, etc.)
+
+  - Other implementations only compute ApproxSHAP values for a single observation at a time (at least as far as I can tell)
+
+  - This is the primary reason why such implementatios do not scale well to large sets of explanations (look at the estimated compute time from **iBreakDown** and **iml** and extrapolate to the full training set of $N = 3000$ records---**fastshap** took roughly ten minutes for $B = 100$ Monte Carlo repetitions, whereas **iBreakDown** and **iml** would take an estimated 14 and 100+ hours to compute, respectively).
+  
+* If you only want explanations for a single observation, **iBreakDown** and **iml** are great and provide some bells and whistles in terms of plotting and printing.
+
+* If you want explanations for multiple instances, then **fastshap** seems to be the most efficient for non-XGBoost models (see, for example, the comparison with TreeSHAP on a random forest in [this notebook]().)
+
+
+## The Friedman 1 benchmark
+
+We'll illustrate major concepts using the Friedman 1 benchmark problem described in @multivariate-friedman-1991 and @bagging-breiman-1996: 
+
+$$
+  Y_i = 10 \sin\left(\pi X_{1i} X_{2i}\right) + 20 \left(X_{3i} - 0.5\right) ^ 2 + 10 X_{4i} + 5 X_{5i} + \epsilon_i, \quad i = 1, 2, \dots, n,
+$$
+
+where $\epsilon_i \stackrel{iid}{\sim} N\left(0, \sigma^2\right)$. Data from this model can be generated using [mlbench](https://CRAN.R-project.org/package=mlbench) package [@R-mlbench], however, we'll use our own function to generate the data. The inputs consist of $p > 5$ independent variables uniformly distributed on the interval $\left[0,1\right]$; however, only five out of the $p$ are actually used in the true model. The code chunk below simulates $N = 3000$ observations from the model above default with $p = 100$ and $\sigma = 1$.
+
+```{r friedman1}
+# Function to generate data from the Friedman 1 benchmark data set
+make_freidman1 <- function(n_samples = 100, n_features = 10, sigma = 0.1, 
+                           seed = NULL) {
+  if (!is.null(seed)) {
+    set.seed(seed)
+  }
+  x <- matrix(runif(n_samples * n_features), ncol = n_features)
+  colnames(x) <- paste0("x", seq_len(n_features))
+  y = 10 * sin(pi * x[, 1L] * x[, 2L]) + 20 * (x[, 3L] - 0.5) ^ 2 + 
+    10 * x[, 4L] + 5 * x[, 5L] + rnorm(n_samples, sd = sigma)
+  as.data.frame(cbind(y = y, x))
+}
+
+# Simulate training data from the Friedman 1 benchmark
+set.seed(824)  # for reproducibility
+friedman1 <- make_freidman1(3000, n_features = 100, sigma = 1)
+X <- subset(friedman1, select = -y)
+```
+
+For these data, it should be clear that features $X_1$--$X_5$ are the most important! (The others don't influence $Y$ at all.) Also, based on the form of the model, we'd expect $X_4$ to be the most important feature, probably followed by $X_1$ and $X_2$, both comparably important, with $X_5$ probably less important. The influence of $X_3$ is harder to determine due to its quadratic nature, but it seems likely that this nonlinearity will suppress this variable's influence since the total range of this term is from 0--1, the same as the $X_5$ term.
+
+For illustration, we'll train an XGBoost model to the Friedman 1 benchmark data using the [xgboost](https://github.com/dmlc/xgboost) package [@R-xgboost]. We use XGBoost so that we can compare the approximate Shapley values to the exact ones produced by the TreeSHAP algorithm [@lundberg-2019-explainable] which is implemented in [xgboost](https://github.com/dmlc/xgboost).
+
+The code below used 5-fold cross-validation to find a reasonable number of trees using a learning rate of 0.3 and a maximum depth of 2 (since we know there's nothing higher than a two-way interaction in the true relationship):
+
+```{r friedman1-xgboost-cv, fig.width=6, fig.asp=0.618, out.width="100%"}
+# Load required packages
+library(xgboost)
+
+# Use 5-fold CV to tune an XGBoost model
+set.seed(831)
+fit.cv <- xgb.cv(data = data.matrix(X), label = friedman1$y, max_depth = 2, 
+                 eta = 0.3, nround = 1000, nfold = 5, verbose = 0,
+                 objective = "reg:squarederror")
+plot(test_rmse_mean ~ iter, data = fit.cv$evaluation_log, type = "l")
+best_iter <- which.min(fit.cv$evaluation_log$test_rmse_mean)
+```
+
+Next, we train an XGBoost model using the "optimal" number of trees found via cross-validation in the previous step (`best_iter`). We'll also compute the RMSE and a pseudo $R^2$ measure on $M = 3000$ test points generated from the same population:
+
+```{r friedman1-xgboost}
+# Fit an XGBoost model
+set.seed(834)
+fit <- xgboost(data = data.matrix(X), label = friedman1$y, max_depth = 2, 
+               eta = 0.3, nround = best_iter, objective = "reg:squarederror", 
+               verbose = 0)
+
+# Compute performance on test data
+set.seed(846)  # for reproducibility
+test <- make_freidman1(3000, n_features = 100, sigma = 1)
+pred <- predict(fit, newdata = data.matrix(subset(test, select = -y)))
+
+# Performance measures
+round(sqrt(mean((pred - test$y) ^ 2)), digits = 3)  # RMSE
+round(cor(pred, test$y) ^ 2, digits = 3)  # R-squared
+```
+
+
+## Explaining a single feature
+
+We'll start by explaining a single observation:
+
+```{r new-obs}
+# Here we'll just use the first training observation
+new_obs <- data.matrix(X[1L, , drop = FALSE])
+```
+
+
+### TreeSHAP: xgboost
+
+To get exact Shapley explanations for from an XGBoost model in R, just call the `predict()` function as usual and specify `predcontrib = TRUE`. **Note** there is also the option to compute an approximation (`approxcontrib = TRUE`) which will be faster, but here we'll set it to `FALSE`:
+
+```{r friedman1-xgboost-treeshap}
+system.time(  # record approximate computation time
+  
+  # Compute TreeSHAP values for new_obs
+  shap_xgboost <- predict(fit, newdata = new_obs, predcontrib = TRUE, 
+                          approxcontrib = FALSE)
+  
+)
+```
+
+This returns a matrix with the same number of rows as `new_obs` and one column for each feature, plus an additional `"BIAS"` column that gives the average of all the training data predictions:
+
+```{r friedman1-xgboost-treeshap-print}
+head(t(shap_xgboost), n = 10)
+tail(t(shap_xgboost), n = 10)
+```
+
+The sum of the exact Shapley values (which is what TreeSHAP can give for tree-based models) gives the difference between the true prediction(s) for the observations to be explained (in this case, `new_obs`) and the average of all the training data predictions.
+
+```{r friedman1-xgboost-treeshap-sum}
+mean(predict(fit, newdata = data.matrix(X)))
+predict(fit, newdata = new_obs)
+sum(shap_xgboost[, 1:100])
+```
+
+We can easily plot the TreeSHAP results from XGBoost after removing the `"BIAS"` component:
+
+```{r friedman1-xgboost-treeshap-plot, fig.width=6, fig.asp=0.618, out.width="100%"}
+# Plot the results (the `[-101L]` is to remove the "BIAS" component)
+plot(as.numeric(shap_xgboost)[-101L], type = "h", xlab = "Feature",
+     ylab = "TreeSHAP", las = 1)
+```
+
+
+### ApproxSHAP: fastshap
+
+To get approximate Shapley explanations using the [fastshap]() package, we call the `explain()` function which requires a prediction wrapper for the model of interest (i.e., a function with two arguments, `object` and `newdata`, that returns a vector of predictions; see `?fastshap::explain` for details.) For XGBoost models on a regression task, `stats::predict()` suffices. Since this approach uses simulation to approximate the true Shapley values, we need to specify the number of Monte Carlo repetitions to use as well. For all the examples in this notebook, we'll use $B = 100$ Monte Carlo repetitions.
+
+```{r friedman1-xgboost-fastshap, fig.width=6, fig.asp=0.618, out.width="100%"}
+# Load required packages
+library(fastshap)
+library(ggplot2)  # for autoplot() function
+
+system.time({  # record approximate computation time
+  
+  # Compute ApproxSHAP values for new_obs
+  set.seed(921)  # for reproducibility
+  shap_fastshap <- explain(fit, X = data.matrix(X), nsim = 100, 
+                           newdata = new_obs, pred_wrapper = stats::predict)
+  
+})
+```
+
+The output from `fastshap::explain()` is always a tibble [@R-tibble] containing the mean approximate Shapley values for each feature column:
+
+```{r friedman1-xgboost-fastshap-print, fig.width=6, fig.asp=0.618, out.width="100%"}
+shap_fastshap
+```
+
+The results can also be visually summarized using the provided `autoplot()` method (see `?fastshap::autoplot.explain` for details):
+
+```{r friedman1-xgboost-fastshap-plot, fig.width=6, fig.asp=0.618, out.width="100%"}
+# Plot the results (only retaining the 10 highest |ApproxSHAP| values)
+autoplot(shap_fastshap, type = "contribution", num_features = 10)
+```
+
+
+### ApproxSHAP: iBreakDown
+
+```{r friedman1-xgboost-iBreakDown}
+# Load required packages
+library(iBreakDown)
+
+system.time({  # record approximate computation time
+  
+  # Compute ApproxSHAP values for new_obs
+  set.seed(952)  # for reproducibility
+  shap_iBreakDown <- shap(fit, data = data.matrix(X), B = 100, 
+                          new_observation = new_obs)
+  
+})
+```
+
+The printed output from `iBreakDown::shap()` describes the distribution of the ApproxSHAP values:
+
+```{r friedman1-xgboost-iBreakDown-print}
+head(shap_iBreakDown)
+```
+
+The results can also be plotted using the `plot()` method (see `?iBreakDown::plot.break_down_uncertainty` for details):
+
+```{r friedman1-xgboost-iBreakDown-plot, fig.width=6, fig.asp=0.618, out.width="100%"}
+plot(shap_iBreakDown)
+```
+
+
+### ApproxSHAP: iml
+
+```{r friedman1-xgboost-iml}
+# Load required packages
+library(iml)
+
+# Create a Predictor object first
+predictor <- Predictor$new(
+  model = fit, 
+  data = as.data.frame(X), 
+  predict.fun = function(object, newdata) {
+    predict(object, newdata = data.matrix(newdata))
+})
+# set.seed(201)
+
+system.time({  # record approximate computation time
+  
+  # Compute ApproxSHAP values for new_obs
+  set.seed(1314)  # for reproducibility
+  shap_iml <- Shapley$new(predictor, sample.size = 100, 
+                          x.interest = as.data.frame(new_obs))
+  
+})
+```
+
+The printed output from `iml::Shapley()` describes the distribution of the ApproxSHAP values (mean and variance) as well as some other useful information like the predicted value and average training prediction:
+
+```{r friedman1-xgboost-iml-print}
+shap_iml
+```
+
+The results can also be plotted using the `plot()` method (see `?iBreakDown::plot.break_down_uncertainty` for details):
+
+```{r friedman1-xgboost-iml-plot, fig.width=6, fig.asp=0.618, out.width="100%"}
+plot(shap_iml)
+```
+
+
+## Explaining the entire training data
+
+```{r friedman-xgboost-fastshap-all}
+system.time({  # record approximate computation time
+  
+  # Compute ApproxSHAP values for new_obs
+  set.seed(1345)  # for reproducibility
+  shap_fastshap_all <- explain(fit, X = data.matrix(X), nsim = 100, 
+                               pred_wrapper = stats::predict)
+  
+})
+```
+
+With Shapley explanations for all the features on the entire training set you can construct informative plots (e.g., SHAP-based variable importance plots, SHAP dependence plots, etc.). We give two examples in the code chunk below:
+
+```{r friedman-xgboost-fastshap-all-plots, fig.width=6, fig.asp=0.618, out.width = "100%"}
+# SHAP-based importance plot
+p1 <- autoplot(shap_fastshap_all, num_features = 20)
+
+# SHAP-based dependence plot for x3
+p2 <- autoplot(shap_fastshap_all, type = "dependence", X = X, feature = "x3",
+               alpha = 0.1)
+
+# Display plots side by side
+grid.arrange(p1, p2, nrow = 1)
+```
+
+
+## References

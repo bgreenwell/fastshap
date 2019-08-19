@@ -6,7 +6,7 @@
 #' 
 #' Construct Shapley-based importance plots or Shap-based dependence plots.
 #' 
-#' @param object An object of class \code{"fastshap"}.
+#' @param object An object of class \code{"explain"}.
 #' 
 #' @param type Character string specifying which type of plot to construct. 
 #' Current options are \code{"importance"} (for Shapley-based variable 
@@ -16,6 +16,9 @@
 #' @param feature Character string specifying which feature to use when 
 #' \code{type = "dependence"}. If \code{NULL} (default) the first feature will
 #' be used to construct the plot.
+#' 
+#' @param num_features Integer specifying the number of variables to plot. 
+#' Default is \code{NULL} which will cause all variables to be displayed.
 #' 
 #' @param X A matrix-like R object (e.g., a data frame or matrix) containing 
 #' ONLY the feature columns from the training data.
@@ -57,10 +60,11 @@
 #' @importFrom stats reorder
 #'
 #' @export
-autoplot.fastshap <- function(
+autoplot.explain <- function(
   object, 
   type = c("importance", "dependence", "contribution"),
   feature = NULL, 
+  num_features = NULL,
   X, 
   color_by = NULL, 
   smooth = FALSE, 
@@ -72,6 +76,18 @@ autoplot.fastshap <- function(
   ...
 ) {
 
+  # Number of features to show for "importance" and "contribution" plots
+  if (is.null(num_features)) {
+    num_features <- ncol(object)
+  } else {
+    num_features <- as.integer(num_features)[1L]  # make sure num_features is a single integer
+    if (num_features > ncol(object) || num_features < 1L) {
+      warning("Argument `num_features` should be between 1 and ", ncol(object), 
+              ". Displaying all features instead.", call. = FALSE)
+      num_features <- ncol(object)
+    }
+  }
+  
   type <- match.arg(type)
   if (type == "importance") {
     
@@ -80,6 +96,8 @@ autoplot.fastshap <- function(
       Variable = names(object),
       Importance = apply(object, MARGIN = 2, FUN = function(x) mean(abs(x)))
     )
+    shap_imp <- shap_imp[order(shap_imp$Importance, decreasing = TRUE), ]  # sort in descending order
+    shap_imp <- shap_imp[seq_len(num_features), ]  # only retain num_features variable importance scores
     
     # Construct plot
     x_string <- "reorder(Variable, Importance)"
@@ -129,9 +147,11 @@ autoplot.fastshap <- function(
       Variable = names(object),
       Shapley = t(object[row_num, , drop = TRUE])
     )
+    shap_con <- shap_con[order(abs(shap_con$Shapley), decreasing = TRUE), ]  # sort in descending order
+    shap_con <- shap_con[seq_len(num_features), ]  # only retain num_features variable importance scores
     
     # Construct plot
-    x_string <- "reorder(Variable, Shapley)"
+    x_string <- "reorder(Variable, abs(Shapley))"
     p <- ggplot(shap_con, aes_string(x = x_string, y = "Shapley", 
                                      color = "Shapley", fill = "Shapley")) +
       geom_col(...) +

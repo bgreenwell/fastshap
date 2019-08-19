@@ -47,6 +47,7 @@ shap_vi <- data.frame(
 shap4 <- merge(shap3, shap_vi, by = "Variable")
 
 ggplot(shap4, aes(x = SHAP, y = reorder(Variable, Importance))) +
-  ggbeeswarm::geom_quasirandom(groupOnX = FALSE, varwidth = TRUE, size = 0.4, alpha = 0.25) +
+  ggbeeswarm::geom_quasirandom(groupOnX = FALSE, varwidth = TRUE, 
+                               size = 0.4, alpha = 0.25) +
   xlab("SHAP value") +
   ylab(NULL)

@@ -20,6 +20,7 @@ knitr::opts_chunk$set(
 <!-- badges: start -->
 [![Travis build status](https://travis-ci.org/bgreenwell/fastshap.svg?branch=master)](https://travis-ci.org/bgreenwell/fastshap)
 [![Codecov test coverage](https://codecov.io/gh/bgreenwell/fastshap/branch/master/graph/badge.svg)](https://codecov.io/gh/bgreenwell/fastshap?branch=master)
+[![Launch Rstudio Binder](http://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/bgreenwell/fastshap/master?urlpath=rstudio)
 <!-- badges: end -->
 
 The goal of **fastshap** is to provide an efficient way to compute the approximate Shapley values discussed in [Molnar (2019)](https://christophm.github.io/interpretable-ml-book/shapley.html). 
@@ -39,9 +40,20 @@ if (!requireNamespace("remotes")) {
 remotes::install_github("bgreenwell/fastshap")
 ```
 
+## Background
+
+The approach in this package is similar to what's described in **Algorithm 1** in Strumbelj and Kononenko (2014) which is reproduced below:
+
+```{r algorithm1, echo=FALSE}
+knitr::include_graphics("man/figures/algorithm1.png")
+```
+
+The problem with this approach is that it requires many calls to the scoring function *f()*. In particular, if we have *N* training records and *p* features, than this algorithm would require *2mnp* calls to *f()* in order to obtain approximate Shapley values for the entire training set. The approach we take is similar, but rather than computing each Monte Carlo estimate one at a time, we construct all the data required to compute the approximate Shapley values for a single feature at once and only use two calls to *f()*. Using this approach only requires *2mp* calls to *f()* to obtain approximate Shapley values for all *p* features for the entire training set. Hence, this approach will scale better to larger training sets. Also, the data instances **b<sub>1</sub>** and **b<sub>2</sub>** are built efficiently for each row in the training set (or subset thereof) all at once and stacked on top of each other in a data frame or matrix using C++ and logical subsetting. We can also parallelize the algorithm across *m* or *p*, depending on which one is more beneficial.
+
+
 ## General comments
 
-* The `fastshap()` function was built for efficiency column-wise (in other words, it is not currently optimized if all you need are the Shapley values for a few rows)
+* The `explain()` function was built for efficiency column-wise (in other words, it is not currently optimized if all you need are the Shapley values for a few rows)
 
 
 ## Example
@@ -71,7 +83,7 @@ pfun <- function(object, newdata) {
 # Compute fast (approximate) Shapley values using 10 Monte Carlo repetitions
 system.time({  # estimate run time
   set.seed(5038)
-  shap <- fastshap(rfo, X = X, pred_wrapper = pfun, nsim = 10)
+  shap <- explain(rfo, X = X, pred_wrapper = pfun, nsim = 10)
 })
 
 # Results are returned as a tibble (with the additional "shap" class)
@@ -119,17 +131,17 @@ p2 <- autoplot(shap, type = "dependence", feature = "x.3", X = X, alpha = 0.5,
 gridExtra::grid.arrange(p1, p2, nrow = 1)
 ```
 
-By default, `fastshap()` computes approximate Shapley values for all rows in the training data. If you want Shapley values for new instances (or a subset of the training set), they must be supplied via the `newdata` argument. This functionality is demonstrated in the code chunk below. (**Note:** `fastshap()` is not yet optimized for this case; that is, computing only a handful of Shapley values for a few instances (in this case, at least for now, consider using the **iml** function `Shapley()`).)
+By default, `explain()` computes approximate Shapley values for all rows in the training data. If you want Shapley values for new instances (or a subset of the training set), they must be supplied via the `newdata` argument. This functionality is demonstrated in the code chunk below. (**Note:** `explain()` is not yet optimized for this case; that is, computing only a handful of Shapley values for a few instances (in this case, at least for now, consider using the **iml** function `Shapley()`).)
 
 ```{r shap-newdata, cache=TRUE}
 # Explanations for first observation; technically `drop = FALSE` isn't necessary 
 # here since X is a data frame
-fastshap(rfo, X = X, pred_wrapper = pfun, nsim = 10,
-         newdata = X[1, , drop = FALSE])
+explain(rfo, X = X, pred_wrapper = pfun, nsim = 10,
+        newdata = X[1, , drop = FALSE])
 
 # Explanations for first three observations
-fastshap(rfo, X = X, feature_names = c("x.1", "x.10"), pred_wrapper = pfun, 
-         nsim = 10, newdata = X[1:3, ])
+explain(rfo, X = X, feature_names = c("x.1", "x.10"), pred_wrapper = pfun, 
+        nsim = 10, newdata = X[1:3, ])
 ```
 
 
@@ -146,7 +158,7 @@ library(doParallel)
 registerDoParallel(5)
 
 # Compute Shapley values in parallel
-fastshap(rfo, X = X, pred_wrapper = pfun, nsim = 10, .parallel = TRUE)
+explain(rfo, X = X, pred_wrapper = pfun, nsim = 10, .parallel = TRUE)
 ```
 
 ## Comparison with TreeSHAP/TreeExplainer for XGBoost models
@@ -180,7 +192,7 @@ bst <- xgboost(data = data.matrix(X), label = trn$y,
 time1 <- system.time({
   set.seed(104)
   tree_shap <- predict(bst, newdata = data.matrix(X), predcontrib = TRUE,
-                      approxcontrib = FALSE)
+                       approxcontrib = FALSE)
 })
 
 # Remove BIAS column
@@ -192,15 +204,15 @@ pfun <- function(object, newdata) {
 }
 time2 <- system.time({
   set.seed(105)
-  shap1 <- fastshap(bst, X = X, pred_wrapper = pfun)
+  shap1 <- explain(bst, X = X, pred_wrapper = pfun)
 })
 time3 <- system.time({
   set.seed(107)
-  shap10 <- fastshap(bst, X = X, pred_wrapper = pfun, nsim = 10)
+  shap10 <- explain(bst, X = X, pred_wrapper = pfun, nsim = 10)
 })
 time4 <- system.time({
   set.seed(108)
-  shap50 <- fastshap(bst, X = X, pred_wrapper = pfun, nsim = 50)
+  shap50 <- explain(bst, X = X, pred_wrapper = pfun, nsim = 50)
 })
 
 # Simulate results for X3 using fastshap with various iterations
@@ -209,7 +221,7 @@ res <- NULL
 nsim <- 100
 for (i in 1:nsim) {
   # message("Iter ", i, " of ", nsim, "...")
-  shap <- fastshap(bst, feature_names = "x.3", X = X, pred_wrapper = pfun, 
+  shap <- explain(bst, feature_names = "x.3", X = X, pred_wrapper = pfun, 
                    nsim = i)
   res <- cbind(res, data.matrix(shap))
 }

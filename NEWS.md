@@ -9,6 +9,13 @@
     - `color_by` for specifying an additional feature to color by for dependence plots (i.e., whenever `type = "dependence"`);
     - `smooth`, `smooth_color`, `smooth_linetype`, `smooth_size`, and `smooth_alpha` for adding/controlling a smoother in dependence plots (i.e., whenever `type = "dependence"`).
     - `...` which can be used to pass on additional parameters to `geom_col()` (when `type = "importance"`) or `geom_point()` (when `type = "dependence"`).
+    
+
+## Breaking changes
+
+* Function `fastshap()` was renamed to `explain()`.
+
+* Functions `explain()` and `explain_column()` (not currently exported) now throw an error whenever the inputs `X` and `newdata` do not inherit from the same class.
 
 
 ## Bug fixes

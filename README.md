@@ -9,6 +9,8 @@
 status](https://travis-ci.org/bgreenwell/fastshap.svg?branch=master)](https://travis-ci.org/bgreenwell/fastshap)
 [![Codecov test
 coverage](https://codecov.io/gh/bgreenwell/fastshap/branch/master/graph/badge.svg)](https://codecov.io/gh/bgreenwell/fastshap?branch=master)
+[![Launch Rstudio
+Binder](http://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/bgreenwell/fastshap/master?urlpath=rstudio)
 <!-- badges: end -->
 
 The goal of **fastshap** is to provide an efficient way to compute the
@@ -31,9 +33,34 @@ if (!requireNamespace("remotes")) {
 remotes::install_github("bgreenwell/fastshap")
 ```
 
+## Background
+
+The approach in this package is similar to what’s described in
+**Algorithm 1** in Strumbelj and Kononenko (2014) which is reproduced
+below:
+
+<img src="man/figures/algorithm1.png" width="100%" style="display: block; margin: auto;" />
+
+The problem with this approach is that it requires many calls to the
+scoring function *f()*. In particular, if we have *N* training records
+and *p* features, than this algorithm would require *2mnp* calls to
+*f()* in order to obtain approximate Shapley values for the entire
+training set. The approach we take is similar, but rather than computing
+each Monte Carlo estimate one at a time, we construct all the data
+required to compute the approximate Shapley values for a single feature
+at once and only use two calls to *f()*. Using this approach only
+requires *2mp* calls to *f()* to obtain approximate Shapley values for
+all *p* features for the entire training set. Hence, this approach will
+scale better to larger training sets. Also, the data instances
+**b<sub>1</sub>** and **b<sub>2</sub>** are built efficiently for each
+row in the training set (or subset thereof) all at once and stacked on
+top of each other in a data frame or matrix using C++ and logical
+subsetting. We can also parallelize the algorithm across *m* or *p*,
+depending on which one is more beneficial.
+
 ## General comments
 
-  - The `fastshap()` function was built for efficiency column-wise (in
+  - The `explain()` function was built for efficiency column-wise (in
     other words, it is not currently optimized if all you need are the
     Shapley values for a few rows)
 
@@ -65,26 +92,26 @@ pfun <- function(object, newdata) {
 # Compute fast (approximate) Shapley values using 10 Monte Carlo repetitions
 system.time({  # estimate run time
   set.seed(5038)
-  shap <- fastshap(rfo, X = X, pred_wrapper = pfun, nsim = 10)
+  shap <- explain(rfo, X = X, pred_wrapper = pfun, nsim = 10)
 })
 #>    user  system elapsed 
-#>  94.205   4.382  20.149
+#>  96.470   4.071  20.284
 
 # Results are returned as a tibble (with the additional "shap" class)
 shap
 #> # A tibble: 3,000 x 10
-#>        x.1    x.2     x.3    x.4     x.5      x.6      x.7     x.8      x.9
-#>      <dbl>  <dbl>   <dbl>  <dbl>   <dbl>    <dbl>    <dbl>   <dbl>    <dbl>
-#>  1  1.44    1.72  -0.641  -2.61  -0.622  -0.116   -3.46e-2  0.132  -0.0323 
-#>  2 -2.50    1.32   0.931   0.152  1.48   -0.0499  -7.64e-2  0.0978  0.00546
-#>  3  1.27    1.13  -0.647  -3.26  -0.684   0.0865   6.70e-3  0.0186  0.0290 
-#>  4  0.331  -2.27  -0.0842  4.12   1.71   -0.0572  -4.23e-4 -0.0348 -0.0191 
-#>  5 -1.06   -1.47  -0.537   3.85   1.23   -0.0519  -6.37e-3  0.102   0.0698 
-#>  6 -1.32    1.82  -0.994  -2.35   1.12   -0.0366  -1.10e-2 -0.0795 -0.284  
-#>  7  1.70    1.85   1.33   -4.95  -0.0251  0.00369  1.11e-1 -0.0315 -0.113  
-#>  8  0.0995 -1.97   0.279   3.80  -0.278  -0.0995   4.03e-2 -0.0653  0.0301 
-#>  9  2.09    0.847 -1.16    4.55  -0.923   0.0280  -9.44e-2 -0.0471  0.0301 
-#> 10  0.865  -2.56  -0.971  -4.84   0.813  -0.0323   1.08e-2 -0.0415 -0.101  
+#>       x.1    x.2     x.3    x.4    x.5      x.6      x.7      x.8     x.9
+#>     <dbl>  <dbl>   <dbl>  <dbl>  <dbl>    <dbl>    <dbl>    <dbl>   <dbl>
+#>  1 -0.545  1.12  -1.68   -1.70  -0.281 -0.0953  -1.55e-2 -0.00274 -0.0435
+#>  2 -3.20   1.05   1.03   -0.815  0.786 -0.00719  1.02e-1  0.114    0.0788
+#>  3  2.07   2.36  -0.823  -2.92  -1.53  -0.0402   7.70e-3  0.00655  0.0435
+#>  4  0.623 -2.78   0.0688  3.17   0.753  0.0816   9.27e-4  0.0741   0.0564
+#>  5 -0.644 -0.258 -0.207   3.12   0.918 -0.0159   3.83e-2  0.0155   0.0315
+#>  6 -0.929  0.506 -1.05   -1.70   1.51   0.0299   5.41e-2  0.0118  -0.234 
+#>  7  2.99   2.48   1.23   -3.46  -0.398  0.0639  -6.17e-3 -0.0237  -0.0353
+#>  8 -0.388 -1.84   0.532   4.64  -0.487 -0.0215   2.77e-2 -0.0346   0.0496
+#>  9  0.647  0.783 -0.769   3.35  -1.13   0.0171   3.70e-3 -0.0348   0.0866
+#> 10  0.832 -1.22  -0.403  -4.19   0.560 -0.0247  -1.82e-2 -0.00990 -0.0256
 #> # … with 2,990 more rows, and 1 more variable: x.10 <dbl>
 ```
 
@@ -139,34 +166,35 @@ gridExtra::grid.arrange(p1, p2, nrow = 1)
 
 <img src="man/figures/README-shap-autoplot-1.png" width="70%" style="display: block; margin: auto;" />
 
-By default, `fastshap()` computes approximate Shapley values for all
-rows in the training data. If you want Shapley values for new instances
-(or a subset of the training set), they must be supplied via the
-`newdata` argument. This functionality is demonstrated in the code chunk
-below. (**Note:** `fastshap()` is not yet optimized for this case; that
-is, computing only a handful of Shapley values for a few instances (in
-this case, at least for now, consider using the **iml** function
+By default, `explain()` computes approximate Shapley values for all rows
+in the training data. If you want Shapley values for new instances (or a
+subset of the training set), they must be supplied via the `newdata`
+argument. This functionality is demonstrated in the code chunk below.
+(**Note:** `explain()` is not yet optimized for this case; that is,
+computing only a handful of Shapley values for a few instances (in this
+case, at least for now, consider using the **iml** function
 `Shapley()`).)
 
 ``` r
 # Explanations for first observation; technically `drop = FALSE` isn't necessary 
 # here since X is a data frame
-fastshap(rfo, X = X, pred_wrapper = pfun, nsim = 10,
-         newdata = X[1, , drop = FALSE])
+explain(rfo, X = X, pred_wrapper = pfun, nsim = 10,
+        newdata = X[1, , drop = FALSE])
 #> # A tibble: 1 x 10
-#>     x.1   x.2    x.3   x.4    x.5    x.6   x.7     x.8     x.9    x.10
-#>   <dbl> <dbl>  <dbl> <dbl>  <dbl>  <dbl> <dbl>   <dbl>   <dbl>   <dbl>
-#> 1 0.856  1.28 -0.722 -1.67 -0.140 -0.124 0.105 -0.0352 -0.0433 -0.0395
+#>       x.1   x.2    x.3   x.4    x.5     x.6     x.7     x.8     x.9
+#>     <dbl> <dbl>  <dbl> <dbl>  <dbl>   <dbl>   <dbl>   <dbl>   <dbl>
+#> 1 -0.0314  1.37 -0.757 -1.83 -0.230 -0.0351 -0.0225 -0.0148 -0.0415
+#> # … with 1 more variable: x.10 <dbl>
 
 # Explanations for first three observations
-fastshap(rfo, X = X, feature_names = c("x.1", "x.10"), pred_wrapper = pfun, 
-         nsim = 10, newdata = X[1:3, ])
+explain(rfo, X = X, feature_names = c("x.1", "x.10"), pred_wrapper = pfun, 
+        nsim = 10, newdata = X[1:3, ])
 #> # A tibble: 3 x 2
 #>      x.1    x.10
 #>    <dbl>   <dbl>
-#> 1 -0.137 -0.0866
-#> 2 -3.06  -0.0477
-#> 3  1.24  -0.0379
+#> 1  0.467  0.0384
+#> 2 -4.05  -0.0469
+#> 3  1.72   0.0630
 ```
 
 ### Parallel execution
@@ -183,20 +211,20 @@ library(doParallel)
 registerDoParallel(5)
 
 # Compute Shapley values in parallel
-fastshap(rfo, X = X, pred_wrapper = pfun, nsim = 10, .parallel = TRUE)
+explain(rfo, X = X, pred_wrapper = pfun, nsim = 10, .parallel = TRUE)
 #> # A tibble: 3,000 x 10
-#>       x.1    x.2     x.3    x.4    x.5      x.6      x.7      x.8      x.9
-#>     <dbl>  <dbl>   <dbl>  <dbl>  <dbl>    <dbl>    <dbl>    <dbl>    <dbl>
-#>  1 -0.999  1.46  -1.38   -2.68  -0.243  1.21e-2 -0.0120  -4.85e-2  0.0970 
-#>  2 -3.25   2.04   0.330   0.754  1.23   9.64e-2  0.195   -5.46e-2 -0.0251 
-#>  3  1.26   1.04  -1.44   -3.07  -1.77  -4.99e-3 -0.0502  -9.60e-2 -0.0453 
-#>  4  1.60  -1.30  -0.0646  3.78   0.702  1.03e-1  0.0436  -3.01e-4  0.0362 
-#>  5 -2.06  -1.81  -0.213   3.47   1.08  -1.12e-2 -0.00622 -9.22e-3  0.106  
-#>  6  0.189  2.54  -1.54   -0.793  1.68   9.02e-2  0.0480  -3.12e-2 -0.532  
-#>  7  1.69   2.20   1.19   -2.82  -0.626  2.63e-4  0.00911 -3.19e-2 -0.0271 
-#>  8  1.39  -0.600  0.0137  2.53   0.219 -1.71e-2  0.0506  -3.71e-2  0.0455 
-#>  9  1.45   0.854 -1.01    3.30  -0.754  4.85e-3  0.0206  -2.18e-2 -0.00183
-#> 10  1.47  -0.944 -0.437  -3.80   1.00   2.28e-2 -0.0362  -6.68e-2 -0.0562 
+#>       x.1    x.2    x.3    x.4    x.5      x.6      x.7      x.8      x.9
+#>     <dbl>  <dbl>  <dbl>  <dbl>  <dbl>    <dbl>    <dbl>    <dbl>    <dbl>
+#>  1 -0.787  0.428 -0.390 -3.75  -0.343 -7.96e-2 -0.0843  -0.0787   0.0178 
+#>  2 -4.38   1.01   0.848  0.961  1.61  -5.13e-2 -0.0157  -0.0540   0.141  
+#>  3  1.60   2.94  -1.16  -1.64  -1.55   1.63e-2  0.0340  -0.0177   0.0923 
+#>  4  1.25  -0.795 -0.207  4.53   1.16  -2.13e-2  0.0321   0.00310 -0.0711 
+#>  5 -1.11  -0.631  0.126  1.67   1.30   2.30e-3  0.0346   0.0193   0.0174 
+#>  6  0.434  1.86  -0.816 -1.67   1.17   1.49e-4  0.00866 -0.0882  -0.0904 
+#>  7  1.14   1.47   1.47  -2.83  -0.742  9.73e-2  0.0208  -0.0577   0.00289
+#>  8 -0.677 -1.58   0.112  3.28   0.488  3.40e-2 -0.00592 -0.00665  0.0887 
+#>  9  2.09   3.85  -0.770  4.78  -1.71   6.73e-4 -0.104   -0.0392   0.0104 
+#> 10  0.666 -3.48  -1.23  -4.26   1.13  -6.78e-2 -0.0342  -0.0742  -0.0317 
 #> # … with 2,990 more rows, and 1 more variable: x.10 <dbl>
 ```
 

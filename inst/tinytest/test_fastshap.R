@@ -28,7 +28,7 @@ pfun <- function(object, newdata) {
 
 # Generate approximate Shapley values for entire training set
 set.seed(102)  # for reproducibility
-shap_all <- fastshap(mars, X = X, pred_wrapper = pfun, nsim = 1)
+shap_all <- explain(mars, X = X, pred_wrapper = pfun, nsim = 1)
 
 # Check dimensions
 expect_identical(
@@ -45,7 +45,7 @@ expect_identical(
 # Check class 
 expect_identical(
   current = class(shap_all),
-  target = c("tbl_df", "tbl", "data.frame", "fastshap")
+  target = c("tbl_df", "tbl", "data.frame", "explain")
 )
 
 # Check Shapley-based variable importance
@@ -57,9 +57,9 @@ expect_identical(
 
 # Generate approximate Shapley values for a single row using first five features
 set.seed(103)  # for reproducibility
-shap_3 <- fastshap(mars, feature_names = names(X)[1L:5L], X = X, 
-                   pred_wrapper = pfun, nsim = 1, 
-                   newdata = X[1L, , drop = FALSE])
+shap_3 <- explain(mars, feature_names = names(X)[1L:5L], X = X, 
+                  pred_wrapper = pfun, nsim = 1, 
+                  newdata = X[1L, , drop = FALSE])
 
 # Check dimensions
 expect_identical(
@@ -69,7 +69,7 @@ expect_identical(
 
 # Check approximate Shapley values for a single feature
 set.seed(104)
-shap_single <- fastshap(mars, feature_names = "x.3", X = X, pred_wrapper = pfun)
+shap_single <- explain(mars, feature_names = "x.3", X = X, pred_wrapper = pfun)
 
 # Check dimensions
 expect_identical(
@@ -86,7 +86,7 @@ expect_identical(
 # Check class 
 expect_identical(
   current = class(shap_single),
-  target = c("tbl_df", "tbl", "data.frame", "fastshap")
+  target = c("tbl_df", "tbl", "data.frame", "explain")
 )
 
 # Check Shapley-based importance plot and Shapley-based dependence plot

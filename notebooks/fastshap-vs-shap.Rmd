@@ -1,0 +1,193 @@
+---
+title: "Boston housing example"
+subtitle: "R's fastshap vs. Python's shap"
+author: "Brandon M. Greenwell"
+date: "`r format(Sys.Date(), format = '%B %d, %Y')`"
+output: html_document
+bibliography: bibliography.bib
+---
+
+```{r setup, include=FALSE}
+# Set global knitr chunk options
+knitr::opts_chunk$set(
+  cache = TRUE,
+  echo = TRUE,
+  error = FALSE,
+  fig.align = "left",
+  message = FALSE,
+  warning = FALSE
+)
+
+# Load required packages
+library(reticulate)
+
+# Set up reticulate
+use_python("/Users/b780620/anaconda3/bin/python3")
+```
+
+In this notebook we compare [fastshap](https://github.com/bgreenwell/fastshap) with the [shap](https://github.com/slundberg/shap) Python module. In particular, we'll compare `fastshap::explain()` with the `shap.SamplingExplainer()` method which provides the same Monte Carlo approach to computing ApproxSHAP (ApproxSHAP) values described in @strumbelj-2014-explaining; in particular, see **Algorithm 1**. We'll also compare `fastshap::explain()` with the results from `shap.TreeExplainer()` which produces exact Shapley (ExactSHAP or TreeSHAP if referring specifically to the implementation for tree-based models) values for a wide variety of tree-based models in Python [@lundberg-2019-explainable]. The comparisons will be made on a random forest trained to the Boston housing data set (the data are available in the `notebooks/data` directory within this repository).
+
+## TL;DR
+
+* The [shap](https://github.com/slundberg/shap) library treats the specified number of Monte Carlo repetitions as a total and breaks distributes them across the feature columns according to variance. There does not seem to be any way to override this; to me, this is confusing and not optimal in all cases. [fastshap](https://github.com/bgreenwell/fastshap) on the other hand, uses the same number of Monte Carlo repetitions on all columns (though, this can be wasteful compared to [shap](https://github.com/slundberg/shap)'s approach). Hence, it is difficult to compare the actual computation time between the two packages in a fair way.
+
+* TreeSHAP (provided by `shap.TreeExplainer()`) does not scale well with tree depth and will likely take longer than [fastshap](https://github.com/bgreenwell/fastshap)'s fast Monte Carlo approach for bagged decision trees and random forests (where trees are intentionally grown deep).
+
+* [fastshap](https://github.com/bgreenwell/fastshap) is quicker compared to most other implementations of ApproxSHAP because it makes far less calls to the underlying prediction function by working on an entire column of ApproxSHAP values at a time. It's also partially written in C++ and makes efficient use of logical subsetting.
+
+
+## fastshap
+
+To start, we'll load all the required packages and prep the Boston housing data: 
+
+```{r r-setup}
+# Load required packages
+library(fastshap)  # for explain() function
+library(ggplot2)   # for autoplot() function
+library(ranger)    # for efficiently fitting random forests
+
+# Set up the Boston housing data
+boston <- read.csv("data/boston.csv")
+X <- data.matrix(subset(boston, select = -cmedv))
+```
+
+Next, we train a random forest and create a simple prediction wrapper to be used by `explain()`:
+
+```{r r-rf}
+# Train a random forest
+set.seed(944)  # for reproducibility
+(rfo <- ranger(cmedv ~ ., data = boston))
+ 
+# Prediction wrappers
+pfun <- function(object, newdata) {
+  predict(object, data = newdata)$predictions
+}
+```
+
+Finally, we compute ApproxSHAP values for all `r nrow(X)` training observations using the `fastshap::explain()` function with $B = 50$ Monte Carlo repetitions, and plot a summary of the results:
+
+```{r r-fastshap, fig.width=6, fig.asp=0.618, out.width="100%"}
+# Comput ApproxSHAP values
+set.seed(945)  # for reproducibility
+t1 <- system.time(  # time the results
+  res_fastshap <- explain(rfo, X = X, nsim = 100, pred_wrapper = pfun)
+)
+
+# Print results
+res_fastshap
+
+# Plot results
+autoplot(res_fastshap)
+```
+
+
+## shap
+
+First we import the required modules and prep the Boston housing data:
+ 
+```{python py-setup}
+import logging
+import pandas as pd
+import sklearn
+import shap
+import time
+
+
+# Ignore basic logging info from shap
+log = logging.getLogger("shap")
+log.setLevel(logging.ERROR)
+
+# Set up the BOston housing data
+boston = pd.read_csv("data/boston.csv")
+X = boston.drop("cmedv", axis=1)
+y = boston.cmedv
+```
+
+Next, we train a random forest to the Boston housing data:
+
+```{python py-rf}
+# Train a random forest
+rfo = sklearn.ensemble.RandomForestRegressor(n_estimators=500, oob_score=True, random_state=822)
+rfo.fit(X, y)
+rfo.oob_score_  # print OOB score
+```
+
+Finally, we compute approximate and exact Shapley values for all `r nrow(X)` training observations using the `shap.SamplingExplainer()` and `shap.TreeExplainer()` methods; for the sampling approach, we use $B = 100$ Monte Carlo repetitions (**Note:** while we specify 100 Monte Carlo repetitions be used, this numb)er, as far as I can tell, represents the total number of repetitions to use across all the features. It appears that [shap](https://github.com/slundberg/shap) will divvy up the specified number of repetitions across the features according to variance.):
+
+```{python py-shap}
+# Initialize explainer
+rfo_explainer_sampling = shap.SamplingExplainer(rfo.predict, X)
+rfo_explainer_tree = shap.TreeExplainer(rfo)
+
+# Compute ApproxSHAP values and time the results
+start = time.time()
+res_shap_samp = rfo_explainer_sampling.shap_values(X, nsamples=100)
+end = time.time()
+t1 = end - start  # ~ computatiom time
+
+# Compute exact TreeSHAP values
+start = time.time()
+res_shap_tree = rfo_explainer_sampling.shap_values(X, approximate=False)
+end = time.time()
+t2 = end - start  # ~ computatiom time
+
+# Print results
+res_shap_samp=pd.DataFrame(res_shap_samp, columns=X.columns)
+res_shap_tree=pd.DataFrame(res_shap_tree, columns=X.columns)
+```
+
+For completion and fair comparison, we'll create another prediction wrapper so that we can compute ApproxSHAP values for the **scikit-learn** (**sklearn**) random forest regressor using the [fastshap](https://github.com/bgreenwell/fastshap) package:
+
+```{r r-fastshap-sklearn}
+# Comput ApproxSHAP values
+set.seed(625)  # for reproducibility
+t2 <- system.time(  # time the results
+  res_fastshap_sklearn <- explain(
+    object = py$rfo, 
+    X = X, 
+    nsim = 100, 
+    pred_wrapper = function(object, newdata) {
+      py$rfo$predict(newdata)
+    }
+  )
+)
+```
+
+In the figure below we plot the resulting Shapley values against `lstat` for each implementation (which two plots look most alike?). The ApproxSHAP results from [shap](https://github.com/slundberg/shap) displays more variability than the other plots do. This is likely due to the fact that `shap.SamplingExplainer()` distributed far less than `nsmaples=100` Monte Carlo repetitions to the computation of the ApproxSHAP values for `lstat`; hence it is difficult to know how long it would actually take for `shap.SamplingExplainer()` to compute $B = 100$ Monte Carlo repetitions in this example.
+
+```{r r-plot-results, echo=FALSE, fig.width=7, fig.asp=1, out.width="100%", fig.cap="**Figure 2** SHAP dependence plots for `lstat` using all four implementations."}
+# Plot results
+par(mfrow = c(2, 2))
+plot(X[, "lstat"], res_fastshap$lstat,
+     main = "fastshap (ranger model)", 
+     xlab = "lstat", ylab = "ApproxSHAP value")
+legend(
+  x = "topright",
+  legend = paste("Time ~", round(t1["elapsed"], digits = 2), "seconds"),
+  inset = 0.01
+)
+plot(X[, "lstat"], res_fastshap_sklearn$lstat,
+     main = "fastshap (sklearn model)", 
+     xlab = "lstat", ylab = "ApproxSHAP value")
+legend(
+  x = "topright",
+  legend = paste("Time ~", round(t2["elapsed"], digits = 2), "seconds"),
+  inset = 0.01
+)
+plot(py$X$lstat, py$res_shap_samp$lstat,
+     main = "shap (sklearn model)", 
+     xlab = "lstat", ylab = "ApproxSHAP value")
+legend(
+  x = "topright",
+  legend = paste("Time ~", round(py$t1, digits = 2), "seconds"),
+  inset = 0.01
+)
+plot(py$X$lstat, py$res_shap_tree$lstat,
+     main = "shap (sklearn model)", 
+     xlab = "lstat", ylab = "Exact Shapley value")
+legend(
+  x = "topright",
+  legend = paste("Time ~", round(py$t2, digits = 2), "seconds"),
+  inset = 0.01
+)
+```
