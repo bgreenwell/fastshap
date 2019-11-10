@@ -24,4 +24,6 @@ Suggests:
     earth,
     mlbench,
     tinytest,
-    covr
+    covr,
+    knitr,
+    rmarkdown

@@ -1,0 +1,8 @@
+pandoc: 2.3.1
+pkgdown: 1.3.0
+pkgdown_sha: ~
+articles:
+  fastshap-vs-iml-iBreakDown: fastshap-vs-iml-iBreakDown.html
+  fastshap-vs-shap: fastshap-vs-shap.html
+  fastshap: fastshap.html
+

@@ -6,4 +6,7 @@
 ^slowtests$
 ^\.travis\.yml$
 ^codecov\.yml$
-^notebooks
+^_pkgdown\.yml$
+^docs$
+^pkgdown$
+^vignettes$
