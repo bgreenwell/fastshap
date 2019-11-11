@@ -103,12 +103,12 @@
 
     
     
-<p>In this vignette we compare <a href="https://github.com/bgreenwell/fastshap">fastshap</a> with the <a href="https://github.com/slundberg/shap">shap</a> Python module. In particular, we’ll compare <code><a href="../reference/explain.html">fastshap::explain()</a></code> with the <code>shap.SamplingExplainer()</code> method which provides the same Monte Carlo approach to computing ApproxSHAP (ApproxSHAP) values described in <span class="citation">@strumbelj-2014-explaining</span>; in particular, see <strong>Algorithm 1</strong>. We’ll also compare <code><a href="../reference/explain.html">fastshap::explain()</a></code> with the results from <code>shap.TreeExplainer()</code> which produces exact Shapley (ExactSHAP or TreeSHAP if referring specifically to the implementation for tree-based models) values for a wide variety of tree-based models in Python <span class="citation">[@lundberg-2019-explainable]</span>. The comparisons will be made on a random forest trained to the Boston housing data set (the data are available in the <code>notebooks/data</code> directory within this repository).</p>
+<p>In this vignette we compare <a href="https://github.com/bgreenwell/fastshap">fastshap</a> with the <a href="https://github.com/slundberg/shap">shap</a> Python module. In particular, we’ll compare <code><a href="../reference/explain.html">fastshap::explain()</a></code> with the <code>shap.SamplingExplainer()</code> method which provides the same Monte Carlo approach to computing ApproxSHAP (ApproxSHAP) values described in <span class="citation">Štrumbelj and Kononenko (2014)</span>; in particular, see <strong>Algorithm 1</strong>. We’ll also compare <code><a href="../reference/explain.html">fastshap::explain()</a></code> with the results from <code>shap.TreeExplainer()</code> which produces exact Shapley (ExactSHAP or TreeSHAP if referring specifically to the implementation for tree-based models) values for a wide variety of tree-based models in Python <span class="citation">(Lundberg et al. 2019)</span>. The comparisons will be made on a random forest trained to the Boston housing data set (the data are available in the <code>notebooks/data</code> directory within this repository).</p>
 <div id="tldr" class="section level2">
 <h2 class="hasAnchor">
 <a href="#tldr" class="anchor"></a>TL;DR</h2>
 <ul>
-<li><p>The <a href="https://github.com/slundberg/shap">shap</a> library treats the specified number of Monte Carlo repetitions as a total and distributes them across the feature columns according to variance (features with higher varaince get more of the total). There does not seem to be any way to override this; to me, this is confusing and not optimal in all cases. <a href="https://github.com/bgreenwell/fastshap">fastshap</a> on the other hand, uses the same number of Monte Carlo repetitions on all columns (though, this can be wasteful compared to <a href="https://github.com/slundberg/shap">shap</a>’s approach). Hence, it is difficult to compare the actual computation time between the two packages in a fair way.</p></li>
+<li><p>The <a href="https://github.com/slundberg/shap">shap</a> library treats the specified number of Monte Carlo repetitions as a total and distributes them across the feature columns according to variance (features with higher variance get more of the total). There does not seem to be any way to override this; to me, this is confusing and not optimal in all cases. <a href="https://github.com/bgreenwell/fastshap">fastshap</a> on the other hand, uses the same number of Monte Carlo repetitions on all columns (though, this can be wasteful compared to <a href="https://github.com/slundberg/shap">shap</a>’s approach). Hence, it is difficult to compare the actual computation time between the two packages in a fair way.</p></li>
 <li><p>TreeSHAP (provided by <code>shap.TreeExplainer()</code>) does not scale well with tree depth and will likely take longer than <a href="https://github.com/bgreenwell/fastshap">fastshap</a>’s fast Monte Carlo approach for bagged decision trees and random forests (where trees are intentionally grown deep).</p></li>
 <li><p><a href="https://github.com/bgreenwell/fastshap">fastshap</a> is quicker compared to most other implementations of ApproxSHAP because it makes far less calls to the underlying prediction function by working on an entire column of ApproxSHAP values at a time. It’s also partially written in C++ and makes efficient use of logical subsetting.</p></li>
 </ul>
@@ -1261,6 +1261,14 @@
 <img src="fastshap-vs-shap_files/figure-html/r-plot-results-1.png" alt="**Figure 2** SHAP dependence plots for `lstat` using all four implementations." width="100%"><p class="caption">
 <strong>Figure 2</strong> SHAP dependence plots for <code>lstat</code> using all four implementations.
 </p>
+</div>
+<div id="refs" class="references">
+<div id="ref-lundberg-2019-explainable">
+<p>Lundberg, Scott M, Gabriel Erion, Hugh Chen, Alex DeGrave, Jordan M Prutkin, Bala Nair, Ronit Katz, Jonathan Himmelfarb, Nisha Bansal, and Su-In Lee. 2019. “Explainable Ai for Trees: From Local Explanations to Global Understanding.” <em>arXiv Preprint arXiv:1905.04610</em>.</p>
+</div>
+<div id="ref-strumbelj-2014-explaining">
+<p>Štrumbelj, Erik, and Igor Kononenko. 2014. “Explaining Prediction Models and Individual Predictions with Feature Contributions.” <em>Knowledge and Information Systems</em> 41 (3): 647–65. <a href="https://doi.org/10.1007/s10115-013-0679-x">https://doi.org/10.1007/s10115-013-0679-x</a>.</p>
+</div>
 </div>
 </div>
   </div>

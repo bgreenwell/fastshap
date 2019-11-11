@@ -5,8 +5,8 @@ vignette: >
   %\VignetteIndexEntry{fastshap-vs-shap}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
+bibliography: bibliography.bib
 ---
-
 
 ```{r setup, include=FALSE}
 # Set global knitr chunk options
@@ -31,7 +31,7 @@ In this vignette we compare [fastshap](https://github.com/bgreenwell/fastshap) w
 
 ## TL;DR
 
-* The [shap](https://github.com/slundberg/shap) library treats the specified number of Monte Carlo repetitions as a total and distributes them across the feature columns according to variance (features with higher varaince get more of the total). There does not seem to be any way to override this; to me, this is confusing and not optimal in all cases. [fastshap](https://github.com/bgreenwell/fastshap) on the other hand, uses the same number of Monte Carlo repetitions on all columns (though, this can be wasteful compared to [shap](https://github.com/slundberg/shap)'s approach). Hence, it is difficult to compare the actual computation time between the two packages in a fair way.
+* The [shap](https://github.com/slundberg/shap) library treats the specified number of Monte Carlo repetitions as a total and distributes them across the feature columns according to variance (features with higher variance get more of the total). There does not seem to be any way to override this; to me, this is confusing and not optimal in all cases. [fastshap](https://github.com/bgreenwell/fastshap) on the other hand, uses the same number of Monte Carlo repetitions on all columns (though, this can be wasteful compared to [shap](https://github.com/slundberg/shap)'s approach). Hence, it is difficult to compare the actual computation time between the two packages in a fair way.
 
 * TreeSHAP (provided by `shap.TreeExplainer()`) does not scale well with tree depth and will likely take longer than [fastshap](https://github.com/bgreenwell/fastshap)'s fast Monte Carlo approach for bagged decision trees and random forests (where trees are intentionally grown deep).
 

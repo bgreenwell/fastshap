@@ -89,12 +89,14 @@ expect_identical(
   target = c("tbl_df", "tbl", "data.frame", "explain")
 )
 
-# Check Shapley-based importance plot and Shapley-based dependence plot
-p1 <- autoplot(shap_all)
-p2 <- autoplot(shap_all, type = "dependence", feature = "x.3", X = X)
-p3 <- autoplot(shap_all, type = "dependence", X = X)
 
-# Check plots
+# Check Shapley-based importance plot -----------------------------------------
+
+# Construct Shapley-based importance plots
+p1 <- autoplot(shap_all)
+p2 <- autoplot(shap_all, num_features = 3)
+
+# Expectations
 expect_identical(
   current = class(p1),
   target = c("gg", "ggplot")
@@ -109,22 +111,57 @@ expect_identical(
 )
 expect_identical(
   current = dim(p2$data),
-  target = c(nrow(X), 2L)
+  target = c(3L, 2L)
 )
+
+# Check Shapley-based dependence plot -----------------------------------------
+
+# Construct Shapley-based idependence plots
+p3 <- autoplot(shap_all, type = "dependence", feature = "x.1", X = X, 
+               color_by = "x.2", smooth = TRUE)
+p4 <- autoplot(shap_all, type = "dependence", X = X)
+
+# Expectations
 expect_identical(
   current = class(p3),
   target = c("gg", "ggplot")
 )
 expect_identical(
   current = dim(p3$data),
+  target = c(nrow(X), 3L)
+)
+expect_identical(
+  current = class(p4),
+  target = c("gg", "ggplot")
+)
+expect_identical(
+  current = dim(p4$data),
   target = c(nrow(X), 2L)
 )
 expect_identical(
-  current = p3$data$x,
+  current = p4$data$x,
   target = X$x.1
 )
 
+# Check Shapley-based contribution plot ---------------------------------------
+
+# Construct Shapley-based contribution plots
+p5 <- autoplot(shap_all, type = "contribution")
+p6 <- autoplot(shap_all, type = "contribution", row_num = 1)
+
+# Expectations
+expect_identical(
+  current = p5$data,
+  target = p6$data
+)
+expect_identical(
+  current = class(p5),
+  target = c("gg", "ggplot")
+)
+expect_identical(
+  current = dim(p5$data),
+  target = c(ncol(X), 2L)
+)
+
 # Inspect plots
-p1
-p2
-p3
+gridExtra::grid.arrange(p1, p2, p3, p4, p5, p6, nrow = 2)

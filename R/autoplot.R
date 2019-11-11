@@ -10,8 +10,9 @@
 #' 
 #' @param type Character string specifying which type of plot to construct. 
 #' Current options are \code{"importance"} (for Shapley-based variable 
-#' importance plots) and \code{"dependence"} (for Shapley-based dependence 
-#' plots).
+#' importance plots), \code{"dependence"} (for Shapley-based dependence 
+#' plots), and \code{"contribution"} (for visualizing the feature contributions
+#' to an individual prediction).
 #' 
 #' @param feature Character string specifying which feature to use when 
 #' \code{type = "dependence"}. If \code{NULL} (default) the first feature will

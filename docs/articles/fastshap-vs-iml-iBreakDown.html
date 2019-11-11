@@ -108,7 +108,7 @@
 <li>The <a href="https://github.com/christophM/iml">iml</a> function <code><a href="https://www.rdocumentation.org/packages/iml/topics/Shapley">Shapley()</a></code>.</li>
 <li>The <a href="https://github.com/ModelOriented/iBreakDown">iBreakDown</a> function <code><a href="https://www.rdocumentation.org/packages/iBreakDown/topics/break_down_uncertainty">shap()</a></code>.</li>
 </ul>
-<p>All of these implementations employ the same Monte Carlo technique for computing the approximate Shapley (ApproxSHAP) values described in <span class="citation">@strumbelj-2014-explaining</span>; in particular, see <strong>Algorithm 1</strong>.</p>
+<p>All of these implementations employ the same Monte Carlo technique for computing the approximate Shapley (ApproxSHAP) values described in <span class="citation">Štrumbelj and Kononenko (2014)</span>; in particular, see <strong>Algorithm 1</strong>.</p>
 <div id="tldr" class="section level2">
 <h2 class="hasAnchor">
 <a href="#tldr" class="anchor"></a>TL;DR</h2>
@@ -120,7 +120,7 @@
 <p><strong>fastshap</strong> works on an entire column of training data at a time; hence, is more efficient at computing ApproxSHAP values for larger sets of training data (i.e., when you want SHAP-based variable importance plots, SHAP dependence plots, etc.)</p>
 <ul>
 <li><p>Other implementations only compute ApproxSHAP values for a single observation at a time (at least as far as I can tell)</p></li>
-<li><p>This is the primary reason why such implementatios do not scale well to large sets of explanations (look at the estimated compute time from <strong>iBreakDown</strong> and <strong>iml</strong> and extrapolate to the full training set of <span class="math inline">\(N = 3000\)</span> records—<strong>fastshap</strong> took roughly ten minutes for <span class="math inline">\(B = 100\)</span> Monte Carlo repetitions, whereas <strong>iBreakDown</strong> and <strong>iml</strong> would take an estimated 14 and 100+ hours to compute, respectively).</p></li>
+<li><p>This is the primary reason why such implementations do not scale well to large sets of explanations (look at the estimated compute time from <strong>iBreakDown</strong> and <strong>iml</strong> and extrapolate to the full training set of <span class="math inline">\(N = 3000\)</span> records—<strong>fastshap</strong> took roughly ten minutes for <span class="math inline">\(B = 100\)</span> Monte Carlo repetitions, whereas <strong>iBreakDown</strong> and <strong>iml</strong> would take an estimated 14 and 100+ hours to compute, respectively).</p></li>
 </ul>
 </li>
 <li><p>If you only want explanations for a single observation, <strong>iBreakDown</strong> and <strong>iml</strong> are great and provide some bells and whistles in terms of plotting and printing.</p></li>
@@ -130,11 +130,11 @@
 <div id="the-friedman-1-benchmark" class="section level2">
 <h2 class="hasAnchor">
 <a href="#the-friedman-1-benchmark" class="anchor"></a>The Friedman 1 benchmark</h2>
-<p>We’ll illustrate major concepts using the Friedman 1 benchmark problem described in <span class="citation">@multivariate-friedman-1991</span> and <span class="citation">@bagging-breiman-1996</span>:</p>
+<p>We’ll illustrate major concepts using the Friedman 1 benchmark problem described in <span class="citation">Friedman (1991)</span> and <span class="citation">Breiman (1996)</span>:</p>
 <p><span class="math display">\[
   Y_i = 10 \sin\left(\pi X_{1i} X_{2i}\right) + 20 \left(X_{3i} - 0.5\right) ^ 2 + 10 X_{4i} + 5 X_{5i} + \epsilon_i, \quad i = 1, 2, \dots, n,
 \]</span></p>
-<p>where <span class="math inline">\(\epsilon_i \stackrel{iid}{\sim} N\left(0, \sigma^2\right)\)</span>. Data from this model can be generated using <a href="https://CRAN.R-project.org/package=mlbench">mlbench</a> package <span class="citation">[@R-mlbench]</span>, however, we’ll use our own function to generate the data. The inputs consist of <span class="math inline">\(p &gt; 5\)</span> independent variables uniformly distributed on the interval <span class="math inline">\(\left[0,1\right]\)</span>; however, only five out of the <span class="math inline">\(p\)</span> are actually used in the true model. The code chunk below simulates <span class="math inline">\(N = 3000\)</span> observations from the model above default with <span class="math inline">\(p = 100\)</span> and <span class="math inline">\(\sigma = 1\)</span>.</p>
+<p>where <span class="math inline">\(\epsilon_i \stackrel{iid}{\sim} N\left(0, \sigma^2\right)\)</span>. Data from this model can be generated using <a href="https://CRAN.R-project.org/package=mlbench">mlbench</a> package <span class="citation">(Leisch and Dimitriadou 2012)</span>, however, we’ll use our own function to generate the data. The inputs consist of <span class="math inline">\(p &gt; 5\)</span> independent variables uniformly distributed on the interval <span class="math inline">\(\left[0,1\right]\)</span>; however, only five out of the <span class="math inline">\(p\)</span> are actually used in the true model. The code chunk below simulates <span class="math inline">\(N = 3000\)</span> observations from the model above default with <span class="math inline">\(p = 100\)</span> and <span class="math inline">\(\sigma = 1\)</span>.</p>
 <div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb1-1" data-line-number="1"><span class="co"># Function to generate data from the Friedman 1 benchmark data set</span></a>
 <a class="sourceLine" id="cb1-2" data-line-number="2">make_freidman1 &lt;-<span class="st"> </span><span class="cf">function</span>(<span class="dt">n_samples =</span> <span class="dv">100</span>, <span class="dt">n_features =</span> <span class="dv">10</span>, <span class="dt">sigma =</span> <span class="fl">0.1</span>, </a>
 <a class="sourceLine" id="cb1-3" data-line-number="3">                           <span class="dt">seed =</span> <span class="ot">NULL</span>) {</a>
@@ -153,7 +153,7 @@
 <a class="sourceLine" id="cb1-16" data-line-number="16">friedman1 &lt;-<span class="st"> </span><span class="kw">make_freidman1</span>(<span class="dv">3000</span>, <span class="dt">n_features =</span> <span class="dv">100</span>, <span class="dt">sigma =</span> <span class="dv">1</span>)</a>
 <a class="sourceLine" id="cb1-17" data-line-number="17">X &lt;-<span class="st"> </span><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/subset">subset</a></span>(friedman1, <span class="dt">select =</span> <span class="op">-</span>y)</a></code></pre></div>
 <p>For these data, it should be clear that features <span class="math inline">\(X_1\)</span>–<span class="math inline">\(X_5\)</span> are the most important! (The others don’t influence <span class="math inline">\(Y\)</span> at all.) Also, based on the form of the model, we’d expect <span class="math inline">\(X_4\)</span> to be the most important feature, probably followed by <span class="math inline">\(X_1\)</span> and <span class="math inline">\(X_2\)</span>, both comparably important, with <span class="math inline">\(X_5\)</span> probably less important. The influence of <span class="math inline">\(X_3\)</span> is harder to determine due to its quadratic nature, but it seems likely that this nonlinearity will suppress this variable’s influence since the total range of this term is from 0–1, the same as the <span class="math inline">\(X_5\)</span> term.</p>
-<p>For illustration, we’ll train an XGBoost model to the Friedman 1 benchmark data using the <a href="https://github.com/dmlc/xgboost">xgboost</a> package <span class="citation">[@R-xgboost]</span>. We use XGBoost so that we can compare the approximate Shapley values to the exact ones produced by the TreeSHAP algorithm <span class="citation">[@lundberg-2019-explainable]</span> which is implemented in <a href="https://github.com/dmlc/xgboost">xgboost</a>.</p>
+<p>For illustration, we’ll train an XGBoost model to the Friedman 1 benchmark data using the <a href="https://github.com/dmlc/xgboost">xgboost</a> package <span class="citation">(Chen, He, and Benesty 2017)</span>. We use XGBoost so that we can compare the approximate Shapley values to the exact ones produced by the TreeSHAP algorithm <span class="citation">(Lundberg et al. 2019)</span> which is implemented in <a href="https://github.com/dmlc/xgboost">xgboost</a>.</p>
 <p>The code below used 5-fold cross-validation to find a reasonable number of trees using a learning rate of 0.3 and a maximum depth of 2 (since we know there’s nothing higher than a two-way interaction in the true relationship):</p>
 <div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb2-1" data-line-number="1"><span class="co"># Load required packages</span></a>
 <a class="sourceLine" id="cb2-2" data-line-number="2"><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/library">library</a></span>(xgboost)</a>
@@ -259,7 +259,7 @@
 <a class="sourceLine" id="cb22-12" data-line-number="12">})</a></code></pre></div>
 <pre><code>##    user  system elapsed 
 ##  54.880   3.684  58.632</code></pre>
-<p>The output from <code><a href="../reference/explain.html">fastshap::explain()</a></code> is always a tibble <span class="citation">[@R-tibble]</span> containing the mean approximate Shapley values for each feature column:</p>
+<p>The output from <code><a href="../reference/explain.html">fastshap::explain()</a></code> is always a tibble <span class="citation">(Müller and Wickham 2019)</span> containing the mean approximate Shapley values for each feature column:</p>
 <div class="sourceCode" id="cb24"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb24-1" data-line-number="1">shap_fastshap</a></code></pre></div>
 <pre><code>## # A tibble: 1 x 100
 ##      x1    x2     x3    x4    x5      x6    x7       x8    x9    x10
@@ -397,9 +397,32 @@
 <a class="sourceLine" id="cb39-9" data-line-number="9"><span class="kw"><a href="../reference/grid.arrange.html">grid.arrange</a></span>(p1, p2, <span class="dt">nrow =</span> <span class="dv">1</span>)</a></code></pre></div>
 <p><img src="fastshap-vs-iml-iBreakDown_files/figure-html/friedman-xgboost-fastshap-all-plots-1.png" width="100%" style="display: block; margin: auto;"></p>
 </div>
-<div id="references" class="section level2">
+<div id="references" class="section level2 unnumbered">
 <h2 class="hasAnchor">
 <a href="#references" class="anchor"></a>References</h2>
+<div id="refs" class="references">
+<div id="ref-bagging-breiman-1996">
+<p>Breiman, Leo. 1996. “Bagging Predictors.” <em>Machine Learning</em> 8 (2): 209–18. <a href="https://doi.org/10.1023/A:1018054314350">https://doi.org/10.1023/A:1018054314350</a>.</p>
+</div>
+<div id="ref-R-xgboost">
+<p>Chen, Tianqi, Tong He, and Michael Benesty. 2017. <em>Xgboost: Extreme Gradient Boosting</em>. <a href="https://CRAN.R-project.org/package=xgboost">https://CRAN.R-project.org/package=xgboost</a>.</p>
+</div>
+<div id="ref-multivariate-friedman-1991">
+<p>Friedman, Jerome H. 1991. “Multivariate Adaptive Regression Splines.” <em>The Annals of Statistics</em> 19 (1): 1–67. <a href="https://doi.org/10.1214/aos/1176347963">https://doi.org/10.1214/aos/1176347963</a>.</p>
+</div>
+<div id="ref-R-mlbench">
+<p>Leisch, Friedrich, and Evgenia Dimitriadou. 2012. <em>Mlbench: Machine Learning Benchmark Problems</em>. <a href="https://CRAN.R-project.org/package=mlbench">https://CRAN.R-project.org/package=mlbench</a>.</p>
+</div>
+<div id="ref-lundberg-2019-explainable">
+<p>Lundberg, Scott M, Gabriel Erion, Hugh Chen, Alex DeGrave, Jordan M Prutkin, Bala Nair, Ronit Katz, Jonathan Himmelfarb, Nisha Bansal, and Su-In Lee. 2019. “Explainable Ai for Trees: From Local Explanations to Global Understanding.” <em>arXiv Preprint arXiv:1905.04610</em>.</p>
+</div>
+<div id="ref-R-tibble">
+<p>Müller, Kirill, and Hadley Wickham. 2019. <em>Tibble: Simple Data Frames</em>. <a href="https://CRAN.R-project.org/package=tibble">https://CRAN.R-project.org/package=tibble</a>.</p>
+</div>
+<div id="ref-strumbelj-2014-explaining">
+<p>Štrumbelj, Erik, and Igor Kononenko. 2014. “Explaining Prediction Models and Individual Predictions with Feature Contributions.” <em>Knowledge and Information Systems</em> 41 (3): 647–65. <a href="https://doi.org/10.1007/s10115-013-0679-x">https://doi.org/10.1007/s10115-013-0679-x</a>.</p>
+</div>
+</div>
 </div>
   </div>
 

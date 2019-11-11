@@ -5,6 +5,7 @@ vignette: >
   %\VignetteIndexEntry{fastshap-vs-iml-iBreakDown}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
+bibliography: bibliography.bib
 ---
 
 ```{r setup, include=FALSE}
@@ -37,7 +38,7 @@ All of these implementations employ the same Monte Carlo technique for computing
 
   - Other implementations only compute ApproxSHAP values for a single observation at a time (at least as far as I can tell)
 
-  - This is the primary reason why such implementatios do not scale well to large sets of explanations (look at the estimated compute time from **iBreakDown** and **iml** and extrapolate to the full training set of $N = 3000$ records---**fastshap** took roughly ten minutes for $B = 100$ Monte Carlo repetitions, whereas **iBreakDown** and **iml** would take an estimated 14 and 100+ hours to compute, respectively).
+  - This is the primary reason why such implementations do not scale well to large sets of explanations (look at the estimated compute time from **iBreakDown** and **iml** and extrapolate to the full training set of $N = 3000$ records---**fastshap** took roughly ten minutes for $B = 100$ Monte Carlo repetitions, whereas **iBreakDown** and **iml** would take an estimated 14 and 100+ hours to compute, respectively).
   
 * If you only want explanations for a single observation, **iBreakDown** and **iml** are great and provide some bells and whistles in terms of plotting and printing.
 
