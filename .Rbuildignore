@@ -10,3 +10,4 @@
 ^docs$
 ^pkgdown$
 ^vignettes$
+^appveyor\.yml$
