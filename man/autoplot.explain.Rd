@@ -4,11 +4,21 @@
 \alias{autoplot.explain}
 \title{Plotting Shapley values}
 \usage{
-\method{autoplot}{explain}(object, type = c("importance", "dependence",
-  "contribution"), feature = NULL, num_features = NULL, X,
-  color_by = NULL, smooth = FALSE, smooth_color = "red",
-  smooth_linetype = "solid", smooth_size = 1, smooth_alpha = 1,
-  row_num = NULL, ...)
+\method{autoplot}{explain}(
+  object,
+  type = c("importance", "dependence", "contribution"),
+  feature = NULL,
+  num_features = NULL,
+  X = NULL,
+  color_by = NULL,
+  smooth = FALSE,
+  smooth_color = "red",
+  smooth_linetype = "solid",
+  smooth_size = 1,
+  smooth_alpha = 1,
+  row_num = NULL,
+  ...
+)
 }
 \arguments{
 \item{object}{An object of class \code{"explain"}.}
@@ -59,6 +69,33 @@ default) the explanation for the first row/instance will be used.}
 \code{\link[ggplot2]{geom_col}} (if \code{type = "importance"}) or 
 \code{\link[ggplot2]{geom_point}} (if \code{type = "dependence"}).}
 }
+\value{
+A \code{"ggplot"} object; see 
+\code{\link[ggplot2]{ggplot2-package}} for details.
+}
 \description{
 Construct Shapley-based importance plots or Shap-based dependence plots.
+}
+\examples{
+#
+# A projection pursuit regression (PPR) example
+#
+
+# Load the sample data; see ?datasets::mtcars for details
+data(mtcars)
+
+# Fit a projection pursuit regression model
+mtcars.ppr <- ppr(mpg ~ ., data = mtcars, nterms = 1)
+
+# Compute approximate Shapley values using 10 Monte Carlo simulations
+set.seed(101)  # for reproducibility
+shap <- explain(mtcars.ppr, X = subset(mtcars, select = -mpg), nsim = 10, 
+                pred_wrapper = predict)
+shap
+
+# Shapley-based plots
+library(ggplot2)
+autoplot(shap)  # Shapley-based importance plot
+autoplot(shap, type = "dependence", feature = "wt", X = mtcars)
+autoplot(shap, type = "contribution", row_num = 1)  # explain first row of X
 }

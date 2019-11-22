@@ -54,6 +54,9 @@
 #' \code{\link[ggplot2]{geom_col}} (if \code{type = "importance"}) or 
 #' \code{\link[ggplot2]{geom_point}} (if \code{type = "dependence"}).
 #' 
+#' @return A \code{"ggplot"} object; see 
+#' \code{\link[ggplot2]{ggplot2-package}} for details.
+#' 
 #' @importFrom ggplot2 aes_string autoplot coord_flip geom_col geom_point
 #' 
 #' @importFrom ggplot2 geom_smooth ggplot xlab ylab
@@ -61,12 +64,35 @@
 #' @importFrom stats reorder
 #'
 #' @export
+#' 
+#' @examples 
+#' #
+#' # A projection pursuit regression (PPR) example
+#' #
+#' 
+#' # Load the sample data; see ?datasets::mtcars for details
+#' data(mtcars)
+#' 
+#' # Fit a projection pursuit regression model
+#' mtcars.ppr <- ppr(mpg ~ ., data = mtcars, nterms = 1)
+#' 
+#' # Compute approximate Shapley values using 10 Monte Carlo simulations
+#' set.seed(101)  # for reproducibility
+#' shap <- explain(mtcars.ppr, X = subset(mtcars, select = -mpg), nsim = 10, 
+#'                 pred_wrapper = predict)
+#' shap
+#' 
+#' # Shapley-based plots
+#' library(ggplot2)
+#' autoplot(shap)  # Shapley-based importance plot
+#' autoplot(shap, type = "dependence", feature = "wt", X = mtcars)
+#' autoplot(shap, type = "contribution", row_num = 1)  # explain first row of X
 autoplot.explain <- function(
   object, 
   type = c("importance", "dependence", "contribution"),
   feature = NULL, 
   num_features = NULL,
-  X, 
+  X = NULL, 
   color_by = NULL, 
   smooth = FALSE, 
   smooth_color = "red", 
@@ -109,6 +135,13 @@ autoplot.explain <- function(
       ylab("mean(|Shapley value|)")
     
   } else if (type == "dependence") {
+    
+    # Check for X
+    if (is.null(X)) {
+      stop("The training set is required for SHAP-dependence plots. Please",
+           " specify it via the `X` argument in the call to `autoplot()`.",
+           call. = FALSE)
+    }
     
     # Construct data to plot
     if (is.null(feature)) {

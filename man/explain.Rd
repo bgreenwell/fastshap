@@ -4,8 +4,15 @@
 \alias{explain}
 \title{Fast approximate Shapley values}
 \usage{
-explain(object, feature_names = NULL, X, nsim = 1, pred_wrapper,
-  newdata = NULL, ...)
+explain(
+  object,
+  feature_names = NULL,
+  X,
+  nsim = 1,
+  pred_wrapper,
+  newdata = NULL,
+  ...
+)
 }
 \arguments{
 \item{object}{A fitted model object (e.g., a 
@@ -56,10 +63,7 @@ Compute fast (approximate) Shapley values for a set of features.
 # A projection pursuit regression (PPR) example
 #
 
-# Load required packages
-library(ggplot2)
-
-# Load the sample data; ?datasets::mtcars for details
+# Load the sample data; see ?datasets::mtcars for details
 data(mtcars)
 
 # Fit a projection pursuit regression model
@@ -75,6 +79,7 @@ shap
 library(ggplot2)
 autoplot(shap)  # Shapley-based importance plot
 autoplot(shap, type = "dependence", feature = "wt", X = mtcars)
+autoplot(shap, type = "contribution", row_num = 1)  # explain first row of X
 }
 \seealso{
 You can find more examples (with larger and more realistic data 

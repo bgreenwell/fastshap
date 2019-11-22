@@ -128,10 +128,7 @@ explain_column <- function(object, X, column, pred_wrapper, newdata = NULL) {
 #' # A projection pursuit regression (PPR) example
 #' #
 #' 
-#' # Load required packages
-#' library(ggplot2)
-#' 
-#' # Load the sample data; ?datasets::mtcars for details
+#' # Load the sample data; see ?datasets::mtcars for details
 #' data(mtcars)
 #' 
 #' # Fit a projection pursuit regression model
@@ -147,6 +144,7 @@ explain_column <- function(object, X, column, pred_wrapper, newdata = NULL) {
 #' library(ggplot2)
 #' autoplot(shap)  # Shapley-based importance plot
 #' autoplot(shap, type = "dependence", feature = "wt", X = mtcars)
+#' autoplot(shap, type = "contribution", row_num = 1)  # explain first row of X
 explain <- function(object, feature_names = NULL, X, nsim = 1, pred_wrapper,
                      newdata = NULL, ...) {
   

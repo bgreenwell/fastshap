@@ -6,6 +6,10 @@
 \usage{
 grid.arrange(..., newpage = TRUE)
 }
+\value{
+A \code{"gtable"} object; see 
+\code{\link[gridExtra]{gridExtra-package}} for details.
+}
 \description{
 See \code{\link[gridExtra]{grid.arrange}} for more details.
 }
