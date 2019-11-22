@@ -13,8 +13,9 @@
 <link rel="apple-touch-icon" type="image/png" sizes="76x76" href="../apple-touch-icon-76x76.png">
 <link rel="apple-touch-icon" type="image/png" sizes="60x60" href="../apple-touch-icon-60x60.png">
 <!-- jquery --><script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script><!-- Bootstrap --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha256-916EbMg70RQy9LHiGkXzG8hSg9EdNy97GazNG/aiY1w=" crossorigin="anonymous">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha256-U5ZEeKfGNOja007MMD3YBI0A3OSZOQbeG6z2f2Y0hu8=" crossorigin="anonymous"></script><!-- Font Awesome icons --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" integrity="sha256-eZrrJcwDc/3uDhsdt61sL2oOBY362qM3lon1gyExkL0=" crossorigin="anonymous">
-<!-- clipboard.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.4/clipboard.min.js" integrity="sha256-FiZwavyI2V6+EXO1U+xzLG3IKldpiTFf3153ea9zikQ=" crossorigin="anonymous"></script><!-- sticky kit --><script src="https://cdnjs.cloudflare.com/ajax/libs/sticky-kit/1.1.3/sticky-kit.min.js" integrity="sha256-c4Rlo1ZozqTPE2RLuvbusY3+SU1pQaJC0TjuhygMipw=" crossorigin="anonymous"></script><!-- pkgdown --><link href="../pkgdown.css" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha256-U5ZEeKfGNOja007MMD3YBI0A3OSZOQbeG6z2f2Y0hu8=" crossorigin="anonymous"></script><!-- Font Awesome icons --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.7.1/css/all.min.css" integrity="sha256-nAmazAk6vS34Xqo0BSrTb+abbtFlgsFK7NKSi6o7Y78=" crossorigin="anonymous">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.7.1/css/v4-shims.min.css" integrity="sha256-6qHlizsOWFskGlwVOKuns+D1nB6ssZrHQrNj1wGplHc=" crossorigin="anonymous">
+<!-- clipboard.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.4/clipboard.min.js" integrity="sha256-FiZwavyI2V6+EXO1U+xzLG3IKldpiTFf3153ea9zikQ=" crossorigin="anonymous"></script><!-- headroom.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.9.4/headroom.min.js" integrity="sha256-DJFC1kqIhelURkuza0AvYal5RxMtpzLjFhsnVIeuk+U=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.9.4/jQuery.headroom.min.js" integrity="sha256-ZX/yNShbjqsohH1k95liqY9Gd8uOiE1S4vZc+9KQ1K4=" crossorigin="anonymous"></script><!-- pkgdown --><link href="../pkgdown.css" rel="stylesheet">
 <script src="../pkgdown.js"></script><meta property="og:title" content="fastshap">
 <meta property="og:description" content="">
 <meta property="og:image" content="/logo.png">
@@ -37,7 +38,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">fastshap</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.0.2</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.0.2.9000</span>
       </span>
     </div>
 
@@ -45,7 +46,7 @@
       <ul class="nav navbar-nav">
 <li>
   <a href="../index.html">
-    <span class="fa fa-home fa-lg"></span>
+    <span class="fas fa fas fa-home fa-lg"></span>
      
   </a>
 </li>
@@ -77,7 +78,7 @@
 <ul class="nav navbar-nav navbar-right">
 <li>
   <a href="https://github.com/bgreenwell/fastshap">
-    <span class="fa fa-github fa-lg"></span>
+    <span class="fab fa fab fa-github fa-lg"></span>
      
   </a>
 </li>
@@ -90,6 +91,7 @@
 <!--/.navbar -->
 
       
+
       </header><div class="row">
   <div class="col-md-9 contents">
     <div class="page-header toc-ignore">
@@ -115,68 +117,68 @@
 <a href="#example" class="anchor"></a>Example</h2>
 <p>The following example demonstrates the basic usage of the <strong>fastshap</strong> package.</p>
 <div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb1-1" data-line-number="1"><span class="co"># Load required packages</span></a>
-<a class="sourceLine" id="cb1-2" data-line-number="2"><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/library">library</a></span>(fastshap)  <span class="co"># for fast (approximate) Shapley values</span></a>
-<a class="sourceLine" id="cb1-3" data-line-number="3"><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/library">library</a></span>(mlbench)   <span class="co"># for Friedman 1 benchmark data set</span></a>
-<a class="sourceLine" id="cb1-4" data-line-number="4"><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/library">library</a></span>(ranger)    <span class="co"># for fast random forest algorithm</span></a>
+<a class="sourceLine" id="cb1-2" data-line-number="2"><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span>(fastshap)  <span class="co"># for fast (approximate) Shapley values</span></a>
+<a class="sourceLine" id="cb1-3" data-line-number="3"><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span>(mlbench)   <span class="co"># for Friedman 1 benchmark data set</span></a>
+<a class="sourceLine" id="cb1-4" data-line-number="4"><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span>(ranger)    <span class="co"># for fast random forest algorithm</span></a>
 <a class="sourceLine" id="cb1-5" data-line-number="5"></a>
 <a class="sourceLine" id="cb1-6" data-line-number="6"><span class="co"># Simulate training data</span></a>
-<a class="sourceLine" id="cb1-7" data-line-number="7"><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/Random">set.seed</a></span>(<span class="dv">101</span>)</a>
-<a class="sourceLine" id="cb1-8" data-line-number="8">trn &lt;-<span class="st"> </span><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/as.data.frame">as.data.frame</a></span>(<span class="kw"><a href="https://www.rdocumentation.org/packages/mlbench/topics/mlbench.friedman1">mlbench.friedman1</a></span>(<span class="dv">3000</span>))</a>
-<a class="sourceLine" id="cb1-9" data-line-number="9">X &lt;-<span class="st"> </span><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/subset">subset</a></span>(trn, <span class="dt">select =</span> <span class="op">-</span>y)  <span class="co"># feature columns only</span></a>
+<a class="sourceLine" id="cb1-7" data-line-number="7"><span class="kw"><a href="https://rdrr.io/r/base/Random.html">set.seed</a></span>(<span class="dv">101</span>)</a>
+<a class="sourceLine" id="cb1-8" data-line-number="8">trn &lt;-<span class="st"> </span><span class="kw"><a href="https://rdrr.io/r/base/as.data.frame.html">as.data.frame</a></span>(<span class="kw"><a href="https://rdrr.io/pkg/mlbench/man/mlbench.friedman1.html">mlbench.friedman1</a></span>(<span class="dv">3000</span>))</a>
+<a class="sourceLine" id="cb1-9" data-line-number="9">X &lt;-<span class="st"> </span><span class="kw"><a href="https://rdrr.io/r/base/subset.html">subset</a></span>(trn, <span class="dt">select =</span> <span class="op">-</span>y)  <span class="co"># feature columns only</span></a>
 <a class="sourceLine" id="cb1-10" data-line-number="10"></a>
 <a class="sourceLine" id="cb1-11" data-line-number="11"><span class="co"># Fit a random forest</span></a>
-<a class="sourceLine" id="cb1-12" data-line-number="12"><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/Random">set.seed</a></span>(<span class="dv">102</span>)</a>
-<a class="sourceLine" id="cb1-13" data-line-number="13">rfo &lt;-<span class="st"> </span><span class="kw"><a href="https://www.rdocumentation.org/packages/ranger/topics/ranger">ranger</a></span>(y <span class="op">~</span><span class="st"> </span>., <span class="dt">data =</span>  trn)</a>
+<a class="sourceLine" id="cb1-12" data-line-number="12"><span class="kw"><a href="https://rdrr.io/r/base/Random.html">set.seed</a></span>(<span class="dv">102</span>)</a>
+<a class="sourceLine" id="cb1-13" data-line-number="13">rfo &lt;-<span class="st"> </span><span class="kw"><a href="https://rdrr.io/pkg/ranger/man/ranger.html">ranger</a></span>(y <span class="op">~</span><span class="st"> </span>., <span class="dt">data =</span>  trn)</a>
 <a class="sourceLine" id="cb1-14" data-line-number="14"></a>
 <a class="sourceLine" id="cb1-15" data-line-number="15"><span class="co"># Prediction wrapper</span></a>
 <a class="sourceLine" id="cb1-16" data-line-number="16">pfun &lt;-<span class="st"> </span><span class="cf">function</span>(object, newdata) {</a>
-<a class="sourceLine" id="cb1-17" data-line-number="17">  <span class="kw"><a href="https://www.rdocumentation.org/packages/stats/topics/predict">predict</a></span>(object, <span class="dt">data =</span> newdata)<span class="op">$</span>predictions</a>
+<a class="sourceLine" id="cb1-17" data-line-number="17">  <span class="kw"><a href="https://rdrr.io/r/stats/predict.html">predict</a></span>(object, <span class="dt">data =</span> newdata)<span class="op">$</span>predictions</a>
 <a class="sourceLine" id="cb1-18" data-line-number="18">}</a>
 <a class="sourceLine" id="cb1-19" data-line-number="19"></a>
 <a class="sourceLine" id="cb1-20" data-line-number="20"><span class="co"># Compute fast (approximate) Shapley values using 10 Monte Carlo repetitions</span></a>
-<a class="sourceLine" id="cb1-21" data-line-number="21"><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/system.time">system.time</a></span>({  <span class="co"># estimate run time</span></a>
-<a class="sourceLine" id="cb1-22" data-line-number="22">  <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/Random">set.seed</a></span>(<span class="dv">5038</span>)</a>
+<a class="sourceLine" id="cb1-21" data-line-number="21"><span class="kw"><a href="https://rdrr.io/r/base/system.time.html">system.time</a></span>({  <span class="co"># estimate run time</span></a>
+<a class="sourceLine" id="cb1-22" data-line-number="22">  <span class="kw"><a href="https://rdrr.io/r/base/Random.html">set.seed</a></span>(<span class="dv">5038</span>)</a>
 <a class="sourceLine" id="cb1-23" data-line-number="23">  shap &lt;-<span class="st"> </span><span class="kw"><a href="../reference/explain.html">explain</a></span>(rfo, <span class="dt">X =</span> X, <span class="dt">pred_wrapper =</span> pfun, <span class="dt">nsim =</span> <span class="dv">10</span>)</a>
 <a class="sourceLine" id="cb1-24" data-line-number="24">})</a>
 <a class="sourceLine" id="cb1-25" data-line-number="25"><span class="co">#&gt;    user  system elapsed </span></a>
-<a class="sourceLine" id="cb1-26" data-line-number="26"><span class="co">#&gt;  89.263   1.672  17.982</span></a>
+<a class="sourceLine" id="cb1-26" data-line-number="26"><span class="co">#&gt;  90.000   1.339  18.477</span></a>
 <a class="sourceLine" id="cb1-27" data-line-number="27"></a>
 <a class="sourceLine" id="cb1-28" data-line-number="28"><span class="co"># Results are returned as a tibble (with the additional "shap" class)</span></a>
 <a class="sourceLine" id="cb1-29" data-line-number="29">shap</a>
 <a class="sourceLine" id="cb1-30" data-line-number="30"><span class="co">#&gt; # A tibble: 3,000 x 10</span></a>
-<a class="sourceLine" id="cb1-31" data-line-number="31"><span class="co">#&gt;       x.1    x.2     x.3    x.4    x.5      x.6      x.7      x.8     x.9</span></a>
-<a class="sourceLine" id="cb1-32" data-line-number="32"><span class="co">#&gt;     &lt;dbl&gt;  &lt;dbl&gt;   &lt;dbl&gt;  &lt;dbl&gt;  &lt;dbl&gt;    &lt;dbl&gt;    &lt;dbl&gt;    &lt;dbl&gt;   &lt;dbl&gt;</span></a>
-<a class="sourceLine" id="cb1-33" data-line-number="33"><span class="co">#&gt;  1 -0.545  1.12  -1.68   -1.70  -0.281 -0.0953  -1.55e-2 -0.00274 -0.0435</span></a>
-<a class="sourceLine" id="cb1-34" data-line-number="34"><span class="co">#&gt;  2 -3.20   1.05   1.03   -0.815  0.786 -0.00719  1.02e-1  0.114    0.0788</span></a>
-<a class="sourceLine" id="cb1-35" data-line-number="35"><span class="co">#&gt;  3  2.07   2.36  -0.823  -2.92  -1.53  -0.0402   7.70e-3  0.00655  0.0435</span></a>
-<a class="sourceLine" id="cb1-36" data-line-number="36"><span class="co">#&gt;  4  0.623 -2.78   0.0688  3.17   0.753  0.0816   9.27e-4  0.0741   0.0564</span></a>
-<a class="sourceLine" id="cb1-37" data-line-number="37"><span class="co">#&gt;  5 -0.644 -0.258 -0.207   3.12   0.918 -0.0159   3.83e-2  0.0155   0.0315</span></a>
-<a class="sourceLine" id="cb1-38" data-line-number="38"><span class="co">#&gt;  6 -0.929  0.506 -1.05   -1.70   1.51   0.0299   5.41e-2  0.0118  -0.234 </span></a>
-<a class="sourceLine" id="cb1-39" data-line-number="39"><span class="co">#&gt;  7  2.99   2.48   1.23   -3.46  -0.398  0.0639  -6.17e-3 -0.0237  -0.0353</span></a>
-<a class="sourceLine" id="cb1-40" data-line-number="40"><span class="co">#&gt;  8 -0.388 -1.84   0.532   4.64  -0.487 -0.0215   2.77e-2 -0.0346   0.0496</span></a>
-<a class="sourceLine" id="cb1-41" data-line-number="41"><span class="co">#&gt;  9  0.647  0.783 -0.769   3.35  -1.13   0.0171   3.70e-3 -0.0348   0.0866</span></a>
-<a class="sourceLine" id="cb1-42" data-line-number="42"><span class="co">#&gt; 10  0.832 -1.22  -0.403  -4.19   0.560 -0.0247  -1.82e-2 -0.00990 -0.0256</span></a>
+<a class="sourceLine" id="cb1-31" data-line-number="31"><span class="co">#&gt;        x.1    x.2     x.3      x.4     x.5     x.6      x.7      x.8     x.9</span></a>
+<a class="sourceLine" id="cb1-32" data-line-number="32"><span class="co">#&gt;      &lt;dbl&gt;  &lt;dbl&gt;   &lt;dbl&gt;    &lt;dbl&gt;   &lt;dbl&gt;   &lt;dbl&gt;    &lt;dbl&gt;    &lt;dbl&gt;   &lt;dbl&gt;</span></a>
+<a class="sourceLine" id="cb1-33" data-line-number="33"><span class="co">#&gt;  1 -0.0894  0.839 -0.438  -3.21     0.0344 -0.110   2.00e-4 -1.82e-4 -0.0865</span></a>
+<a class="sourceLine" id="cb1-34" data-line-number="34"><span class="co">#&gt;  2 -4.39    1.11   1.01   -0.00996  1.13   -0.0195  1.41e-1 -5.47e-2  0.109 </span></a>
+<a class="sourceLine" id="cb1-35" data-line-number="35"><span class="co">#&gt;  3  1.35    1.72  -1.11   -3.47    -0.739  -0.0468  7.94e-3 -1.55e-2  0.0524</span></a>
+<a class="sourceLine" id="cb1-36" data-line-number="36"><span class="co">#&gt;  4  1.72   -3.24  -0.293   3.37     0.320   0.0329  8.20e-2  2.14e-2  0.0457</span></a>
+<a class="sourceLine" id="cb1-37" data-line-number="37"><span class="co">#&gt;  5 -1.54   -1.96   0.0507  3.72     1.64   -0.0377  1.91e-2  8.76e-2  0.0454</span></a>
+<a class="sourceLine" id="cb1-38" data-line-number="38"><span class="co">#&gt;  6 -0.979   1.22  -1.00   -1.60     1.15    0.0607  8.84e-3 -2.02e-3 -0.157 </span></a>
+<a class="sourceLine" id="cb1-39" data-line-number="39"><span class="co">#&gt;  7  0.650   2.03   1.44   -3.25    -0.0564  0.0859  6.81e-2  7.19e-2  0.0830</span></a>
+<a class="sourceLine" id="cb1-40" data-line-number="40"><span class="co">#&gt;  8 -1.22   -1.88   0.304   4.86    -0.0709 -0.0442 -7.67e-3 -3.37e-2 -0.0326</span></a>
+<a class="sourceLine" id="cb1-41" data-line-number="41"><span class="co">#&gt;  9  1.59    1.22  -0.548   3.60    -0.765   0.0583 -1.11e-1 -6.25e-3  0.132 </span></a>
+<a class="sourceLine" id="cb1-42" data-line-number="42"><span class="co">#&gt; 10  1.10   -2.36  -1.15   -1.49     0.927  -0.0437 -3.44e-2  3.01e-2 -0.142 </span></a>
 <a class="sourceLine" id="cb1-43" data-line-number="43"><span class="co">#&gt; # … with 2,990 more rows, and 1 more variable: x.10 &lt;dbl&gt;</span></a></code></pre></div>
 <p>You can use the results to help interpret the model in many different ways. For example, in the code chunk below we take the sum of the absolute value of the Shapley values within each feature to construct a Shap-based feature variable importance plot:</p>
 <div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb2-1" data-line-number="1"><span class="co"># Load required packages</span></a>
-<a class="sourceLine" id="cb2-2" data-line-number="2"><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/library">library</a></span>(ggplot2)</a>
+<a class="sourceLine" id="cb2-2" data-line-number="2"><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span>(ggplot2)</a>
 <a class="sourceLine" id="cb2-3" data-line-number="3"><span class="kw"><a href="https://ggplot2.tidyverse.org/reference/theme_get.html">theme_set</a></span>(<span class="kw"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html">theme_bw</a></span>())</a>
 <a class="sourceLine" id="cb2-4" data-line-number="4"></a>
 <a class="sourceLine" id="cb2-5" data-line-number="5"><span class="co"># Aggregate Shapley values</span></a>
-<a class="sourceLine" id="cb2-6" data-line-number="6">shap_imp &lt;-<span class="st"> </span><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/data.frame">data.frame</a></span>(</a>
-<a class="sourceLine" id="cb2-7" data-line-number="7">  <span class="dt">Variable =</span> <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/names">names</a></span>(shap),</a>
-<a class="sourceLine" id="cb2-8" data-line-number="8">  <span class="dt">Importance =</span> <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/apply">apply</a></span>(shap, <span class="dt">MARGIN =</span> <span class="dv">2</span>, <span class="dt">FUN =</span> <span class="cf">function</span>(x) <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/sum">sum</a></span>(<span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/MathFun">abs</a></span>(x)))</a>
+<a class="sourceLine" id="cb2-6" data-line-number="6">shap_imp &lt;-<span class="st"> </span><span class="kw"><a href="https://rdrr.io/r/base/data.frame.html">data.frame</a></span>(</a>
+<a class="sourceLine" id="cb2-7" data-line-number="7">  <span class="dt">Variable =</span> <span class="kw"><a href="https://rdrr.io/r/base/names.html">names</a></span>(shap),</a>
+<a class="sourceLine" id="cb2-8" data-line-number="8">  <span class="dt">Importance =</span> <span class="kw"><a href="https://rdrr.io/r/base/apply.html">apply</a></span>(shap, <span class="dt">MARGIN =</span> <span class="dv">2</span>, <span class="dt">FUN =</span> <span class="cf">function</span>(x) <span class="kw"><a href="https://rdrr.io/r/base/sum.html">sum</a></span>(<span class="kw"><a href="https://rdrr.io/r/base/MathFun.html">abs</a></span>(x)))</a>
 <a class="sourceLine" id="cb2-9" data-line-number="9">)</a>
 <a class="sourceLine" id="cb2-10" data-line-number="10"></a>
 <a class="sourceLine" id="cb2-11" data-line-number="11"><span class="co"># Plot Shap-based variable importance</span></a>
-<a class="sourceLine" id="cb2-12" data-line-number="12"><span class="kw"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html">ggplot</a></span>(shap_imp, <span class="kw"><a href="https://ggplot2.tidyverse.org/reference/aes.html">aes</a></span>(<span class="kw"><a href="https://www.rdocumentation.org/packages/stats/topics/reorder.factor">reorder</a></span>(Variable, Importance), Importance)) <span class="op">+</span></a>
+<a class="sourceLine" id="cb2-12" data-line-number="12"><span class="kw"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html">ggplot</a></span>(shap_imp, <span class="kw"><a href="https://ggplot2.tidyverse.org/reference/aes.html">aes</a></span>(<span class="kw"><a href="https://rdrr.io/r/stats/reorder.factor.html">reorder</a></span>(Variable, Importance), Importance)) <span class="op">+</span></a>
 <a class="sourceLine" id="cb2-13" data-line-number="13"><span class="st">  </span><span class="kw"><a href="https://ggplot2.tidyverse.org/reference/geom_bar.html">geom_col</a></span>() <span class="op">+</span></a>
 <a class="sourceLine" id="cb2-14" data-line-number="14"><span class="st">  </span><span class="kw"><a href="https://ggplot2.tidyverse.org/reference/coord_flip.html">coord_flip</a></span>() <span class="op">+</span></a>
 <a class="sourceLine" id="cb2-15" data-line-number="15"><span class="st">  </span><span class="kw"><a href="https://ggplot2.tidyverse.org/reference/labs.html">xlab</a></span>(<span class="st">""</span>) <span class="op">+</span></a>
 <a class="sourceLine" id="cb2-16" data-line-number="16"><span class="st">  </span><span class="kw"><a href="https://ggplot2.tidyverse.org/reference/labs.html">ylab</a></span>(<span class="st">"mean(|Shapley value|)"</span>)</a></code></pre></div>
 <p><img src="fastshap_files/figure-html/shap-importance-1.png" width="70%"></p>
 <p>We can also plot the Shapley values for each feature to construct Shap-based dependence plots:</p>
-<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb3-1" data-line-number="1">shap_dep_x3 &lt;-<span class="st"> </span><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/data.frame">data.frame</a></span>(<span class="dt">x3 =</span> X[[<span class="st">"x.3"</span>]], <span class="dt">shap =</span> shap[[<span class="st">"x.3"</span>]])</a>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb3-1" data-line-number="1">shap_dep_x3 &lt;-<span class="st"> </span><span class="kw"><a href="https://rdrr.io/r/base/data.frame.html">data.frame</a></span>(<span class="dt">x3 =</span> X[[<span class="st">"x.3"</span>]], <span class="dt">shap =</span> shap[[<span class="st">"x.3"</span>]])</a>
 <a class="sourceLine" id="cb3-2" data-line-number="2"><span class="kw"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html">ggplot</a></span>(shap_dep_x3, <span class="kw"><a href="https://ggplot2.tidyverse.org/reference/aes.html">aes</a></span>(x3, shap)) <span class="op">+</span></a>
 <a class="sourceLine" id="cb3-3" data-line-number="3"><span class="st">  </span><span class="kw"><a href="https://ggplot2.tidyverse.org/reference/geom_point.html">geom_point</a></span>(<span class="dt">alpha =</span> <span class="fl">0.3</span>) <span class="op">+</span></a>
 <a class="sourceLine" id="cb3-4" data-line-number="4"><span class="st">  </span><span class="kw"><a href="https://ggplot2.tidyverse.org/reference/geom_smooth.html">geom_smooth</a></span>() <span class="op">+</span></a>
@@ -188,7 +190,7 @@
 <a class="sourceLine" id="cb4-2" data-line-number="2">p2 &lt;-<span class="st"> </span><span class="kw"><a href="https://ggplot2.tidyverse.org/reference/autoplot.html">autoplot</a></span>(shap, <span class="dt">type =</span> <span class="st">"dependence"</span>, <span class="dt">feature =</span> <span class="st">"x.3"</span>, <span class="dt">X =</span> X, <span class="dt">alpha =</span> <span class="fl">0.5</span>,</a>
 <a class="sourceLine" id="cb4-3" data-line-number="3">               <span class="dt">color_by =</span> <span class="st">"x.2"</span>, <span class="dt">smooth =</span> <span class="ot">TRUE</span>, <span class="dt">smooth_color =</span> <span class="st">"black"</span>) <span class="op">+</span></a>
 <a class="sourceLine" id="cb4-4" data-line-number="4"><span class="st">        </span><span class="kw"><a href="https://ggplot2.tidyverse.org/reference/scale_viridis.html">scale_color_viridis_c</a></span>()</a>
-<a class="sourceLine" id="cb4-5" data-line-number="5">gridExtra<span class="op">::</span><span class="kw"><a href="https://www.rdocumentation.org/packages/gridExtra/topics/arrangeGrob">grid.arrange</a></span>(p1, p2, <span class="dt">nrow =</span> <span class="dv">1</span>)</a>
+<a class="sourceLine" id="cb4-5" data-line-number="5">gridExtra<span class="op">::</span><span class="kw"><a href="https://rdrr.io/pkg/gridExtra/man/arrangeGrob.html">grid.arrange</a></span>(p1, p2, <span class="dt">nrow =</span> <span class="dv">1</span>)</a>
 <a class="sourceLine" id="cb4-6" data-line-number="6"><span class="co">#&gt; `geom_smooth()` using method = 'gam' and formula 'y ~ s(x, bs = "cs")'</span></a></code></pre></div>
 <p><img src="fastshap_files/figure-html/shap-autoplot-1.png" width="70%"></p>
 <p>By default, <code><a href="../reference/explain.html">explain()</a></code> computes approximate Shapley values for all rows in the training data. If you want Shapley values for new instances (or a subset of the training set), they must be supplied via the <code>newdata</code> argument. This functionality is demonstrated in the code chunk below. (<strong>Note:</strong> <code><a href="../reference/explain.html">explain()</a></code> is not yet optimized for this case; that is, computing only a handful of Shapley values for a few instances (in this case, at least for now, consider using the <strong>iml</strong> function <code>Shapley()</code>).)</p>
@@ -197,19 +199,19 @@
 <a class="sourceLine" id="cb5-3" data-line-number="3"><span class="kw"><a href="../reference/explain.html">explain</a></span>(rfo, <span class="dt">X =</span> X, <span class="dt">pred_wrapper =</span> pfun, <span class="dt">nsim =</span> <span class="dv">10</span>,</a>
 <a class="sourceLine" id="cb5-4" data-line-number="4">        <span class="dt">newdata =</span> X[<span class="dv">1</span>, , <span class="dt">drop =</span> <span class="ot">FALSE</span>])</a>
 <a class="sourceLine" id="cb5-5" data-line-number="5"><span class="co">#&gt; # A tibble: 1 x 10</span></a>
-<a class="sourceLine" id="cb5-6" data-line-number="6"><span class="co">#&gt;      x.1   x.2    x.3   x.4    x.5     x.6      x.7     x.8     x.9    x.10</span></a>
-<a class="sourceLine" id="cb5-7" data-line-number="7"><span class="co">#&gt;    &lt;dbl&gt; &lt;dbl&gt;  &lt;dbl&gt; &lt;dbl&gt;  &lt;dbl&gt;   &lt;dbl&gt;    &lt;dbl&gt;   &lt;dbl&gt;   &lt;dbl&gt;   &lt;dbl&gt;</span></a>
-<a class="sourceLine" id="cb5-8" data-line-number="8"><span class="co">#&gt; 1 -0.429  1.29 -0.340 -3.49 0.0713 -0.0390 -0.00684 -0.0634 0.00992 0.00432</span></a>
+<a class="sourceLine" id="cb5-6" data-line-number="6"><span class="co">#&gt;      x.1   x.2    x.3   x.4    x.5     x.6     x.7    x.8    x.9     x.10</span></a>
+<a class="sourceLine" id="cb5-7" data-line-number="7"><span class="co">#&gt;    &lt;dbl&gt; &lt;dbl&gt;  &lt;dbl&gt; &lt;dbl&gt;  &lt;dbl&gt;   &lt;dbl&gt;   &lt;dbl&gt;  &lt;dbl&gt;  &lt;dbl&gt;    &lt;dbl&gt;</span></a>
+<a class="sourceLine" id="cb5-8" data-line-number="8"><span class="co">#&gt; 1 -0.391 0.987 -0.595 -2.74 -0.378 -0.0563 -0.0205 0.0456 0.0363 -0.00262</span></a>
 <a class="sourceLine" id="cb5-9" data-line-number="9"></a>
 <a class="sourceLine" id="cb5-10" data-line-number="10"><span class="co"># Explanations for first three observations</span></a>
-<a class="sourceLine" id="cb5-11" data-line-number="11"><span class="kw"><a href="../reference/explain.html">explain</a></span>(rfo, <span class="dt">X =</span> X, <span class="dt">feature_names =</span> <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/c">c</a></span>(<span class="st">"x.1"</span>, <span class="st">"x.10"</span>), <span class="dt">pred_wrapper =</span> pfun, </a>
+<a class="sourceLine" id="cb5-11" data-line-number="11"><span class="kw"><a href="../reference/explain.html">explain</a></span>(rfo, <span class="dt">X =</span> X, <span class="dt">feature_names =</span> <span class="kw"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="st">"x.1"</span>, <span class="st">"x.10"</span>), <span class="dt">pred_wrapper =</span> pfun, </a>
 <a class="sourceLine" id="cb5-12" data-line-number="12">        <span class="dt">nsim =</span> <span class="dv">10</span>, <span class="dt">newdata =</span> X[<span class="dv">1</span><span class="op">:</span><span class="dv">3</span>, ])</a>
 <a class="sourceLine" id="cb5-13" data-line-number="13"><span class="co">#&gt; # A tibble: 3 x 2</span></a>
-<a class="sourceLine" id="cb5-14" data-line-number="14"><span class="co">#&gt;      x.1    x.10</span></a>
-<a class="sourceLine" id="cb5-15" data-line-number="15"><span class="co">#&gt;    &lt;dbl&gt;   &lt;dbl&gt;</span></a>
-<a class="sourceLine" id="cb5-16" data-line-number="16"><span class="co">#&gt; 1 -0.448  0.0370</span></a>
-<a class="sourceLine" id="cb5-17" data-line-number="17"><span class="co">#&gt; 2 -2.39  -0.0384</span></a>
-<a class="sourceLine" id="cb5-18" data-line-number="18"><span class="co">#&gt; 3  1.20   0.110</span></a>
+<a class="sourceLine" id="cb5-14" data-line-number="14"><span class="co">#&gt;     x.1     x.10</span></a>
+<a class="sourceLine" id="cb5-15" data-line-number="15"><span class="co">#&gt;   &lt;dbl&gt;    &lt;dbl&gt;</span></a>
+<a class="sourceLine" id="cb5-16" data-line-number="16"><span class="co">#&gt; 1 -1.49 -0.0265 </span></a>
+<a class="sourceLine" id="cb5-17" data-line-number="17"><span class="co">#&gt; 2 -4.53  0.00751</span></a>
+<a class="sourceLine" id="cb5-18" data-line-number="18"><span class="co">#&gt; 3  1.33  0.0690</span></a>
 <a class="sourceLine" id="cb5-19" data-line-number="19"></a>
 <a class="sourceLine" id="cb5-20" data-line-number="20"><span class="co"># Plot individual explanations</span></a>
 <a class="sourceLine" id="cb5-21" data-line-number="21">expl &lt;-<span class="st"> </span><span class="kw"><a href="../reference/explain.html">explain</a></span>(rfo, <span class="dt">X =</span> X,<span class="dt">pred_wrapper =</span> pfun, <span class="dt">nsim =</span> <span class="dv">10</span>, <span class="dt">newdata =</span> X[1L, ])</a>
@@ -220,34 +222,34 @@
 <a href="#parallel-execution" class="anchor"></a>Parallel execution</h3>
 <p>With <strong>fastshap</strong> you can compute contributions for multiple features in parallel using any parallel backend supported by the <strong>foreach</strong> package. This is illustrated in the code chunk below.</p>
 <div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb6-1" data-line-number="1"><span class="co"># Load required packages</span></a>
-<a class="sourceLine" id="cb6-2" data-line-number="2"><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/library">library</a></span>(doParallel)</a>
+<a class="sourceLine" id="cb6-2" data-line-number="2"><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span>(doParallel)</a>
 <a class="sourceLine" id="cb6-3" data-line-number="3"></a>
 <a class="sourceLine" id="cb6-4" data-line-number="4"><span class="co"># Set up parallel backend</span></a>
 <a class="sourceLine" id="cb6-5" data-line-number="5">cl &lt;-<span class="st"> </span><span class="cf">if</span> (.Platform<span class="op">$</span>OS.type <span class="op">==</span><span class="st"> "unix"</span>) <span class="dv">8</span> <span class="cf">else</span> <span class="kw">makeCluster</span>(<span class="dv">8</span>)</a>
-<a class="sourceLine" id="cb6-6" data-line-number="6"><span class="kw"><a href="https://www.rdocumentation.org/packages/doParallel/topics/registerDoParallel">registerDoParallel</a></span>(cl)</a>
+<a class="sourceLine" id="cb6-6" data-line-number="6"><span class="kw"><a href="https://rdrr.io/pkg/doParallel/man/registerDoParallel.html">registerDoParallel</a></span>(cl)</a>
 <a class="sourceLine" id="cb6-7" data-line-number="7"></a>
 <a class="sourceLine" id="cb6-8" data-line-number="8"><span class="co"># Compute Shapley values in parallel</span></a>
 <a class="sourceLine" id="cb6-9" data-line-number="9"><span class="kw"><a href="../reference/explain.html">explain</a></span>(rfo, <span class="dt">X =</span> X, <span class="dt">pred_wrapper =</span> pfun, <span class="dt">nsim =</span> <span class="dv">10</span>, <span class="dt">.parallel =</span> <span class="ot">TRUE</span>)</a>
 <a class="sourceLine" id="cb6-10" data-line-number="10"><span class="co">#&gt; # A tibble: 3,000 x 10</span></a>
-<a class="sourceLine" id="cb6-11" data-line-number="11"><span class="co">#&gt;       x.1    x.2     x.3    x.4     x.5     x.6      x.7      x.8      x.9</span></a>
-<a class="sourceLine" id="cb6-12" data-line-number="12"><span class="co">#&gt;     &lt;dbl&gt;  &lt;dbl&gt;   &lt;dbl&gt;  &lt;dbl&gt;   &lt;dbl&gt;   &lt;dbl&gt;    &lt;dbl&gt;    &lt;dbl&gt;    &lt;dbl&gt;</span></a>
-<a class="sourceLine" id="cb6-13" data-line-number="13"><span class="co">#&gt;  1  0.594  0.696 -0.901  -0.999  0.0571 -0.0717 -0.102    0.0507  -0.0322 </span></a>
-<a class="sourceLine" id="cb6-14" data-line-number="14"><span class="co">#&gt;  2 -4.74   0.396  0.950   2.21   0.811  -0.0282  0.103   -0.0356   0.0914 </span></a>
-<a class="sourceLine" id="cb6-15" data-line-number="15"><span class="co">#&gt;  3  1.22   1.32  -0.506  -3.15  -1.03   -0.0701 -0.0696   0.0451   0.0362 </span></a>
-<a class="sourceLine" id="cb6-16" data-line-number="16"><span class="co">#&gt;  4  0.839 -1.91  -0.437   3.74   0.948  -0.0266 -0.0225  -0.0125   0.00715</span></a>
-<a class="sourceLine" id="cb6-17" data-line-number="17"><span class="co">#&gt;  5 -1.04  -0.403 -0.245   1.73   1.33    0.0213  0.0617   0.0685   0.0235 </span></a>
-<a class="sourceLine" id="cb6-18" data-line-number="18"><span class="co">#&gt;  6 -1.51   0.999 -0.761  -1.83   0.565   0.0681  0.00792  0.0366  -0.145  </span></a>
-<a class="sourceLine" id="cb6-19" data-line-number="19"><span class="co">#&gt;  7  0.587  2.74   1.50   -3.62  -0.496   0.0425  0.00124 -0.195   -0.0112 </span></a>
-<a class="sourceLine" id="cb6-20" data-line-number="20"><span class="co">#&gt;  8 -0.882 -2.24  -0.0866  2.63  -0.260  -0.0588  0.0177   0.0210   0.0111 </span></a>
-<a class="sourceLine" id="cb6-21" data-line-number="21"><span class="co">#&gt;  9  1.93   1.62  -0.595   6.06  -1.54    0.0828 -0.0525  -0.00607  0.141  </span></a>
-<a class="sourceLine" id="cb6-22" data-line-number="22"><span class="co">#&gt; 10  0.967 -1.73  -0.260  -4.15   0.478  -0.0516  0.0515  -0.0419   0.00155</span></a>
+<a class="sourceLine" id="cb6-11" data-line-number="11"><span class="co">#&gt;        x.1    x.2    x.3    x.4     x.5      x.6      x.7     x.8      x.9</span></a>
+<a class="sourceLine" id="cb6-12" data-line-number="12"><span class="co">#&gt;      &lt;dbl&gt;  &lt;dbl&gt;  &lt;dbl&gt;  &lt;dbl&gt;   &lt;dbl&gt;    &lt;dbl&gt;    &lt;dbl&gt;   &lt;dbl&gt;    &lt;dbl&gt;</span></a>
+<a class="sourceLine" id="cb6-13" data-line-number="13"><span class="co">#&gt;  1  0.0112  0.839 -1.02  -1.95   0.497   1.32e-2 -0.00378 -0.0302 -0.106  </span></a>
+<a class="sourceLine" id="cb6-14" data-line-number="14"><span class="co">#&gt;  2 -4.08    1.49   0.509 -0.527  2.16    5.88e-2  0.0816  -0.0338 -0.0483 </span></a>
+<a class="sourceLine" id="cb6-15" data-line-number="15"><span class="co">#&gt;  3  1.73    2.33  -1.20  -4.42  -1.25   -8.50e-4  0.0250  -0.0803 -0.0126 </span></a>
+<a class="sourceLine" id="cb6-16" data-line-number="16"><span class="co">#&gt;  4  2.39   -1.27   0.110  3.84   1.24    3.64e-3 -0.00605  0.0286  0.0469 </span></a>
+<a class="sourceLine" id="cb6-17" data-line-number="17"><span class="co">#&gt;  5 -1.38   -0.855 -0.224  2.17   0.308   1.58e-2  0.0869   0.0798  0.00112</span></a>
+<a class="sourceLine" id="cb6-18" data-line-number="18"><span class="co">#&gt;  6  1.60    1.35  -0.876 -2.41   1.28    9.94e-2  0.0488  -0.133  -0.158  </span></a>
+<a class="sourceLine" id="cb6-19" data-line-number="19"><span class="co">#&gt;  7  1.43    2.30   1.07  -3.77  -0.915  -1.10e-2 -0.0665  -0.0145  0.00386</span></a>
+<a class="sourceLine" id="cb6-20" data-line-number="20"><span class="co">#&gt;  8 -0.875  -1.01   0.538  2.49   0.0828  1.51e-2  0.00551  0.0379  0.0398 </span></a>
+<a class="sourceLine" id="cb6-21" data-line-number="21"><span class="co">#&gt;  9  2.58    2.84  -0.797  4.22  -1.30    2.16e-2  0.0337  -0.0454  0.0304 </span></a>
+<a class="sourceLine" id="cb6-22" data-line-number="22"><span class="co">#&gt; 10  1.14   -3.18  -0.550 -3.47   1.09   -4.58e-2 -0.0516   0.0110 -0.134  </span></a>
 <a class="sourceLine" id="cb6-23" data-line-number="23"><span class="co">#&gt; # … with 2,990 more rows, and 1 more variable: x.10 &lt;dbl&gt;</span></a></code></pre></div>
 </div>
 </div>
 <div id="comparison-with-treeshaptreeexplainer-for-xgboost-models" class="section level2">
 <h2 class="hasAnchor">
 <a href="#comparison-with-treeshaptreeexplainer-for-xgboost-models" class="anchor"></a>Comparison with TreeSHAP/TreeExplainer for XGBoost models</h2>
-<p>You can compute the contributions of each feature for XGBoost models in an efficient way using the methods described in <a href="https://arxiv.org/abs/1705.07874">(Lundberg 2017)</a>. These are available through the <code><a href="https://www.rdocumentation.org/packages/stats/topics/predict">predict()</a></code> function for <strong>xgboost</strong> models; see <code><a href="https://www.rdocumentation.org/packages/xgboost/topics/predict.xgb.Booster">?xgboost::predict.xgb.Booster</a></code> for details. Below we compute the contributions for each feature using both methods and compare the results using a Shapley-based dependence plot on feature <code>x.3</code>, the results are quite surprising (<strong>no parallel processing was used to obtain the <strong>fastshap</strong> results</strong>). And remember, <strong>fastshap</strong> can be used with any prediction model in R.</p>
+<p>You can compute the contributions of each feature for XGBoost models in an efficient way using the methods described in <a href="https://arxiv.org/abs/1705.07874">(Lundberg 2017)</a>. These are available through the <code><a href="https://rdrr.io/r/stats/predict.html">predict()</a></code> function for <strong>xgboost</strong> models; see <code><a href="https://rdrr.io/pkg/xgboost/man/predict.xgb.Booster.html">?xgboost::predict.xgb.Booster</a></code> for details. Below we compute the contributions for each feature using both methods and compare the results using a Shapley-based dependence plot on feature <code>x.3</code>, the results are quite surprising (<strong>no parallel processing was used to obtain the <strong>fastshap</strong> results</strong>). And remember, <strong>fastshap</strong> can be used with any prediction model in R.</p>
 <p><img src="fastshap_files/figure-html/fastshap-comparison-1.png" width="70%"></p>
 <p>We can also check that <strong>fastshap</strong> converges to the true Shapley values by comparing the results to TreeSHAP while varying the number of Monte Carlo repetitions:</p>
 <p><img src="fastshap_files/figure-html/fastshap-convergence-1.png" width="70%"></p>
@@ -262,6 +264,7 @@
   </div>
 
   <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">
+
         <div id="tocnav">
       <h2 class="hasAnchor">
 <a href="#tocnav" class="anchor"></a>Contents</h2>
@@ -277,17 +280,20 @@
 </div>
 
 
+
       <footer><div class="copyright">
   <p>Developed by Brandon Greenwell.</p>
 </div>
 
 <div class="pkgdown">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.3.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.4.1.</p>
 </div>
+
       </footer>
 </div>
 
   
+
 
   </body>
 </html>
