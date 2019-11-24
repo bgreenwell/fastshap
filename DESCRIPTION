@@ -5,7 +5,7 @@ Version: 0.0.2.9000
 Authors@R: person("Brandon", "Greenwell", email = "greenwell.brandon@gmail.com", role =
          c("aut", "cre"), comment = c(ORCID = "0000-0002-8120-0084"))
 Description: Computes fast approximate Shapley values for any supervised 
-    learning model. Shapely values help to explain the predictions from any black box model using ideas 
+    learning model. Shapley values help to explain the predictions from any black box model using ideas 
     from game theory; see Strumbel and Kononenko (2014) <doi:10.1007/s10115-013-0679-x> for details.
 License: GPL (>= 2)
 URL: https://github.com/bgreenwell/fastshap
