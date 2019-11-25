@@ -1,5 +1,10 @@
 # fastshap 0.0.2.9000
 
+## Minor changes
+
+* Fixed a typo in the package description; Shapley was misspelled as Shapely (fixed by Dirk Eddelbuettel in [#1](https://github.com/bgreenwell/fastshap/pull/1)).
+
+
 # fastshap 0.0.2
 
 ## New features
@@ -28,7 +33,7 @@
 
 * Fixed a bug in the C++ source that caused doubles to be incorrectly converted to integers.
 
-* Fixed a bug in `autoplot.fastshap()` when `type = "importance"`; in particular, the function incorrectly used `sum(|SHapley value|)` instead of `mean(|SHapley value|)`.
+* Fixed a bug in `autoplot.fastshap()` when `type = "importance"`; in particular, the function incorrectly used `sum(|Shapley value|)` instead of `mean(|Shapley value|)`.
 
 
 # fastshap 0.0.1
