@@ -1,1 +1,3 @@
-*.html linguist-vendored
+* linguist-vendored
+*.R linguist-vendored=false
+*.cpp linguist-vendored=false
