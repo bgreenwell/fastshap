@@ -25,9 +25,11 @@ values which help explain the predictions from machine learning models.
 
 ## Installation
 
-You can install the development version of **fastshap** from GitHub:
-
 ``` r
+# You can install latest stable version from CRAN:
+install.packages("fastshap")
+
+# Alternatively, you can install the latest development version from GitHub:
 if (!requireNamespace("remotes")) {
   install.packages("remotes")
 }
