@@ -1,6 +1,8 @@
-# fastshap 0.0.2.9000
+# fastshap 0.0.3
 
 ## Minor changes
+
+* Tweak imports (in particular, use `@importFrom Rcpp sourceCpp` tag).
 
 * Fixed a typo in the package description; Shapley was misspelled as Shapely (fixed by Dirk Eddelbuettel in [#1](https://github.com/bgreenwell/fastshap/pull/1)).
 

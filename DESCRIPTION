@@ -1,7 +1,7 @@
 Package: fastshap
 Type: Package
 Title: Fast Approximate Shapley Values
-Version: 0.0.2.9000
+Version: 0.0.3
 Authors@R: person("Brandon", "Greenwell", email = "greenwell.brandon@gmail.com", role =
          c("aut", "cre"), comment = c(ORCID = "0000-0002-8120-0084"))
 Description: Computes fast approximate Shapley values for any supervised 

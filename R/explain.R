@@ -1,6 +1,8 @@
 #' @keywords internal
 #' 
 #' @useDynLib fastshap, .registration = TRUE
+#' 
+#' @importFrom Rcpp sourceCpp
 explain_column <- function(object, X, column, pred_wrapper, newdata = NULL) {
   
   # Check types

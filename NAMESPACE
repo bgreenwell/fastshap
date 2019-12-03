@@ -3,6 +3,7 @@
 S3method(autoplot,explain)
 export(explain)
 export(grid.arrange)
+importFrom(Rcpp,sourceCpp)
 importFrom(ggplot2,aes_string)
 importFrom(ggplot2,autoplot)
 importFrom(ggplot2,coord_flip)
