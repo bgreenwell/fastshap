@@ -27,10 +27,11 @@ knitr::include_graphics("basic-algorithm.png")
 
 The problem with this approach is that it requires many calls to the scoring function *f()*. In particular, if we have *N* training records and *p* features, than this algorithm would require *2mnp* calls to *f()* in order to obtain approximate Shapley values for the entire training set. The approach we take is similar, but rather than computing each Monte Carlo estimate one at a time, we construct all the data required to compute the approximate Shapley values for a single feature at once and only use two calls to *f()*. Using this approach only requires *2mp* calls to *f()* to obtain approximate Shapley values for all *p* features for the entire training set. Hence, this approach will scale better to larger training sets. Also, the data instances **b<sub>1</sub>** and **b<sub>2</sub>** are built efficiently for each row in the training set (or subset thereof) all at once and stacked on top of each other in a data frame or matrix using C++ and logical subsetting. We can also parallelize the algorithm across *m* or *p*, depending on which one is more beneficial.
 
+**NOTE:** Although [fastshap](https://cran.r-project.org/package=fastshap) efficiently employs the sampling approach to computing approximate Shapley values, the package also supports exact approaches for certain classes of linear models gradient boosted decision trees (e.g., [xgboost](https://cran.r-project.org/package=xgboost)).
 
 ## Example
 
-The following example demonstrates the basic usage of the **fastshap** package.
+The following example demonstrates the basic usage of the [fastshap](https://cran.r-project.org/package=fastshap) package.
 
 ```{r compute-shap}
 # Load required packages
@@ -103,7 +104,7 @@ p2 <- autoplot(shap, type = "dependence", feature = "x.3", X = X, alpha = 0.5,
 gridExtra::grid.arrange(p1, p2, nrow = 1)
 ```
 
-By default, `explain()` computes approximate Shapley values for all rows in the training data. If you want Shapley values for new instances (or a subset of the training set), they must be supplied via the `newdata` argument. This functionality is demonstrated in the code chunk below. (**Note:** `explain()` is not yet optimized for this case; that is, computing only a handful of Shapley values for a few instances (in this case, at least for now, consider using the **iml** function `Shapley()`).)
+By default, `explain()` computes approximate Shapley values for all rows in the training data. If you want Shapley values for new instances (or a subset of the training set), they must be supplied via the `newdata` argument. This functionality is demonstrated in the code chunk below. (**NOTE:** `explain()` is not yet optimized for this case; that is, computing only a handful of Shapley values for a few instances (in this case, at least for now, consider using the [iml](https://cran.r-project.org/package=iml) function `Shapley()`).)
 
 ```{r shap-newdata, fig.width=6, fig.asp=0.618, out.width="70%"}
 # Explanations for first observation; technically `drop = FALSE` isn't necessary 
@@ -123,7 +124,7 @@ autoplot(expl, type = "contribution")
 
 ### Parallel execution
 
-With **fastshap** you can compute contributions for multiple features in parallel using any parallel backend supported by the **foreach** package. This is illustrated in the code chunk below. 
+With [fastshap](https://cran.r-project.org/package=fastshap) you can compute contributions for multiple features in parallel using any parallel backend supported by the [foreach](https://cran.r-project.org/package=foreach) package. This is illustrated in the code chunk below. 
 
 ```{r shap-parallel}
 # Load required packages
@@ -140,7 +141,7 @@ explain(rfo, X = X, pred_wrapper = pfun, nsim = 10, .parallel = TRUE)
 
 ## Comparison with TreeSHAP/TreeExplainer for XGBoost models
 
-You can compute the contributions of each feature for XGBoost models in an efficient way using the methods described in [(Lundberg 2017)](https://arxiv.org/abs/1705.07874). These are available through the `predict()` function for **xgboost** models; see `?xgboost::predict.xgb.Booster` for details. Below we compute the contributions for each feature using both methods and compare the results using a Shapley-based dependence plot on feature `x.3`, the results are quite surprising (__no parallel processing was used to obtain the **fastshap** results__). And remember, **fastshap** can be used with any prediction model in R. 
+You can compute the contributions of each feature for XGBoost models in an efficient way using the methods described in [(Lundberg 2017)](https://arxiv.org/abs/1705.07874). These are available through the `predict()` function for [xgboost](https://cran.r-project.org/package=xgboost) models; see `?xgboost::predict.xgb.Booster` for details. Below we compute the contributions for each feature using both methods and compare the results using a Shapley-based dependence plot on feature `x.3`, the results are quite surprising (__no parallel processing was used to obtain the [fastshap](https://cran.r-project.org/package=fastshap) results__). And remember, [fastshap](https://cran.r-project.org/package=fastshap) can be used with any prediction model in R. 
 
 ```{r fastshap-vs-treeshap, echo=FALSE}
 # Load required packages
@@ -225,7 +226,7 @@ plot(X[, 3], shap50[, 3, drop = TRUE], main = "fastshap (nsim = 50); ~ 15.600 se
 lines(lowess(X[, 3], shap50[, 3, drop = TRUE]), lwd = 2, col = "red2")
 ```
 
-We can also check that **fastshap** converges to the true Shapley values by comparing the results to TreeSHAP while varying the number of Monte Carlo repetitions:
+We can also check that [fastshap](https://cran.r-project.org/package=fastshap) converges to the true Shapley values by comparing the results to TreeSHAP while varying the number of Monte Carlo repetitions:
 
 ```{r fastshap-convergence, echo=FALSE, fig.width=7, fig.asp=0.9, out.width="70%"}
 # Plot results for a random sample of rows
@@ -244,6 +245,15 @@ for (i in sample(nrow(tree_shap), size = 4)) {
   legend("bottomright", lwd = c(2, 1), inset = 0.01, bty = "n", cex = 0.8,
          legend = c("Exact (TreeSHAP)", "Approximate (fastshap)"))
 }
+```
+
+Finally, starting with [fastshap](https://cran.r-project.org/package=fastshap) version 0.0.4, you can request exact Shapley values for [xgboost](https://cran.r-project.org/package=xgboost) and linear models (i.e., models fit using `stats::lm()` and `stats::glm()`). This is illustrated in the code chunk below where we use `fastshap::explain()` to compute exact explanations using TreeSHAP from the previously fitted [xgboost](https://cran.r-project.org/package=xgboost) model.
+
+```{r fastshap-exact, fig.width=7, fig.asp=0.9, out.width="70%"}
+system.time({
+  shap <- explain(bst, X = data.matrix(X), pred_wrapper = pfun, exact = TRUE)
+})
+autoplot(shap)
 ```
 
 
