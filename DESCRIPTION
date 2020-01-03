@@ -19,7 +19,7 @@ Imports:
 LinkingTo: 
     Rcpp,
     RcppArmadillo
-RoxygenNote: 7.0.0
+RoxygenNote: 7.0.2
 Suggests: 
     earth,
     mlbench,

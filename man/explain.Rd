@@ -2,15 +2,42 @@
 % Please edit documentation in R/explain.R
 \name{explain}
 \alias{explain}
+\alias{explain.default}
+\alias{explain.lm}
+\alias{explain.xgb.Booster}
 \title{Fast approximate Shapley values}
 \usage{
-explain(
+explain(object, ...)
+
+\method{explain}{default}(
+  object,
+  feature_names = NULL,
+  X = NULL,
+  nsim = 1,
+  pred_wrapper = NULL,
+  newdata = NULL,
+  ...
+)
+
+\method{explain}{lm}(
   object,
   feature_names = NULL,
   X,
   nsim = 1,
   pred_wrapper,
   newdata = NULL,
+  exact = FALSE,
+  ...
+)
+
+\method{explain}{xgb.Booster}(
+  object,
+  feature_names = NULL,
+  X = NULL,
+  nsim = 1,
+  pred_wrapper,
+  newdata = NULL,
+  exact = FALSE,
   ...
 )
 }
@@ -18,18 +45,23 @@ explain(
 \item{object}{A fitted model object (e.g., a 
 \code{\link[randomForest]{randomForest}} object).}
 
+\item{...}{Additional optional arguments to be passed onto
+\code{\link[plyr]{laply}}.}
+
 \item{feature_names}{Character string giving the names of the predictor
 variables (i.e., features) of interest. If \code{NULL} (default) they will be
 taken from the column names of \code{X}.}
 
 \item{X}{A matrix-like R object (e.g., a data frame or matrix) containing 
-ONLY the feature columns from the training data.}
+ONLY the feature columns from the training data. \strong{NOTE:} This argument
+is required whenever \code{exact = FALSE}.}
 
 \item{nsim}{The number of Monte Carlo repetitions to use for estimating each 
 Shapley value. Default is 1.}
 
 \item{pred_wrapper}{Prediction function that requires two arguments,
-\code{object} and \code{newdata}. The output of this function should be 
+\code{object} and \code{newdata}. \strong{NOTE:} This argument is required 
+whenever \code{exact = FALSE}.The output of this function should be 
 determined according to:
 
 \describe{
@@ -43,10 +75,13 @@ determined according to:
 \item{newdata}{A matrix-like R object (e.g., a data frame or matrix) 
 containing ONLY the feature columns for the observation(s) of interest. 
 Default is \code{NULL} which will produce approximate Shapley values for all 
-the rows in \code{X}.}
+the rows in \code{X} (i.e., the training data).}
 
-\item{...}{Additional optional arguments to be passed onto
-\code{\link[plyr]{laply}}.}
+\item{exact}{Logical indicating whether to compute exact Shapley values. 
+Currently only available for \code{\link[stats]{lm}} and 
+\code{\link[xgboost]{xgboost}} objects. Default is \code{FALSE}. Note 
+that setting \code{exact = TRUE} will return explanations for each of the 
+\code{\link[stats]{terms}} in an \code{\link[stats]{lm}} object.}
 }
 \value{
 A tibble with one column for each feature specified in 
@@ -58,6 +93,11 @@ row for each observation in \code{X}).
 \description{
 Compute fast (approximate) Shapley values for a set of features.
 }
+\note{
+Setting \code{exact = TRUE} with a linear model (i.e., an 
+\code{\link[stats]{lm}} or \code{\link[stats]{glm}} object) assumes that the
+input features are independent.
+}
 \examples{
 #
 # A projection pursuit regression (PPR) example
@@ -67,12 +107,16 @@ Compute fast (approximate) Shapley values for a set of features.
 data(mtcars)
 
 # Fit a projection pursuit regression model
-mtcars.ppr <- ppr(mpg ~ ., data = mtcars, nterms = 1)
+fit <- lm(mpg ~ ., data = mtcars)
 
 # Compute approximate Shapley values using 10 Monte Carlo simulations
 set.seed(101)  # for reproducibility
-shap <- explain(mtcars.ppr, X = subset(mtcars, select = -mpg), nsim = 10, 
+shap <- explain(fit, X = subset(mtcars, select = -mpg), nsim = 10, 
                 pred_wrapper = predict)
+shap
+
+# Compute exact Shapley (i.e., LinearSHAP) values
+shap <- explain(fit, exact = TRUE)
 shap
 
 # Shapley-based plots
