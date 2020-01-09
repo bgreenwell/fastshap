@@ -20,10 +20,12 @@ Imports:
 Suggests: 
     covr,
     earth,
+    htmltools,
     knitr,
     mlbench,
     reticulate,
     rmarkdown,
+    rstudioapi,
     tinytest
 LinkingTo: 
     Rcpp,

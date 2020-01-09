@@ -38,7 +38,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">fastshap</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.0.2.9000</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.0.3.9000</span>
       </span>
     </div>
 
@@ -68,6 +68,9 @@
     </li>
     <li>
       <a href="../articles/fastshap-vs-shap.html">fastshap-vs-shap</a>
+    </li>
+    <li>
+      <a href="../articles/forceplot.html">Visualizing Prediction Explanations with Force Plots</a>
     </li>
   </ul>
 </li>
@@ -111,11 +114,12 @@
 <p>The approach in this package is similar to what’s described in <strong>Algorithm 1</strong> in Strumbelj and Kononenko (2014) which is reproduced below:</p>
 <p><img src="basic-algorithm.png" width="468"></p>
 <p>The problem with this approach is that it requires many calls to the scoring function <em>f()</em>. In particular, if we have <em>N</em> training records and <em>p</em> features, than this algorithm would require <em>2mnp</em> calls to <em>f()</em> in order to obtain approximate Shapley values for the entire training set. The approach we take is similar, but rather than computing each Monte Carlo estimate one at a time, we construct all the data required to compute the approximate Shapley values for a single feature at once and only use two calls to <em>f()</em>. Using this approach only requires <em>2mp</em> calls to <em>f()</em> to obtain approximate Shapley values for all <em>p</em> features for the entire training set. Hence, this approach will scale better to larger training sets. Also, the data instances <strong>b<sub>1</sub></strong> and <strong>b<sub>2</sub></strong> are built efficiently for each row in the training set (or subset thereof) all at once and stacked on top of each other in a data frame or matrix using C++ and logical subsetting. We can also parallelize the algorithm across <em>m</em> or <em>p</em>, depending on which one is more beneficial.</p>
+<p><strong>NOTE:</strong> Although <a href="https://cran.r-project.org/package=fastshap">fastshap</a> efficiently employs the sampling approach to computing approximate Shapley values, the package also supports exact approaches for certain classes of linear models gradient boosted decision trees (e.g., <a href="https://cran.r-project.org/package=xgboost">xgboost</a>).</p>
 </div>
 <div id="example" class="section level2">
 <h2 class="hasAnchor">
 <a href="#example" class="anchor"></a>Example</h2>
-<p>The following example demonstrates the basic usage of the <strong>fastshap</strong> package.</p>
+<p>The following example demonstrates the basic usage of the <a href="https://cran.r-project.org/package=fastshap">fastshap</a> package.</p>
 <div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb1-1" data-line-number="1"><span class="co"># Load required packages</span></a>
 <a class="sourceLine" id="cb1-2" data-line-number="2"><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span>(fastshap)  <span class="co"># for fast (approximate) Shapley values</span></a>
 <a class="sourceLine" id="cb1-3" data-line-number="3"><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span>(mlbench)   <span class="co"># for Friedman 1 benchmark data set</span></a>
@@ -193,7 +197,7 @@
 <a class="sourceLine" id="cb4-5" data-line-number="5">gridExtra<span class="op">::</span><span class="kw"><a href="https://rdrr.io/pkg/gridExtra/man/arrangeGrob.html">grid.arrange</a></span>(p1, p2, <span class="dt">nrow =</span> <span class="dv">1</span>)</a>
 <a class="sourceLine" id="cb4-6" data-line-number="6"><span class="co">#&gt; `geom_smooth()` using method = 'gam' and formula 'y ~ s(x, bs = "cs")'</span></a></code></pre></div>
 <p><img src="fastshap_files/figure-html/shap-autoplot-1.png" width="70%"></p>
-<p>By default, <code><a href="../reference/explain.html">explain()</a></code> computes approximate Shapley values for all rows in the training data. If you want Shapley values for new instances (or a subset of the training set), they must be supplied via the <code>newdata</code> argument. This functionality is demonstrated in the code chunk below. (<strong>Note:</strong> <code><a href="../reference/explain.html">explain()</a></code> is not yet optimized for this case; that is, computing only a handful of Shapley values for a few instances (in this case, at least for now, consider using the <strong>iml</strong> function <code>Shapley()</code>).)</p>
+<p>By default, <code><a href="../reference/explain.html">explain()</a></code> computes approximate Shapley values for all rows in the training data. If you want Shapley values for new instances (or a subset of the training set), they must be supplied via the <code>newdata</code> argument. This functionality is demonstrated in the code chunk below. (<strong>NOTE:</strong> <code><a href="../reference/explain.html">explain()</a></code> is not yet optimized for this case; that is, computing only a handful of Shapley values for a few instances (in this case, at least for now, consider using the <a href="https://cran.r-project.org/package=iml">iml</a> function <code>Shapley()</code>).)</p>
 <div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb5-1" data-line-number="1"><span class="co"># Explanations for first observation; technically `drop = FALSE` isn't necessary </span></a>
 <a class="sourceLine" id="cb5-2" data-line-number="2"><span class="co"># here since X is a data frame</span></a>
 <a class="sourceLine" id="cb5-3" data-line-number="3"><span class="kw"><a href="../reference/explain.html">explain</a></span>(rfo, <span class="dt">X =</span> X, <span class="dt">pred_wrapper =</span> pfun, <span class="dt">nsim =</span> <span class="dv">10</span>,</a>
@@ -220,7 +224,7 @@
 <div id="parallel-execution" class="section level3">
 <h3 class="hasAnchor">
 <a href="#parallel-execution" class="anchor"></a>Parallel execution</h3>
-<p>With <strong>fastshap</strong> you can compute contributions for multiple features in parallel using any parallel backend supported by the <strong>foreach</strong> package. This is illustrated in the code chunk below.</p>
+<p>With <a href="https://cran.r-project.org/package=fastshap">fastshap</a> you can compute contributions for multiple features in parallel using any parallel backend supported by the <a href="https://cran.r-project.org/package=foreach">foreach</a> package. This is illustrated in the code chunk below.</p>
 <div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb6-1" data-line-number="1"><span class="co"># Load required packages</span></a>
 <a class="sourceLine" id="cb6-2" data-line-number="2"><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span>(doParallel)</a>
 <a class="sourceLine" id="cb6-3" data-line-number="3"></a>
@@ -249,10 +253,19 @@
 <div id="comparison-with-treeshaptreeexplainer-for-xgboost-models" class="section level2">
 <h2 class="hasAnchor">
 <a href="#comparison-with-treeshaptreeexplainer-for-xgboost-models" class="anchor"></a>Comparison with TreeSHAP/TreeExplainer for XGBoost models</h2>
-<p>You can compute the contributions of each feature for XGBoost models in an efficient way using the methods described in <a href="https://arxiv.org/abs/1705.07874">(Lundberg 2017)</a>. These are available through the <code><a href="https://rdrr.io/r/stats/predict.html">predict()</a></code> function for <strong>xgboost</strong> models; see <code><a href="https://rdrr.io/pkg/xgboost/man/predict.xgb.Booster.html">?xgboost::predict.xgb.Booster</a></code> for details. Below we compute the contributions for each feature using both methods and compare the results using a Shapley-based dependence plot on feature <code>x.3</code>, the results are quite surprising (<strong>no parallel processing was used to obtain the <strong>fastshap</strong> results</strong>). And remember, <strong>fastshap</strong> can be used with any prediction model in R.</p>
+<p>You can compute the contributions of each feature for XGBoost models in an efficient way using the methods described in <a href="https://arxiv.org/abs/1705.07874">(Lundberg 2017)</a>. These are available through the <code><a href="https://rdrr.io/r/stats/predict.html">predict()</a></code> function for <a href="https://cran.r-project.org/package=xgboost">xgboost</a> models; see <code><a href="https://rdrr.io/pkg/xgboost/man/predict.xgb.Booster.html">?xgboost::predict.xgb.Booster</a></code> for details. Below we compute the contributions for each feature using both methods and compare the results using a Shapley-based dependence plot on feature <code>x.3</code>, the results are quite surprising (<strong>no parallel processing was used to obtain the <a href="https://cran.r-project.org/package=fastshap">fastshap</a> results</strong>). And remember, <a href="https://cran.r-project.org/package=fastshap">fastshap</a> can be used with any prediction model in R.</p>
 <p><img src="fastshap_files/figure-html/fastshap-comparison-1.png" width="70%"></p>
-<p>We can also check that <strong>fastshap</strong> converges to the true Shapley values by comparing the results to TreeSHAP while varying the number of Monte Carlo repetitions:</p>
+<p>We can also check that <a href="https://cran.r-project.org/package=fastshap">fastshap</a> converges to the true Shapley values by comparing the results to TreeSHAP while varying the number of Monte Carlo repetitions:</p>
 <p><img src="fastshap_files/figure-html/fastshap-convergence-1.png" width="70%"></p>
+<p>Finally, starting with <a href="https://cran.r-project.org/package=fastshap">fastshap</a> version 0.0.4, you can request exact Shapley values for <a href="https://cran.r-project.org/package=xgboost">xgboost</a> and linear models (i.e., models fit using <code><a href="https://rdrr.io/r/stats/lm.html">stats::lm()</a></code> and <code><a href="https://rdrr.io/r/stats/glm.html">stats::glm()</a></code>). This is illustrated in the code chunk below where we use <code><a href="../reference/explain.html">fastshap::explain()</a></code> to compute exact explanations using TreeSHAP from the previously fitted <a href="https://cran.r-project.org/package=xgboost">xgboost</a> model.</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb7-1" data-line-number="1"><span class="kw"><a href="https://rdrr.io/r/base/system.time.html">system.time</a></span>({</a>
+<a class="sourceLine" id="cb7-2" data-line-number="2">  shap &lt;-<span class="st"> </span><span class="kw"><a href="../reference/explain.html">explain</a></span>(bst, <span class="dt">X =</span> <span class="kw"><a href="https://rdrr.io/r/base/data.matrix.html">data.matrix</a></span>(X), <span class="dt">pred_wrapper =</span> pfun, <span class="dt">exact =</span> <span class="ot">TRUE</span>)</a>
+<a class="sourceLine" id="cb7-3" data-line-number="3">})</a>
+<a class="sourceLine" id="cb7-4" data-line-number="4"><span class="co">#&gt; [15:32:10] </span><span class="al">WARNING</span><span class="co">: amalgamation/../src/objective/regression_obj.cu:152: reg:linear is now deprecated in favor of reg:squarederror.</span></a>
+<a class="sourceLine" id="cb7-5" data-line-number="5"><span class="co">#&gt;    user  system elapsed </span></a>
+<a class="sourceLine" id="cb7-6" data-line-number="6"><span class="co">#&gt;   0.280   0.009   0.304</span></a>
+<a class="sourceLine" id="cb7-7" data-line-number="7"><span class="kw"><a href="https://ggplot2.tidyverse.org/reference/autoplot.html">autoplot</a></span>(shap)</a></code></pre></div>
+<p><img src="fastshap_files/figure-html/fastshap-exact-1.png" width="70%"></p>
 </div>
 <div id="references" class="section level2">
 <h2 class="hasAnchor">

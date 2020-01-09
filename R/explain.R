@@ -87,10 +87,12 @@ explain_column <- function(object, X, column, pred_wrapper, newdata = NULL) {
 #' taken from the column names of \code{X}.
 #'
 #' @param X A matrix-like R object (e.g., a data frame or matrix) containing 
-#' ONLY the feature columns from the training data.
+#' ONLY the feature columns from the training data. \strong{NOTE:} This argument
+#' is required whenever \code{exact = FALSE}.
 #'
 #' @param pred_wrapper Prediction function that requires two arguments,
-#' \code{object} and \code{newdata}. The output of this function should be 
+#' \code{object} and \code{newdata}. \strong{NOTE:} This argument is required 
+#' whenever \code{exact = FALSE}.The output of this function should be 
 #' determined according to:
 #'
 #' \describe{
@@ -107,7 +109,13 @@ explain_column <- function(object, X, column, pred_wrapper, newdata = NULL) {
 #' @param newdata A matrix-like R object (e.g., a data frame or matrix) 
 #' containing ONLY the feature columns for the observation(s) of interest. 
 #' Default is \code{NULL} which will produce approximate Shapley values for all 
-#' the rows in \code{X}.
+#' the rows in \code{X} (i.e., the training data).
+#' 
+#' @param exact Logical indicating whether to compute exact Shapley values. 
+#' Currently only available for \code{\link[stats]{lm}} and 
+#' \code{\link[xgboost]{xgboost}} objects. Default is \code{FALSE}. Note 
+#' that setting \code{exact = TRUE} will return explanations for each of the 
+#' \code{\link[stats]{terms}} in an \code{\link[stats]{lm}} object.
 #' 
 #' @param ... Additional optional arguments to be passed onto
 #' \code{\link[plyr]{laply}}.
@@ -122,6 +130,11 @@ explain_column <- function(object, X, column, pred_wrapper, newdata = NULL) {
 #' sets) on the \strong{fastshap} GitHub repository: 
 #' \url{https://github.com/bgreenwell/fastshap}.
 #' 
+#' @note Setting \code{exact = TRUE} with a linear model (i.e., an 
+#' \code{\link[stats]{lm}} or \code{\link[stats]{glm}} object) assumes that the
+#' input features are independent.
+#' 
+#' @rdname explain
 #' 
 #' @export
 #' 
@@ -134,12 +147,16 @@ explain_column <- function(object, X, column, pred_wrapper, newdata = NULL) {
 #' data(mtcars)
 #' 
 #' # Fit a projection pursuit regression model
-#' mtcars.ppr <- ppr(mpg ~ ., data = mtcars, nterms = 1)
+#' fit <- lm(mpg ~ ., data = mtcars)
 #' 
 #' # Compute approximate Shapley values using 10 Monte Carlo simulations
 #' set.seed(101)  # for reproducibility
-#' shap <- explain(mtcars.ppr, X = subset(mtcars, select = -mpg), nsim = 10, 
+#' shap <- explain(fit, X = subset(mtcars, select = -mpg), nsim = 10, 
 #'                 pred_wrapper = predict)
+#' shap
+#' 
+#' # Compute exact Shapley (i.e., LinearSHAP) values
+#' shap <- explain(fit, exact = TRUE)
 #' shap
 #' 
 #' # Shapley-based plots
@@ -147,8 +164,16 @@ explain_column <- function(object, X, column, pred_wrapper, newdata = NULL) {
 #' autoplot(shap)  # Shapley-based importance plot
 #' autoplot(shap, type = "dependence", feature = "wt", X = mtcars)
 #' autoplot(shap, type = "contribution", row_num = 1)  # explain first row of X
-explain <- function(object, feature_names = NULL, X, nsim = 1, pred_wrapper,
-                     newdata = NULL, ...) {
+explain <- function(object, ...) {
+  UseMethod("explain")
+} 
+
+
+#' @rdname explain
+#' 
+#' @export
+explain.default <- function(object, feature_names = NULL, X = NULL, nsim = 1, 
+                            pred_wrapper = NULL, newdata = NULL, ...) {
   
   # TODO:
   #
@@ -160,8 +185,19 @@ explain <- function(object, feature_names = NULL, X, nsim = 1, pred_wrapper,
   #      https://github.com/slundberg/ShapleyValues.jl for an implementation in
   #      Julia.
   
+  # Deal with NULL arguments
   if (is.null(feature_names)) {
     feature_names = colnames(X)
+  }
+  if (is.null(X)) {
+    stop("Training features required for approximate Shapley values. Please ",
+         "supply them via the `X` argument; see `?fastshap::explain` for ",
+         "details.", call. = FALSE)
+  }
+  if (is.null(X)) {
+    stop("Prediction function required for approximate Shapley values. Please ",
+         "supply one via the `pred_wrapper` argument; see ",
+         "`?fastshap::explain` for details.", call. = FALSE)
   }
   res <- plyr::laply(feature_names, .fun = function(x) {
     reps <- replicate(nsim, {  # replace later with vapply()
@@ -183,4 +219,53 @@ explain <- function(object, feature_names = NULL, X, nsim = 1, pred_wrapper,
   names(res) <- feature_names
   class(res) <- c(class(res), "explain")
   res
+}
+
+
+#' @rdname explain
+#' 
+#' @export
+explain.lm <- function(object, feature_names = NULL, X, nsim = 1, 
+                       pred_wrapper, newdata = NULL, exact = FALSE, ...) {
+  if (isTRUE(exact)) {  # use LinearSHAP
+    res <- if (is.null(newdata)) {
+      stats::predict(object, type = "terms", ...)
+    } else {
+      stats::predict(object, newdata = newdata, type = "terms", ...)
+    }
+    baseline <- attr(res, which = "constant")  # mean response for all training data
+    res <- tibble::as_tibble(res)
+    attr(res, which = "baseline") <- baseline
+    class(res) <- c(class(res), "explain")
+    res
+  } else {
+    explain.default(object, feature_names = feature_names, X = X, nsim = nsim,
+                    pred_wrapper = pred_wrapper, newdata = newdata, ...)
+  }
+}
+
+
+#' @rdname explain
+#' 
+#' @export
+explain.xgb.Booster <- function(object, feature_names = NULL, X = NULL, nsim = 1, 
+                                pred_wrapper, newdata = NULL, exact = FALSE, 
+                                ...) {
+  if (isTRUE(exact)) {  # use TreeSHAP
+    if (is.null(X) && is.null(newdata)) {
+      stop("Must supply `X` or `newdata` argument (but not both).", 
+           call. = FALSE)
+    }
+    X <- if (is.null(X)) newdata else X
+    res <- stats::predict(object, newdata = X, predcontrib = TRUE, 
+                          approxcontrib = FALSE, ...)
+    res <- tibble::as_tibble(res)
+    attr(res, which = "baseline") <- res[["BIAS"]]
+    res[["BIAS"]] <- NULL
+    class(res) <- c(class(res), "explain")
+    res
+  } else {
+    explain.default(object, feature_names = feature_names, X = X, nsim = nsim,
+                    pred_wrapper = pred_wrapper, newdata = newdata, ...)
+  }
 }

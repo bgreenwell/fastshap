@@ -1,16 +1,18 @@
 ---
-title: "forceplot"
+title: "Visualizing Prediction Explanations with Force Plots"
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{forceplot}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
+bibliography: bibliography.bib
 ---
 
 ```{r, include = FALSE}
 knitr::opts_chunk$set(
   collapse = TRUE,
-  comment = "#>"
+  comment = "#>",
+  cache = TRUE
 )
 ```
 
@@ -33,3 +35,29 @@ bst <- xgboost(X, label = boston$cmedv, nrounds = 338, max_depth = 3, eta = 0.1,
 # Compute exact explanations for all rows
 ex <- explain(bst, exact = TRUE, X = X)
 ```
+
+If you have the appropriate dependencies installed (i.e., [reticulate](https://cran.r-project.org/package=reticulate) and [shap](https://github.com/slundberg/shap)) then you can utilize [shap](https://github.com/slundberg/shap))'s *additive force layout* [@lundberg2018explainable] to visualize [fastshap](https://github.com/slundberg/fastshap)'s prediction explanations; see `?fastshap::force_plot` for details.
+
+```{r force-plot}
+# Visualize first explanation
+force_plot(object = ex[1L, ], feature_values = X[1L, ], display = "html")  
+```
+
+The above plot shows how each feature contributes to push the model output from the baseline prediction (i.e., the average predicted outcome over the entire training set `X`) to the corresponding model output (in this case, the value of `preds[1L]`). Features pushing the prediction higher are shown in red, while those pushing the prediction lower are shown in blue.
+
+If you don't specify `exact = TRUE` in the call to `fastshap::explain()`, then you should specify the `baseline` and `prediction` arguments to `fastshap::force_plot()` in order for the plot to render properly.
+
+```{r force-plot-optional-args}
+# Compute approximate explanations for all rows
+set.seed(1126)  # for reproducibility
+ex2 <- explain(bst, X = X, pred_wrapper = predict, nsim = 100, .progress = "none")
+preds <- predict(bst, newdata = X)  # predictions for all training observations
+
+# Visualize first explanation
+force_plot(object = ex2[1L, ], feature_values = X[1L, ], prediction = preds[1L], 
+           baseline = mean(preds), display = "html")  
+```
+
+It should be noted that only exact Shapley explanations (i.e., calling `fastshap::explain()` with `exact = TRUE`) satisfy the so-called *efficiency property* where the sum of the feature contributions for *x* must add up to the difference between the corresponding prediction for *x* and the average of all the training predictions (i.e., the baseline). Hence, for approximate Shapley values, this function uses the optionally supplied values for `prediction` and `baseline` to internally scale the feature contributions to satisfy this property before constructing the plot. 
+
+# References

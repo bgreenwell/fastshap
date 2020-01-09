@@ -1,10 +1,24 @@
+# fastshap 0.0.3.9000
+
+## New features
+
+* New (experimental) function for constructing [force plots](https://github.com/slundberg/shap) [(#7)](https://github.com/bgreenwell/fastshap/issues/7) to help visualize prediction explanations. The function is also a generic which means additional methods can be added.
+
+* Function `explain()` became a generic and gained a new logical argument, `exact`, for computing exact Shapley contributions for linear models (LinearSHAP, which assumes independent features) and boosted dections trees (TreeSHAP). Currently, only `"lm"`, `"glm"`, and `"xgb.Booster"` objects are supported [(#2)](https://github.com/bgreenwell/fastshap/issues/2)[(#3)](https://github.com/bgreenwell/fastshap/issues/3).
+
+
+## Minor changes
+
+* Minor improvements to package documentation.
+
+
 # fastshap 0.0.3
 
 ## Minor changes
 
 * Tweak imports (in particular, use `@importFrom Rcpp sourceCpp` tag).
 
-* Fixed a typo in the package description; Shapley was misspelled as Shapely (fixed by Dirk Eddelbuettel in [#1](https://github.com/bgreenwell/fastshap/pull/1)).
+* Fixed a typo in the package description; Shapley was misspelled as Shapely (fixed by Dirk Eddelbuettel in [(#1)](https://github.com/bgreenwell/fastshap/pull/1)).
 
 
 # fastshap 0.0.2
