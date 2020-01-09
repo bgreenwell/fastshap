@@ -135,7 +135,6 @@ force_plot.explain <- function(object, prediction = NULL, baseline = NULL,
     ...
   )
 
-
   # Display results
   tfile <- tempfile(fileext = ".html")
   shap$save_html(tfile, plot_html = fp)
@@ -160,5 +159,4 @@ force_plot.explain <- function(object, prediction = NULL, baseline = NULL,
     htmltools::includeHTML(tfile)
   }
 
-  
 }
