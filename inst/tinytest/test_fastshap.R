@@ -30,6 +30,11 @@ pfun <- function(object, newdata) {
 set.seed(102)  # for reproducibility
 shap_all <- explain(mars, X = X, pred_wrapper = pfun, nsim = 1)
 
+# Check argument types
+expect_error(
+  explain(mars, X = X, pred_wrapper = pfun, newdata = data.matrix(X[1L, ]))
+)
+
 # Check dimensions
 expect_identical(
   current = dim(shap_all),
@@ -97,6 +102,9 @@ p1 <- autoplot(shap_all)
 p2 <- autoplot(shap_all, num_features = 3)
 
 # Expectations
+expect_warning(
+  autoplot(shap_all, num_features = 0)
+)
 expect_identical(
   current = class(p1),
   target = c("gg", "ggplot")
@@ -122,6 +130,9 @@ p3 <- autoplot(shap_all, type = "dependence", feature = "x.1", X = X,
 p4 <- autoplot(shap_all, type = "dependence", X = X)
 
 # Expectations
+expect_error(  # missing `X`
+  autoplot(shap_all, type = "dependence")
+)
 expect_identical(
   current = class(p3),
   target = c("gg", "ggplot")

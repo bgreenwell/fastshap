@@ -1,0 +1,35 @@
+---
+title: "forceplot"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{forceplot}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup}
+# Load required packages
+library(fastshap)
+library(xgboost)
+
+# Load the Boston housing data
+# install.packages("pdp)
+data(boston, package = "pdp")
+X <- data.matrix(subset(boston, select = -cmedv))  # matrix of feature values
+
+# Fit a gradient boosted regression tree ensemble; hyperparameters were tuned 
+# using `autoxgb::autoxgb()`
+set.seed(859)  # for reproducibility
+bst <- xgboost(X, label = boston$cmedv, nrounds = 338, max_depth = 3, eta = 0.1,
+               verbose = 0)
+
+# Compute exact explanations for all rows
+ex <- explain(bst, exact = TRUE, X = X)
+```
