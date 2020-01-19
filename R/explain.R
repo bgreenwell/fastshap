@@ -111,6 +111,11 @@ explain_column <- function(object, X, column, pred_wrapper, newdata = NULL) {
 #' Default is \code{NULL} which will produce approximate Shapley values for all 
 #' the rows in \code{X} (i.e., the training data).
 #' 
+#' @param adjust Logical indicating whether or not to adjust the sum of the 
+#' estimated Shapley values to satisfy the \emph{efficiency property}; that is,
+#' to equal the difference between the model's prediction for that sample and 
+#' the average prediction over all the training data (i.e., \code{X}).
+#' 
 #' @param exact Logical indicating whether to compute exact Shapley values. 
 #' Currently only available for \code{\link[stats]{lm}} and 
 #' \code{\link[xgboost]{xgboost}} objects. Default is \code{FALSE}. Note 
@@ -132,7 +137,9 @@ explain_column <- function(object, X, column, pred_wrapper, newdata = NULL) {
 #' 
 #' @note Setting \code{exact = TRUE} with a linear model (i.e., an 
 #' \code{\link[stats]{lm}} or \code{\link[stats]{glm}} object) assumes that the
-#' input features are independent.
+#' input features are independent. Also, setting \code{adjust = TRUE} is 
+#' experimental and we follow the same approach as in
+#' \href{https://github.com/slundberg/shap}{shap}.
 #' 
 #' @rdname explain
 #' 
@@ -173,17 +180,8 @@ explain <- function(object, ...) {
 #' 
 #' @export
 explain.default <- function(object, feature_names = NULL, X = NULL, nsim = 1, 
-                            pred_wrapper = NULL, newdata = NULL, ...) {
-  
-  # TODO:
-  #
-  #   1. Correct sum of SHAP values to equal the predicted output of the model
-  #      minus the average prediction?
-  #
-  #   2. Feature grouping. For assessing the importance of groups of features
-  #      without assuming independence between them; see
-  #      https://github.com/slundberg/ShapleyValues.jl for an implementation in
-  #      Julia.
+                            pred_wrapper = NULL, newdata = NULL, adjust = FALSE,
+                            ...) {
   
   # Deal with NULL arguments
   if (is.null(feature_names)) {
@@ -199,26 +197,92 @@ explain.default <- function(object, feature_names = NULL, X = NULL, nsim = 1,
          "supply one via the `pred_wrapper` argument; see ",
          "`?fastshap::explain` for details.", call. = FALSE)
   }
-  res <- plyr::laply(feature_names, .fun = function(x) {
-    reps <- replicate(nsim, {  # replace later with vapply()
-      explain_column(object, X = X, column = x, pred_wrapper = pred_wrapper,
-                     newdata = newdata)  # numeric(nrow(X))
-    })
-    res <- if (is.matrix(reps)) {
-      # apply(reps, MARGIN = 1, FUN = mean)
-      rowMeans(reps)
-    } else {
-      mean.default(reps)
+  
+  if (isTRUE(adjust)) {  # compute variances and adjust the sum
+    
+    # Need nsim > 1 to compute variances for adjustment
+    if (nsim < 2) {
+      stop("Need `nsim > 1` whenever `adjust = TRUE`.", call. = FALSE)
     }
-  }, ...)
+    
+    # Check for dependencies
+    if (!requireNamespace("abind", quietly = TRUE)) {
+      stop("Package \"abind\" needed for this function to work. Please ",
+           "install it.", call. = FALSE)
+    }
+    if (!requireNamespace("matrixStats", quietly = TRUE)) {
+      stop("Package \"matrixStats\" needed for this function to work. Please ",
+           "install it.", call. = FALSE)
+    }
+    
+    # Compute approximate Shapley values and variances
+    res <- plyr::laply(feature_names, .fun = function(x) {
+      reps <- replicate(nsim, {  # replace later with vapply()
+        explain_column(object, X = X, column = x, pred_wrapper = pred_wrapper,
+                       newdata = newdata)  # numeric(nrow(X))
+      })
+      if (is.matrix(reps)) {
+        abind::abind(rowMeans(reps), matrixStats::rowVars(reps), along = 2)
+      } else {
+        cbind(mean.default(reps), stats::var(reps))
+      }
+    }, ...)
+    
+    # Compute average training prediction (fnull) and predictions associated
+    # with each explanation (fx)
+    if (is.null(newdata)) {  # explain all training rows
+      fnull <- mean(fx <- pred_wrapper(object, newdata = X))
+    } else {  # explain new observations
+      fx <- pred_wrapper(object, newdata = newdata)
+      fnull <- mean(pred_wrapper(object, newdata = X))
+    }
+    
+    # Adjust sum of approximate Shapley values
+    if (length(dim(res)) == 3L) {  # multiple explanations
+      for (i in seq_len(dim(res)[2L])) {
+        err <- fx[i] - sum(res[, i, 1L]) - fnull
+        v <- (res[, i, 2L] / max(res[, i, 2L])) * 1e6
+        adj <- err * (v - (v * sum(v)) / (1 + sum(v)))
+        res[, i, 1L] <- res[, i, 1L] + adj
+      }
+      res <- res[, , 1L]
+    } else {
+      err <- fx - sum(res[, 1L]) - fnull
+      v <- (res[, 2L] / max(res[, 2L])) * 1e6
+      adj <- err * (v - (v * sum(v)) / (1 + sum(v)))
+      res[, 1L] <- res[, 1L] + adj
+      res <- res[, 1L]
+    }
+    
+  } else {  # don't adjust
+    
+    # Compute approximate Shapley values
+    res <- plyr::laply(feature_names, .fun = function(x) {
+      reps <- replicate(nsim, {  # replace later with vapply()
+        explain_column(object, X = X, column = x, pred_wrapper = pred_wrapper,
+                       newdata = newdata)  # numeric(nrow(X))
+      })
+      if (is.matrix(reps)) {
+        rowMeans(reps)
+      } else {
+        mean.default(reps)
+      }
+    }, ...)
+    
+  }
+  
+  # Reformat into a tibble and fix column names
   res <- if (length(feature_names) == 1L) {
     tibble::enframe(res, name = NULL)
   } else {
     res <- tibble::as_tibble(t(res))
   }
   names(res) <- feature_names
+  
+  # Add extra `"explain"` class for printing, plotting, etc.
   class(res) <- c(class(res), "explain")
   res
+
 }
 
 

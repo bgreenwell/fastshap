@@ -16,6 +16,7 @@ explain(object, ...)
   nsim = 1,
   pred_wrapper = NULL,
   newdata = NULL,
+  adjust = FALSE,
   ...
 )
 
@@ -77,6 +78,11 @@ containing ONLY the feature columns for the observation(s) of interest.
 Default is \code{NULL} which will produce approximate Shapley values for all 
 the rows in \code{X} (i.e., the training data).}
 
+\item{adjust}{Logical indicating whether or not to adjust the sum of the 
+estimated Shapley values to satisfy the \emph{efficiency property}; that is,
+to equal the difference between the model's prediction for that sample and 
+the average prediction over all the training data (i.e., \code{X}).}
+
 \item{exact}{Logical indicating whether to compute exact Shapley values. 
 Currently only available for \code{\link[stats]{lm}} and 
 \code{\link[xgboost]{xgboost}} objects. Default is \code{FALSE}. Note 
@@ -96,7 +102,9 @@ Compute fast (approximate) Shapley values for a set of features.
 \note{
 Setting \code{exact = TRUE} with a linear model (i.e., an 
 \code{\link[stats]{lm}} or \code{\link[stats]{glm}} object) assumes that the
-input features are independent.
+input features are independent. Also, setting \code{adjust = TRUE} is 
+experimental and we follow the same approach as in
+\href{https://github.com/slundberg/shap}{shap}.
 }
 \examples{
 #

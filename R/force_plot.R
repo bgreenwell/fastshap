@@ -126,6 +126,7 @@ force_plot.explain <- function(object, prediction = NULL, baseline = NULL,
   
   # Import shap module and construct HTML for plot
   shap <- reticulate::import("shap")
+  # shap$initjs()
   fp <- shap$force_plot(
     base_value = if (is.null(baseline)) 0 else baseline, 
     shap_values = data.matrix(object),  # coerce to matrix

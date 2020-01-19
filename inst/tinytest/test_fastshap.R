@@ -1,7 +1,16 @@
+# Exits
+if (!requireNamespace("earth", quietly = TRUE)) {
+  exit_file("Package earth missing")
+}
+if (!requireNamespace("ggplot2", quietly = TRUE)) {
+  exit_file("Package ggplot2 missing")
+}
+
 # Load required packages
-library(earth)    # for fitting MARS models
-library(ggplot2)  # for autoplot() generic
-library(mlbench)  # for ML benchmark data sets
+suppressMessages({
+  # library(earth)
+  library(ggplot2)
+})
 
 # Check C++ function
 num_rows <- 100000
@@ -14,12 +23,11 @@ expect_true(
 )
 
 # Generate training data from the Friedman 1 benchmark problem
-set.seed(101)  # for reproducibility
-trn <- as.data.frame(mlbench.friedman1(500))
+trn <- gen_friedman(500, seed = 101)
 X <- subset(trn, select = -y)
 
 # Fit a MARS model to the simulated Friedman benchmark data
-mars <- earth(y ~ ., data = trn, degree = 2)
+mars <- earth::earth(y ~ ., data = trn, degree = 2)
 
 # Prediction wrapper
 pfun <- function(object, newdata) {
@@ -74,7 +82,7 @@ expect_identical(
 
 # Check approximate Shapley values for a single feature
 set.seed(104)
-shap_single <- explain(mars, feature_names = "x.3", X = X, pred_wrapper = pfun)
+shap_single <- explain(mars, feature_names = "x3", X = X, pred_wrapper = pfun)
 
 # Check dimensions
 expect_identical(
@@ -85,7 +93,7 @@ expect_identical(
 # Check column names
 expect_identical(
   current = names(shap_single),
-  target = "x.3"
+  target = "x3"
 )
 
 # Check class 
@@ -125,8 +133,8 @@ expect_identical(
 # Check Shapley-based dependence plot -----------------------------------------
 
 # Construct Shapley-based idependence plots
-p3 <- autoplot(shap_all, type = "dependence", feature = "x.1", X = X, 
-               color_by = "x.2", smooth = TRUE)
+p3 <- autoplot(shap_all, type = "dependence", feature = "x1", X = X, 
+               color_by = "x2", smooth = TRUE)
 p4 <- autoplot(shap_all, type = "dependence", X = X)
 
 # Expectations
@@ -151,7 +159,7 @@ expect_identical(
 )
 expect_identical(
   current = p4$data$x,
-  target = X$x.1
+  target = X$x1
 )
 
 # Check Shapley-based contribution plot ---------------------------------------

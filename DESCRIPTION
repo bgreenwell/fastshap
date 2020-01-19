@@ -18,11 +18,12 @@ Imports:
     Rcpp (>= 1.0.1), 
     tibble
 Suggests: 
+    abind,
     covr,
     earth,
     htmltools,
     knitr,
-    mlbench,
+    matrixStats,
     reticulate,
     rmarkdown,
     rstudioapi,

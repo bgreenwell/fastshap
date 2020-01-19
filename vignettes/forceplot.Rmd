@@ -36,7 +36,7 @@ bst <- xgboost(X, label = boston$cmedv, nrounds = 338, max_depth = 3, eta = 0.1,
 ex <- explain(bst, exact = TRUE, X = X)
 ```
 
-If you have the appropriate dependencies installed (i.e., [reticulate](https://cran.r-project.org/package=reticulate) and [shap](https://github.com/slundberg/shap)) then you can utilize [shap](https://github.com/slundberg/shap))'s *additive force layout* [@lundberg2018explainable] to visualize [fastshap](https://github.com/slundberg/fastshap)'s prediction explanations; see `?fastshap::force_plot` for details.
+If you have the appropriate dependencies installed (i.e., [reticulate](https://cran.r-project.org/package=reticulate) and [shap](https://github.com/slundberg/shap)) then you can utilize [shap](https://github.com/slundberg/shap)'s *additive force layout* [@lundberg2018explainable] to visualize [fastshap](https://github.com/slundberg/fastshap)'s prediction explanations; see `?fastshap::force_plot` for details.
 
 ```{r force-plot}
 # Visualize first explanation

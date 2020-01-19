@@ -2,6 +2,9 @@
 
 ## New features
 
+* The default method of `explain()` gained a new logical argument called `adjust`. When `adjust = TRUE` (and `nsim > 1`), the algorithm will adjust the sum of the estimated Shapley values to satisfy the *efficiency property*; that is, to equal the difference between the model's prediction for that sample and the average prediction over all the training data. This option is experimental and we follow the same approach as in
+[shap](https://github.com/slundberg/shap) [(#6)](https://github.com/bgreenwell/fastshap/issues/6).
+
 * New (experimental) function for constructing [force plots](https://github.com/slundberg/shap) [(#7)](https://github.com/bgreenwell/fastshap/issues/7) to help visualize prediction explanations. The function is also a generic which means additional methods can be added.
 
 * Function `explain()` became a generic and gained a new logical argument, `exact`, for computing exact Shapley contributions for linear models (LinearSHAP, which assumes independent features) and boosted dections trees (TreeSHAP). Currently, only `"lm"`, `"glm"`, and `"xgb.Booster"` objects are supported [(#2)](https://github.com/bgreenwell/fastshap/issues/2)[(#3)](https://github.com/bgreenwell/fastshap/issues/3).
