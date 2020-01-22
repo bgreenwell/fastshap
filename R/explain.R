@@ -231,7 +231,7 @@ explain.default <- function(object, feature_names = NULL, X = NULL, nsim = 1,
          "supply them via the `X` argument; see `?fastshap::explain` for ",
          "details.", call. = FALSE)
   }
-  if (is.null(X)) {
+  if (is.null(pred_wrapper)) {
     stop("Prediction function required for approximate Shapley values. Please ",
          "supply one via the `pred_wrapper` argument; see ",
          "`?fastshap::explain` for details.", call. = FALSE)
