@@ -22,12 +22,12 @@ explain_column <- function(object, X, column, pred_wrapper, newdata = NULL) {
   p <- ncol(X)  # number of features
   
   # Generate original and sampled feature instances
-  if (is.null(newdata)) {
-    W <- X[sample(n), ]  # shuffle rows
+  if (is.null(newdata)) {  # FIXME: Should sampling be done with replacement?
+    W <- X[sample(n, replace = TRUE), ]  
     O <- genOMat(n, p)
   } else {
-    W <- X[sample(n, size = nrow(newdata)), , drop = FALSE]  # randomly sample rows from full X
-    O <- genOMat(n, p)[sample(n, size = nrow(newdata)), , drop = FALSE]
+    W <- X[sample(n, size = nrow(newdata), replace = TRUE), , drop = FALSE]  # randomly sample rows from full X
+    O <- genOMat(n, p)[sample(n, size = nrow(newdata), replace = TRUE), , drop = FALSE]
     X <- newdata  # observations of interest
   }
   
@@ -67,6 +67,20 @@ explain_column <- function(object, X, column, pred_wrapper, newdata = NULL) {
     B[[2L]][!O] <- W[!O]
     
   }
+  
+  # Make sure each component of `B` has the same column classes as `X`
+  B[[1L]] <- copy_classes(B[[1L]], y = X)
+  B[[2L]] <- copy_classes(B[[2L]], y = X)
+  
+  # print(head(O))
+  # cat("\nColumn classes for X\n")
+  # print(sapply(X, class))
+  # cat("\nColumn classes for W\n")
+  # print(sapply(W, class))
+  # cat("\nColumn classes for B1\n")
+  # print(sapply(B[[1L]], class))
+  # cat("\nColumn classes for B2\n")
+  # print(sapply(B[[2L]], class))
   
   # Return differences in predictions
   pred_wrapper(object, newdata = B[[1L]]) - 
@@ -183,6 +197,31 @@ explain.default <- function(object, feature_names = NULL, X = NULL, nsim = 1,
                             pred_wrapper = NULL, newdata = NULL, adjust = FALSE,
                             ...) {
   
+  # Experimental patch for more efficiently computing single-row explanations
+  if (!is.null(newdata)) {
+    if (nrow(newdata) == 1L && nsim > 1) {
+      newdata <- newdata[rep(1L, times = nsim), ]  # replicate row `nsim` times
+      res <- explain.default(object, feature_names = feature_names, X = X, 
+                             nsim = 1L, pred_wrapper = pred_wrapper, 
+                             newdata = newdata, adjust = FALSE, ...)
+      phi_avg <- colMeans(res)
+      if (isTRUE(adjust)) {
+        # Compute average training prediction (fnull) and predictions associated
+        # with each explanation (fx)
+        fx <- pred_wrapper(object, newdata = newdata[1L, ])
+        fnull <- mean(pred_wrapper(object, newdata = X))
+        phi_var <- apply(res, MARGIN = 2, FUN = stats::var)
+        err <- fx - sum(phi_avg) - fnull
+        v <- (phi_var / max(phi_var)) * 1e6
+        adj <- err * (v - (v * sum(v)) / (1 + sum(v)))
+        phi_avg <- phi_avg + adj
+      }
+      res <- tibble::as_tibble(t(phi_avg))
+      class(res) <- c(class(res), "explain")
+      return(res)
+    }
+  }
+  
   # Deal with NULL arguments
   if (is.null(feature_names)) {
     feature_names = colnames(X)
@@ -232,7 +271,7 @@ explain.default <- function(object, feature_names = NULL, X = NULL, nsim = 1,
     # with each explanation (fx)
     if (is.null(newdata)) {  # explain all training rows
       fnull <- mean(fx <- pred_wrapper(object, newdata = X))
-    } else {  # explain new observations
+    } else {  # explain new observation(s)
       fx <- pred_wrapper(object, newdata = newdata)
       fnull <- mean(pred_wrapper(object, newdata = X))
     }

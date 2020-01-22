@@ -54,7 +54,7 @@ shap3 <- fastshap::explain(  # explain a few rows
 )
 
 # Expectations
-tol <- 1e-06
+tol <- 1e-05
 fnull <- mean(fx <- pfun(mars, newdata = X))
 diffs <- c(
   max(rowSums(shap1) - (fx - fnull)), 

@@ -1,5 +1,14 @@
 # fastshap 0.0.3.9000
 
+## Enhancements
+
+* Function `explain()` should now be MUCH faster at explaing a single observation, especially when `nsim` is relatively large (e.g., `nsim >= 1000`).
+
+## Bug fixes
+
+* Fixed a MAJOR bug that occured whenever explaining data sets with non-numeric
+features.
+
 ## New features
 
 * The default method of `explain()` gained a new logical argument called `adjust`. When `adjust = TRUE` (and `nsim > 1`), the algorithm will adjust the sum of the estimated Shapley values to satisfy the *efficiency property*; that is, to equal the difference between the model's prediction for that sample and the average prediction over all the training data. This option is experimental and we follow the same approach as in
@@ -9,11 +18,9 @@
 
 * Function `explain()` became a generic and gained a new logical argument, `exact`, for computing exact Shapley contributions for linear models (LinearSHAP, which assumes independent features) and boosted dections trees (TreeSHAP). Currently, only `"lm"`, `"glm"`, and `"xgb.Booster"` objects are supported [(#2)](https://github.com/bgreenwell/fastshap/issues/2)[(#3)](https://github.com/bgreenwell/fastshap/issues/3).
 
-
 ## Minor changes
 
 * Minor improvements to package documentation.
-
 
 # fastshap 0.0.3
 
@@ -22,7 +29,6 @@
 * Tweak imports (in particular, use `@importFrom Rcpp sourceCpp` tag).
 
 * Fixed a typo in the package description; Shapley was misspelled as Shapely (fixed by Dirk Eddelbuettel in [(#1)](https://github.com/bgreenwell/fastshap/pull/1)).
-
 
 # fastshap 0.0.2
 
@@ -37,14 +43,12 @@
     - `smooth`, `smooth_color`, `smooth_linetype`, `smooth_size`, and `smooth_alpha` for adding/controlling a smoother in dependence plots (i.e., whenever `type = "dependence"`).
     
     - `...` which can be used to pass on additional parameters to `geom_col()` (when `type = "importance"`) or `geom_point()` (when `type = "dependence"`).
-    
 
 ## Breaking changes
 
 * Function `fastshap()` was renamed to `explain()`.
 
 * Functions `explain()` and `explain_column()` (not currently exported) now throw an error whenever the inputs `X` and `newdata` do not inherit from the same class.
-
 
 ## Bug fixes
 
@@ -53,7 +57,6 @@
 * Fixed a bug in the C++ source that caused doubles to be incorrectly converted to integers.
 
 * Fixed a bug in `autoplot.fastshap()` when `type = "importance"`; in particular, the function incorrectly used `sum(|Shapley value|)` instead of `mean(|Shapley value|)`.
-
 
 # fastshap 0.0.1
 
