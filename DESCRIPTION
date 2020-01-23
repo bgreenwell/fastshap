@@ -27,7 +27,8 @@ Suggests:
     reticulate,
     rmarkdown,
     rstudioapi,
-    tinytest
+    tinytest,
+    titanic
 LinkingTo: 
     Rcpp,
     RcppArmadillo

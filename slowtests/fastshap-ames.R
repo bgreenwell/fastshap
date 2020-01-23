@@ -1,6 +1,6 @@
 # Load required packages
 library(doParallel)
-library(fastshap)
+# library(fastshap)
 library(pdp)
 library(ranger)
 library(vip)
@@ -21,16 +21,21 @@ pfun <- function(object, newdata) {
 # Compute approximate Shapley values using 10 Monte Carlo simulations
 set.seed(102)  # for reproducibility
 time1 <- system.time(
-  shap1 <- fastshap(rfo, X = X, pred_wrapper = pfun, nsim = 10, 
-                    .progress = "text")
+  shap1 <- fastshap::explain(rfo, X = X, pred_wrapper = pfun, nsim = 10, 
+                             .progress = "text")
 )
+# > time1
+#     user   system  elapsed 
+# 1001.506   17.423  373.066 
+#
+# Version 0.0.3 reported 347.988 seconds
 
 # Parallel version
 registerDoParallel(cores = parallel::detectCores())
 set.seed(102)  # for reproducibility
 time2 <- system.time(
-  shap2 <- fastshap(rfo, X = X, pred_wrapper = pfun, nsim = 10,
-                    .parallel = TRUE)
+  shap2 <- fastshap::explain(rfo, X = X, pred_wrapper = pfun, nsim = 10,
+                             .parallel = TRUE)
 )
 
 library(ggplot2)

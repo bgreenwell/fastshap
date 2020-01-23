@@ -1,21 +1,6 @@
 {
     "debugBreakpointsState" : {
         "breakpoints" : [
-            {
-                "editor_line_number" : 33,
-                "editor_state" : 1,
-                "function_name" : "toplevel",
-                "function_steps" : "",
-                "id" : 3,
-                "is_package_breakpoint" : false,
-                "is_pending_debug_completion" : false,
-                "line_number" : 33,
-                "needs_updated_steps" : false,
-                "package_name" : "",
-                "path" : "~/Desktop/devel/fastshap/inst/tinytest/test_fastshap_exact.R",
-                "state" : 1,
-                "type" : 1
-            }
         ]
     }
 }

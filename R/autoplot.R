@@ -59,7 +59,7 @@
 #' 
 #' @importFrom ggplot2 aes_string autoplot coord_flip geom_col geom_point
 #' 
-#' @importFrom ggplot2 geom_smooth ggplot xlab ylab
+#' @importFrom ggplot2 geom_smooth ggplot guides xlab ylab
 #' 
 #' @importFrom stats reorder
 #'
@@ -191,8 +191,9 @@ autoplot.explain <- function(
       geom_col(...) +
       coord_flip() +
       xlab("") +
-      ylab("Shapley value")
-    
+      ylab("Shapley value") +
+      guides(fill = FALSE, color = FALSE)
+
   }
   
   # Return plot
