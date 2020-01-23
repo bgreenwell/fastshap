@@ -72,16 +72,6 @@ explain_column <- function(object, X, column, pred_wrapper, newdata = NULL) {
   B[[1L]] <- copy_classes(B[[1L]], y = X)
   B[[2L]] <- copy_classes(B[[2L]], y = X)
   
-  # print(head(O))
-  # cat("\nColumn classes for X\n")
-  # print(sapply(X, class))
-  # cat("\nColumn classes for W\n")
-  # print(sapply(W, class))
-  # cat("\nColumn classes for B1\n")
-  # print(sapply(B[[1L]], class))
-  # cat("\nColumn classes for B2\n")
-  # print(sapply(B[[2L]], class))
-  
   # Return differences in predictions
   pred_wrapper(object, newdata = B[[1L]]) - 
     pred_wrapper(object, newdata = B[[2L]])  

@@ -16,6 +16,11 @@ features <- c(
   "Embarked"   # port of embarkation
 )
 titanic <- titanic[, features]
+for (i in seq_len(ncol(titanic))) {
+  if (is.character(titanic[[i]])) {
+    titanic[[i]] <- as.factor(titanic[[i]])
+  }
+}
 titanic$Survived <- as.factor(titanic$Survived)
 titanic <- na.omit(titanic)
 
