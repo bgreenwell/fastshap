@@ -1,12 +1,14 @@
-# fastshap 0.0.3.9000
+# fastshap 0.0.4.9000
+
+# fastshap 0.0.4
 
 ## Enhancements
 
-* Function `explain()` should now be MUCH faster at explaing a single observation, especially when `nsim` is relatively large (e.g., `nsim >= 1000`).
+* Function `explain()` should now be MUCH faster at explaining a single observation, especially when `nsim` is relatively large (e.g., `nsim >= 1000`).
 
 ## Bug fixes
 
-* Fixed a MAJOR bug that occured whenever explaining data sets with non-numeric
+* Fixed a MAJOR bug that occurred whenever explaining data sets with non-numeric
 features.
 
 ## New features
@@ -16,11 +18,13 @@ features.
 
 * New (experimental) function for constructing [force plots](https://github.com/slundberg/shap) [(#7)](https://github.com/bgreenwell/fastshap/issues/7) to help visualize prediction explanations. The function is also a generic which means additional methods can be added.
 
-* Function `explain()` became a generic and gained a new logical argument, `exact`, for computing exact Shapley contributions for linear models (LinearSHAP, which assumes independent features) and boosted dections trees (TreeSHAP). Currently, only `"lm"`, `"glm"`, and `"xgb.Booster"` objects are supported [(#2)](https://github.com/bgreenwell/fastshap/issues/2)[(#3)](https://github.com/bgreenwell/fastshap/issues/3).
+* Function `explain()` became a generic and gained a new logical argument, `exact`, for computing exact Shapley contributions for linear models (LinearSHAP, which assumes independent features) and boosted decision trees (TreeSHAP). Currently, only `"lm"`, `"glm"`, and `"xgb.Booster"` objects are supported [(#2)](https://github.com/bgreenwell/fastshap/issues/2)[(#3)](https://github.com/bgreenwell/fastshap/issues/3).
 
 ## Minor changes
 
 * Minor improvements to package documentation.
+
+* Removed unnecessary legend from contribution plots.
 
 # fastshap 0.0.3
 

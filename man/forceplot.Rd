@@ -9,7 +9,6 @@ force_plot(object, ...)
 
 \method{force_plot}{explain}(
   object,
-  prediction = NULL,
   baseline = NULL,
   feature_values = NULL,
   display = c("viewer", "html"),
@@ -20,10 +19,6 @@ force_plot(object, ...)
 \item{object}{An object of class \code{"explain"}.}
 
 \item{...}{Additional optional arguments. (Currently ignored.)}
-
-\item{prediction}{Numeric vector containing the corresponding prediction for 
-each row in \code{object}. \strong{NOTE:} It is recommended to provide this 
-argument whenever \code{object} contains approximate Shapley values.}
 
 \item{baseline}{Numeric giving the average prediction across all the training
 observations. \strong{NOTE:} It is recommended to provide this argument 
@@ -52,15 +47,15 @@ the prediction lower are shown in blue.
 \note{
 It should be noted that only exact Shapley explanations (i.e., calling 
 \code{fastshap::explain()} with \code{exact = TRUE}) satisfy the so-called 
-\emph{efficiency property} where the sum of the feature contributions for 
+\emph{additivity property} where the sum of the feature contributions for 
 \emph{x} must add up to the difference between the corresponding prediction 
 for \emph{x} and the average of all the training predictions (i.e., the 
-baseline). Hence, for approximate Shapley values, this function uses the 
-optionally supplied values for \code{prediction} and \code{baseline} to 
-internally scale the feature contributions to satisfy this property before 
-constructing the plot.
+baseline). Consequently, if you don't set \code{adjust = TRUE} in the call to 
+\code{\link{explain}} before using \code{fastshap::force_plot()}, the 
+output value displayed on the plot will not make much sense.
 }
 \examples{
+\dontrun{
 #
 # A projection pursuit regression (PPR) example
 #
@@ -74,13 +69,13 @@ mtcars.ppr <- ppr(mpg ~ ., data = mtcars, nterms = 1)
 # Compute approximate Shapley values using 10 Monte Carlo simulations
 set.seed(101)  # for reproducibility
 shap <- explain(mtcars.ppr, X = subset(mtcars, select = -mpg), nsim = 10, 
-                pred_wrapper = predict)
+                pred_wrapper = predict, adjust = TRUE)
 
 # Visualize first explanation
 preds <- predict(mtcars.ppr, newdata = mtcars)
 x <- subset(mtcars, select = -mpg)[1L, ]  # take first row of feature values
-force_plot(shap[1L, ], prediction = preds[1L], baseline = mean(preds),
-           feature_values = x)
+force_plot(shap[1L, ], baseline = mean(preds), feature_values = x)
+}
 }
 \references{
 Lundberg, Scott M, Bala Nair, Monica S Vavilala, Mayumi Horibe, Michael J 

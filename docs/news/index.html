@@ -102,6 +102,9 @@
   </a>
   <ul class="dropdown-menu" role="menu">
     <li>
+      <a href="../articles/example-titanic.html">Titanic: Machine Learning from Disaster</a>
+    </li>
+    <li>
       <a href="../articles/fastshap-vs-iml-iBreakDown.html">fastshap-vs-iml-iBreakDown</a>
     </li>
     <li>
@@ -144,12 +147,27 @@
 <h1 class="page-header">
 <a href="#fastshap-0-0-3-9000" class="anchor"></a>fastshap 0.0.3.9000<small> Unreleased </small>
 </h1>
+<div id="enhancements" class="section level2">
+<h2 class="hasAnchor">
+<a href="#enhancements" class="anchor"></a>Enhancements</h2>
+<ul>
+<li>Function <code><a href="../reference/explain.html">explain()</a></code> should now be MUCH faster at explaining a single observation, especially when <code>nsim</code> is relatively large (e.g., <code>nsim &gt;= 1000</code>).</li>
+</ul>
+</div>
+<div id="bug-fixes" class="section level2">
+<h2 class="hasAnchor">
+<a href="#bug-fixes" class="anchor"></a>Bug fixes</h2>
+<ul>
+<li>Fixed a MAJOR bug that occurred whenever explaining data sets with non-numeric features.</li>
+</ul>
+</div>
 <div id="new-features" class="section level2">
 <h2 class="hasAnchor">
 <a href="#new-features" class="anchor"></a>New features</h2>
 <ul>
+<li><p>The default method of <code><a href="../reference/explain.html">explain()</a></code> gained a new logical argument called <code>adjust</code>. When <code>adjust = TRUE</code> (and <code>nsim &gt; 1</code>), the algorithm will adjust the sum of the estimated Shapley values to satisfy the <em>efficiency property</em>; that is, to equal the difference between the model’s prediction for that sample and the average prediction over all the training data. This option is experimental and we follow the same approach as in <a href="https://github.com/slundberg/shap">shap</a> <a href="https://github.com/bgreenwell/fastshap/issues/6">(<a href='https://github.com/bgreenwell/fastshap/issues/6'>#6</a>)</a>.</p></li>
 <li><p>New (experimental) function for constructing <a href="https://github.com/slundberg/shap">force plots</a> <a href="https://github.com/bgreenwell/fastshap/issues/7">(<a href='https://github.com/bgreenwell/fastshap/issues/7'>#7</a>)</a> to help visualize prediction explanations. The function is also a generic which means additional methods can be added.</p></li>
-<li><p>Function <code><a href="../reference/explain.html">explain()</a></code> became a generic and gained a new logical argument, <code>exact</code>, for computing exact Shapley contributions for linear models (LinearSHAP, which assumes independent features) and boosted dections trees (TreeSHAP). Currently, only <code>"lm"</code>, <code>"glm"</code>, and <code>"xgb.Booster"</code> objects are supported <a href="https://github.com/bgreenwell/fastshap/issues/2">(<a href='https://github.com/bgreenwell/fastshap/issues/2'>#2</a>)</a><a href="https://github.com/bgreenwell/fastshap/issues/3">(<a href='https://github.com/bgreenwell/fastshap/issues/3'>#3</a>)</a>.</p></li>
+<li><p>Function <code><a href="../reference/explain.html">explain()</a></code> became a generic and gained a new logical argument, <code>exact</code>, for computing exact Shapley contributions for linear models (LinearSHAP, which assumes independent features) and boosted decision trees (TreeSHAP). Currently, only <code>"lm"</code>, <code>"glm"</code>, and <code>"xgb.Booster"</code> objects are supported <a href="https://github.com/bgreenwell/fastshap/issues/2">(<a href='https://github.com/bgreenwell/fastshap/issues/2'>#2</a>)</a><a href="https://github.com/bgreenwell/fastshap/issues/3">(<a href='https://github.com/bgreenwell/fastshap/issues/3'>#3</a>)</a>.</p></li>
 </ul>
 </div>
 <div id="minor-changes" class="section level2">
@@ -200,9 +218,9 @@
 <li><p>Functions <code><a href="../reference/explain.html">explain()</a></code> and <code>explain_column()</code> (not currently exported) now throw an error whenever the inputs <code>X</code> and <code>newdata</code> do not inherit from the same class.</p></li>
 </ul>
 </div>
-<div id="bug-fixes" class="section level2">
+<div id="bug-fixes-1" class="section level2">
 <h2 class="hasAnchor">
-<a href="#bug-fixes" class="anchor"></a>Bug fixes</h2>
+<a href="#bug-fixes-1" class="anchor"></a>Bug fixes</h2>
 <ul>
 <li><p>Fixed a bug in the C++ source that gave more weight to extreme permutations.</p></li>
 <li><p>Fixed a bug in the C++ source that caused doubles to be incorrectly converted to integers.</p></li>

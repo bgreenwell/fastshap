@@ -23,6 +23,10 @@ NULL
 #' 
 #' Copy column classes of \code{y} on to \code{x}.
 #' 
+#' @param x A data frame.
+#' 
+#' @param y A data frame.
+#' 
 #' @keywords internal
 #' 
 #' @noRd
@@ -52,16 +56,6 @@ copy_classes <- function(x, y) {
         } else {
           x[[name]] <- factor(x[[name]], levels = levels(y[[name]]))
         }
-        # levels(x[[name]]) <- levels(y[[name]])
-        # if (!all(levels(y[[name]]) %in% x[[name]])) {
-        #   stop("Factors levels ", paste0("{", paste(
-        #     levels(y[[name]])[!(levels(y[[name]]) %in% x[[name]])],
-        #     collapse = ", "), "}"), " for predictor variable ", name,
-        #     " found in training data, but not in data supplied to `pred.grid`.",
-        #     call. = FALSE)
-        # } else {
-        #   levels(x[[name]]) <- levels(y[[name]])
-        # }
       }
       # Convert to character
       if (is.character(y[[name]])) {

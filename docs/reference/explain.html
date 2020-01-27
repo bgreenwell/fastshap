@@ -103,6 +103,9 @@
   </a>
   <ul class="dropdown-menu" role="menu">
     <li>
+      <a href="../articles/example-titanic.html">Titanic: Machine Learning from Disaster</a>
+    </li>
+    <li>
       <a href="../articles/fastshap-vs-iml-iBreakDown.html">fastshap-vs-iml-iBreakDown</a>
     </li>
     <li>
@@ -156,6 +159,7 @@
   <span class='kw'>nsim</span> <span class='kw'>=</span> <span class='fl'>1</span>,
   <span class='kw'>pred_wrapper</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
   <span class='kw'>newdata</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
+  <span class='kw'>adjust</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>,
   <span class='no'>...</span>
 )
 
@@ -236,6 +240,13 @@ Default is <code>NULL</code> which will produce approximate Shapley values for a
 the rows in <code>X</code> (i.e., the training data).</p></td>
     </tr>
     <tr>
+      <th>adjust</th>
+      <td><p>Logical indicating whether or not to adjust the sum of the 
+estimated Shapley values to satisfy the <em>efficiency property</em>; that is,
+to equal the difference between the model's prediction for that sample and 
+the average prediction over all the training data (i.e., <code>X</code>).</p></td>
+    </tr>
+    <tr>
       <th>exact</th>
       <td><p>Logical indicating whether to compute exact Shapley values. 
 Currently only available for <code><a href='https://rdrr.io/r/stats/lm.html'>lm</a></code> and 
@@ -256,7 +267,9 @@ row for each observation in <code>X</code>).</p>
 
     <p>Setting <code>exact = TRUE</code> with a linear model (i.e., an 
 <code><a href='https://rdrr.io/r/stats/lm.html'>lm</a></code> or <code><a href='https://rdrr.io/r/stats/glm.html'>glm</a></code> object) assumes that the
-input features are independent.</p>
+input features are independent. Also, setting <code>adjust = TRUE</code> is 
+experimental and we follow the same approach as in
+<a href='https://github.com/slundberg/shap'>shap</a>.</p>
     <h2 class="hasAnchor" id="see-also"><a class="anchor" href="#see-also"></a>See also</h2>
 
     <div class='dont-index'><p>You can find more examples (with larger and more realistic data 
@@ -279,18 +292,18 @@ sets) on the <strong>fastshap</strong> GitHub repository:
 <span class='no'>shap</span> <span class='kw'>&lt;-</span> <span class='fu'>explain</span>(<span class='no'>fit</span>, <span class='kw'>X</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/subset.html'>subset</a></span>(<span class='no'>mtcars</span>, <span class='kw'>select</span> <span class='kw'>=</span> -<span class='no'>mpg</span>), <span class='kw'>nsim</span> <span class='kw'>=</span> <span class='fl'>10</span>,
                 <span class='kw'>pred_wrapper</span> <span class='kw'>=</span> <span class='no'>predict</span>)
 <span class='no'>shap</span></div><div class='output co'>#&gt; <span style='color: #555555;'># A tibble: 32 x 10</span><span>
-#&gt;        cyl   disp     hp     drat     wt   qsec      vs     am    gear    carb
-#&gt;      </span><span style='color: #555555;font-style: italic;'>&lt;dbl&gt;</span><span>  </span><span style='color: #555555;font-style: italic;'>&lt;dbl&gt;</span><span>  </span><span style='color: #555555;font-style: italic;'>&lt;dbl&gt;</span><span>    </span><span style='color: #555555;font-style: italic;'>&lt;dbl&gt;</span><span>  </span><span style='color: #555555;font-style: italic;'>&lt;dbl&gt;</span><span>  </span><span style='color: #555555;font-style: italic;'>&lt;dbl&gt;</span><span>   </span><span style='color: #555555;font-style: italic;'>&lt;dbl&gt;</span><span>  </span><span style='color: #555555;font-style: italic;'>&lt;dbl&gt;</span><span>   </span><span style='color: #555555;font-style: italic;'>&lt;dbl&gt;</span><span>   </span><span style='color: #555555;font-style: italic;'>&lt;dbl&gt;</span><span>
-#&gt; </span><span style='color: #555555;'> 1</span><span> -</span><span style='color: #BB0000;'>0.044</span><span style='color: #BB0000;text-decoration: underline;'>6</span><span> -</span><span style='color: #BB0000;'>0.747</span><span>  0.629  0.065</span><span style='text-decoration: underline;'>3</span><span>   1.64  -</span><span style='color: #BB0000;'>0.755</span><span> -</span><span style='color: #BB0000;'>0.127</span><span>   1.01   0.262  -</span><span style='color: #BB0000;'>0.299</span><span> 
-#&gt; </span><span style='color: #555555;'> 2</span><span>  0.044</span><span style='text-decoration: underline;'>6</span><span> -</span><span style='color: #BB0000;'>0.973</span><span>  1.07   0.492    1.97  -</span><span style='color: #BB0000;'>1.55</span><span>  -</span><span style='color: #BB0000;'>0.095</span><span style='color: #BB0000;text-decoration: underline;'>3</span><span>  1.76   0.065</span><span style='text-decoration: underline;'>5</span><span> -</span><span style='color: #BB0000;'>0.239</span><span> 
-#&gt; </span><span style='color: #555555;'> 3</span><span>  0.178  -</span><span style='color: #BB0000;'>1.40</span><span>   1.20   0.327    3.64  -</span><span style='color: #BB0000;'>0.122</span><span>  0.159   1.26   0.262   0.439 
-#&gt; </span><span style='color: #555555;'> 4</span><span>  0.022</span><span style='text-decoration: underline;'>3</span><span>  0.479  0.724 -</span><span style='color: #BB0000;'>0.380</span><span>    0.251  1.81   0.159  -</span><span style='color: #BB0000;'>1.51</span><span>  -</span><span style='color: #BB0000;'>0.524</span><span>   0.379 
-#&gt; </span><span style='color: #555555;'> 5</span><span> -</span><span style='color: #BB0000;'>0.178</span><span>   1.01  -</span><span style='color: #BB0000;'>0.447</span><span> -</span><span style='color: #BB0000;'>0.310</span><span>   -</span><span style='color: #BB0000;'>2.71</span><span>  -</span><span style='color: #BB0000;'>0.580</span><span> -</span><span style='color: #BB0000;'>0.191</span><span>  -</span><span style='color: #BB0000;'>1.01</span><span>  -</span><span style='color: #BB0000;'>0.262</span><span>   0.160 
-#&gt; </span><span style='color: #555555;'> 6</span><span>  0.022</span><span style='text-decoration: underline;'>3</span><span>  0.671  0.649 -</span><span style='color: #BB0000;'>0.746</span><span>   -</span><span style='color: #BB0000;'>0.887</span><span>  2.54   0.222  -</span><span style='color: #BB0000;'>0.756</span><span> -</span><span style='color: #BB0000;'>0.590</span><span>   0.219 
-#&gt; </span><span style='color: #555555;'> 7</span><span> -</span><span style='color: #BB0000;'>0.245</span><span>   1.38  -</span><span style='color: #BB0000;'>1.47</span><span>  -</span><span style='color: #BB0000;'>0.209</span><span>   -</span><span style='color: #BB0000;'>1.36</span><span>  -</span><span style='color: #BB0000;'>1.66</span><span>  -</span><span style='color: #BB0000;'>0.191</span><span>  -</span><span style='color: #BB0000;'>0.504</span><span> -</span><span style='color: #BB0000;'>0.524</span><span>  -</span><span style='color: #BB0000;'>0.279</span><span> 
-#&gt; </span><span style='color: #555555;'> 8</span><span>  0.156  -</span><span style='color: #BB0000;'>1.02</span><span>   1.46   0.006</span><span style='text-decoration: underline;'>30</span><span>  0.364  2.62   0.127  -</span><span style='color: #BB0000;'>1.26</span><span>   0.065</span><span style='text-decoration: underline;'>5</span><span>  0.079</span><span style='text-decoration: underline;'>8</span><span>
-#&gt; </span><span style='color: #555555;'> 9</span><span>  0.201  -</span><span style='color: #BB0000;'>1.69</span><span>   1.21   0.281   -</span><span style='color: #BB0000;'>1.04</span><span>   4.29   0.159  -</span><span style='color: #BB0000;'>1.26</span><span>   0.131   0.359 
-#&gt; </span><span style='color: #555555;'>10</span><span>  0.089</span><span style='text-decoration: underline;'>2</span><span> -</span><span style='color: #BB0000;'>0.394</span><span>  0.509  0.188   -</span><span style='color: #BB0000;'>2.54</span><span>   0.418  0.095</span><span style='text-decoration: underline;'>3</span><span> -</span><span style='color: #BB0000;'>1.01</span><span>   0.393  -</span><span style='color: #BB0000;'>0.339</span><span> 
+#&gt;        cyl     disp      hp    drat     wt   qsec      vs     am    gear    carb
+#&gt;      </span><span style='color: #555555;font-style: italic;'>&lt;dbl&gt;</span><span>    </span><span style='color: #555555;font-style: italic;'>&lt;dbl&gt;</span><span>   </span><span style='color: #555555;font-style: italic;'>&lt;dbl&gt;</span><span>   </span><span style='color: #555555;font-style: italic;'>&lt;dbl&gt;</span><span>  </span><span style='color: #555555;font-style: italic;'>&lt;dbl&gt;</span><span>  </span><span style='color: #555555;font-style: italic;'>&lt;dbl&gt;</span><span>   </span><span style='color: #555555;font-style: italic;'>&lt;dbl&gt;</span><span>  </span><span style='color: #555555;font-style: italic;'>&lt;dbl&gt;</span><span>   </span><span style='color: #555555;font-style: italic;'>&lt;dbl&gt;</span><span>   </span><span style='color: #555555;font-style: italic;'>&lt;dbl&gt;</span><span>
+#&gt; </span><span style='color: #555555;'> 1</span><span>  0.022</span><span style='text-decoration: underline;'>3</span><span> -</span><span style='color: #BB0000;'>1.40</span><span>     0.977   0.443   1.94   0.263 -</span><span style='color: #BB0000;'>0.063</span><span style='color: #BB0000;text-decoration: underline;'>6</span><span>  1.26   0.328  -</span><span style='color: #BB0000;'>0.239</span><span> 
+#&gt; </span><span style='color: #555555;'> 2</span><span>  0.134   0.009</span><span style='text-decoration: underline;'>60</span><span>  0.516   0.422   1.50  -</span><span style='color: #BB0000;'>0.863</span><span> -</span><span style='color: #BB0000;'>0.159</span><span>   1.01  -</span><span style='color: #BB0000;'>0.065</span><span style='color: #BB0000;text-decoration: underline;'>5</span><span> -</span><span style='color: #BB0000;'>0.199</span><span> 
+#&gt; </span><span style='color: #555555;'> 3</span><span>  0.290  -</span><span style='color: #BB0000;'>1.90</span><span>     0.969   0.312   3.43   0.981  0.127   1.26   0.262   0.419 
+#&gt; </span><span style='color: #555555;'> 4</span><span> -</span><span style='color: #BB0000;'>0.022</span><span style='color: #BB0000;text-decoration: underline;'>3</span><span>  0.768    1.35   -</span><span style='color: #BB0000;'>0.582</span><span>  -</span><span style='color: #BB0000;'>1.06</span><span>   0.291  0.254  -</span><span style='color: #BB0000;'>0.504</span><span> -</span><span style='color: #BB0000;'>0.524</span><span>   0.339 
+#&gt; </span><span style='color: #555555;'> 5</span><span> -</span><span style='color: #BB0000;'>0.044</span><span style='color: #BB0000;text-decoration: underline;'>6</span><span>  2.05    -</span><span style='color: #BB0000;'>1.23</span><span>   -</span><span style='color: #BB0000;'>0.128</span><span>  -</span><span style='color: #BB0000;'>2.01</span><span>  -</span><span style='color: #BB0000;'>0.795</span><span> -</span><span style='color: #BB0000;'>0.063</span><span style='color: #BB0000;text-decoration: underline;'>6</span><span> -</span><span style='color: #BB0000;'>0.756</span><span> -</span><span style='color: #BB0000;'>0.328</span><span>   0.259 
+#&gt; </span><span style='color: #555555;'> 6</span><span>  0.044</span><span style='text-decoration: underline;'>6</span><span> -</span><span style='color: #BB0000;'>0.119</span><span>    0.589  -</span><span style='color: #BB0000;'>0.841</span><span>  -</span><span style='color: #BB0000;'>1.70</span><span>   1.60   0.159  -</span><span style='color: #BB0000;'>1.01</span><span>  -</span><span style='color: #BB0000;'>0.655</span><span>   0.319 
+#&gt; </span><span style='color: #555555;'> 7</span><span> -</span><span style='color: #BB0000;'>0.178</span><span>   1.49    -</span><span style='color: #BB0000;'>1.38</span><span>   -</span><span style='color: #BB0000;'>0.351</span><span>  -</span><span style='color: #BB0000;'>0.875</span><span> -</span><span style='color: #BB0000;'>1.98</span><span>  -</span><span style='color: #BB0000;'>0.222</span><span>  -</span><span style='color: #BB0000;'>2.02</span><span>  -</span><span style='color: #BB0000;'>0.655</span><span>  -</span><span style='color: #BB0000;'>0.239</span><span> 
+#&gt; </span><span style='color: #555555;'> 8</span><span>  0.223  -</span><span style='color: #BB0000;'>1.08</span><span>     1.92   -</span><span style='color: #BB0000;'>0.057</span><span style='color: #BB0000;text-decoration: underline;'>5</span><span>  0.187  1.64   0.127  -</span><span style='color: #BB0000;'>1.01</span><span>  -</span><span style='color: #BB0000;'>0.065</span><span style='color: #BB0000;text-decoration: underline;'>5</span><span>  0.120 
+#&gt; </span><span style='color: #555555;'> 9</span><span>  0.312  -</span><span style='color: #BB0000;'>1.84</span><span>     1.24    0.260   2.00   4.53   0.127  -</span><span style='color: #BB0000;'>0.504</span><span>  0.328   0.079</span><span style='text-decoration: underline;'>8</span><span>
+#&gt; </span><span style='color: #555555;'>10</span><span>  0.044</span><span style='text-decoration: underline;'>6</span><span> -</span><span style='color: #BB0000;'>1.78</span><span>     0.092</span><span style='text-decoration: underline;'>4</span><span>  0.260  -</span><span style='color: #BB0000;'>1.66</span><span>   0.372  0.159  -</span><span style='color: #BB0000;'>1.26</span><span>   0.131  -</span><span style='color: #BB0000;'>0.140</span><span> 
 #&gt; </span><span style='color: #555555;'># … with 22 more rows</span><span></div><div class='input'>
 <span class='co'># Compute exact Shapley (i.e., LinearSHAP) values</span>
 <span class='no'>shap</span> <span class='kw'>&lt;-</span> <span class='fu'>explain</span>(<span class='no'>fit</span>, <span class='kw'>exact</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>)

@@ -59,25 +59,29 @@ bst <- xgboost::xgboost(  # params found using `autoxgb::autoxgb()`
 )
 
 # Generate exact and approximate Shapley values for entire training set
-X <- data.matrix(X)
-tree_shap <- explain(bst, X = X, exact = TRUE)
+x <- data.matrix(X)[1L, , drop = FALSE]
+ex_exact <- explain(bst, X = x, exact = TRUE)
 set.seed(132)
-app_shap <- explain(bst, X = X, pred_wrapper = pfun, nsim = 10)
+ex_apprx <- explain(bst, X = data.matrix(X), newdata = x, adjust = TRUE,
+                    pred_wrapper = pfun, nsim = 1000)
+
+# Check accuracy
+expect_true(cor(as.numeric(ex_exact), as.numeric((ex_apprx))) > 0.999)
 
 # Check dimensions
 expect_identical(
-  current = dim(tree_shap),
-  target = dim(app_shap)
+  current = dim(ex_exact),
+  target = dim(ex_apprx)
 )
 
 # Check column names
 expect_identical(
-  current = names(tree_shap),
+  current = names(ex_exact),
   target = colnames(X)
 )
 
 # Check class 
 expect_identical(
-  current = class(tree_shap),
+  current = class(ex_exact),
   target = c("tbl_df", "tbl", "data.frame", "explain")
 )

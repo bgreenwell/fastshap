@@ -43,10 +43,10 @@ explain(object, ...)
 )
 }
 \arguments{
-\item{object}{A fitted model object (e.g., a 
-\code{\link[randomForest]{randomForest}} object).}
+\item{object}{A fitted model object (e.g., a \code{\link[ranger]{ranger}} or
+an \code{\link[xgboost]{xgboost}} object).}
 
-\item{...}{Additional optional arguments to be passed onto
+\item{...}{Additional optional arguments to be passed on to
 \code{\link[plyr]{laply}}.}
 
 \item{feature_names}{Character string giving the names of the predictor
@@ -58,11 +58,13 @@ ONLY the feature columns from the training data. \strong{NOTE:} This argument
 is required whenever \code{exact = FALSE}.}
 
 \item{nsim}{The number of Monte Carlo repetitions to use for estimating each 
-Shapley value. Default is 1.}
+Shapley value (only used when \code{exact = FALSE}). Default is 1. 
+\strong{NOTE:} To obtain the most accurate results, \code{nsim} should be set 
+as large as feasibly possible.}
 
 \item{pred_wrapper}{Prediction function that requires two arguments,
 \code{object} and \code{newdata}. \strong{NOTE:} This argument is required 
-whenever \code{exact = FALSE}.The output of this function should be 
+whenever \code{exact = FALSE}. The output of this function should be 
 determined according to:
 
 \describe{
@@ -74,14 +76,16 @@ determined according to:
 }}
 
 \item{newdata}{A matrix-like R object (e.g., a data frame or matrix) 
-containing ONLY the feature columns for the observation(s) of interest. 
-Default is \code{NULL} which will produce approximate Shapley values for all 
-the rows in \code{X} (i.e., the training data).}
+containing ONLY the feature columns for the observation(s) of interest; that 
+is, the observation(s) you want to compute explanations for. Default is 
+\code{NULL} which will produce approximate Shapley values for all the rows in 
+\code{X} (i.e., the training data).}
 
 \item{adjust}{Logical indicating whether or not to adjust the sum of the 
-estimated Shapley values to satisfy the \emph{efficiency property}; that is,
-to equal the difference between the model's prediction for that sample and 
-the average prediction over all the training data (i.e., \code{X}).}
+estimated Shapley values to satisfy the \emph{additivity} (or 
+\emph{local accuracy}) property; that is, to equal the difference between the 
+model's prediction for that sample and the average prediction over all the 
+training data (i.e., \code{X}).}
 
 \item{exact}{Logical indicating whether to compute exact Shapley values. 
 Currently only available for \code{\link[stats]{lm}} and 

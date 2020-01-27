@@ -104,6 +104,9 @@ shap package." />
   </a>
   <ul class="dropdown-menu" role="menu">
     <li>
+      <a href="../articles/example-titanic.html">Titanic: Machine Learning from Disaster</a>
+    </li>
+    <li>
       <a href="../articles/fastshap-vs-iml-iBreakDown.html">fastshap-vs-iml-iBreakDown</a>
     </li>
     <li>
@@ -153,7 +156,6 @@ shap package." />
 <span class='co'># S3 method for explain</span>
 <span class='fu'>force_plot</span>(
   <span class='no'>object</span>,
-  <span class='kw'>prediction</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
   <span class='kw'>baseline</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
   <span class='kw'>feature_values</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
   <span class='kw'>display</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='st'>"viewer"</span>, <span class='st'>"html"</span>),
@@ -170,12 +172,6 @@ shap package." />
     <tr>
       <th>...</th>
       <td><p>Additional optional arguments. (Currently ignored.)</p></td>
-    </tr>
-    <tr>
-      <th>prediction</th>
-      <td><p>Numeric vector containing the corresponding prediction for 
-each row in <code>object</code>. <strong>NOTE:</strong> It is recommended to provide this 
-argument whenever <code>object</code> contains approximate Shapley values.</p></td>
     </tr>
     <tr>
       <th>baseline</th>
@@ -224,7 +220,8 @@ Machine-Learning Predictions for the Prevention of Hypoxaemia During
 Surgery." Nature Biomedical Engineering 2 (10). Nature Publishing Group: 749.</p>
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
-    <pre class="examples"><div class='input'><span class='co'>#</span>
+    <pre class="examples"><div class='input'><span class='kw'>if</span> (<span class='fl'>FALSE</span>) {
+<span class='co'>#</span>
 <span class='co'># A projection pursuit regression (PPR) example</span>
 <span class='co'>#</span>
 
@@ -242,8 +239,8 @@ Surgery." Nature Biomedical Engineering 2 (10). Nature Publishing Group: 749.</p
 <span class='co'># Visualize first explanation</span>
 <span class='no'>preds</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/stats/predict.html'>predict</a></span>(<span class='no'>mtcars.ppr</span>, <span class='kw'>newdata</span> <span class='kw'>=</span> <span class='no'>mtcars</span>)
 <span class='no'>x</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/subset.html'>subset</a></span>(<span class='no'>mtcars</span>, <span class='kw'>select</span> <span class='kw'>=</span> -<span class='no'>mpg</span>)[<span class='fl'>1L</span>, ]  <span class='co'># take first row of feature values</span>
-<span class='fu'>force_plot</span>(<span class='no'>shap</span>[<span class='fl'>1L</span>, ], <span class='kw'>prediction</span> <span class='kw'>=</span> <span class='no'>preds</span>[<span class='fl'>1L</span>], <span class='kw'>baseline</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/mean.html'>mean</a></span>(<span class='no'>preds</span>),
-           <span class='kw'>feature_values</span> <span class='kw'>=</span> <span class='no'>x</span>)</div></pre>
+<span class='fu'>force_plot</span>(<span class='no'>shap</span>[<span class='fl'>1L</span>, ], <span class='kw'>baseline</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/mean.html'>mean</a></span>(<span class='no'>preds</span>), <span class='kw'>feature_values</span> <span class='kw'>=</span> <span class='no'>x</span>)
+}</div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">
     <h2>Contents</h2>

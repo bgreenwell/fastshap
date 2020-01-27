@@ -26,8 +26,8 @@ expect_true(
 trn <- gen_friedman(500, seed = 101)
 X <- subset(trn, select = -y)
 
-# Fit a MARS model to the simulated Friedman benchmark data
-mars <- earth::earth(y ~ ., data = trn, degree = 2)
+# Fit a fit model to the simulated Friedman benchmark data
+fit <- earth::earth(y ~ ., data = trn, degree = 2)
 
 # Prediction wrapper
 pfun <- function(object, newdata) {
@@ -36,11 +36,19 @@ pfun <- function(object, newdata) {
 
 # Generate approximate Shapley values for entire training set
 set.seed(102)  # for reproducibility
-shap_all <- explain(mars, X = X, pred_wrapper = pfun, nsim = 1)
+shap_all <- explain(fit, X = X, pred_wrapper = pfun, nsim = 1)
 
 # Check argument types
 expect_error(
-  explain(mars, X = X, pred_wrapper = pfun, newdata = data.matrix(X[1L, ]))
+  explain(fit, X = X, pred_wrapper = pfun, newdata = data.matrix(X[1L, ]))
+)
+
+# Missing arguments
+expect_error(  # Argument `X` is missing
+  explain(fit, pred_wrapper = pfun, newdata = data.matrix(X[1L, ]))
+)
+expect_error(  # Argument `pred_wrapper` is missing
+  explain(fit, X = X, newdata = data.matrix(X[1L, ]))
 )
 
 # Check dimensions
@@ -70,7 +78,7 @@ expect_identical(
 
 # Generate approximate Shapley values for a single row using first five features
 set.seed(103)  # for reproducibility
-shap_3 <- explain(mars, feature_names = names(X)[1L:5L], X = X, 
+shap_3 <- explain(fit, feature_names = names(X)[1L:5L], X = X, 
                   pred_wrapper = pfun, nsim = 1, 
                   newdata = X[1L, , drop = FALSE])
 
@@ -82,7 +90,7 @@ expect_identical(
 
 # Check approximate Shapley values for a single feature
 set.seed(104)
-shap_single <- explain(mars, feature_names = "x3", X = X, pred_wrapper = pfun)
+shap_single <- explain(fit, feature_names = "x3", X = X, pred_wrapper = pfun)
 
 # Check dimensions
 expect_identical(
@@ -130,6 +138,7 @@ expect_identical(
   target = c(3L, 2L)
 )
 
+
 # Check Shapley-based dependence plot -----------------------------------------
 
 # Construct Shapley-based idependence plots
@@ -161,6 +170,7 @@ expect_identical(
   current = p4$data$x,
   target = X$x1
 )
+
 
 # Check Shapley-based contribution plot ---------------------------------------
 

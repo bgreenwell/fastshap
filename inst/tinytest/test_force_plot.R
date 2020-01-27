@@ -1,4 +1,7 @@
 # Exits
+if (length(unclass(packageVersion("fastshap"))[[1L]]) == 3) {
+  exit_file("Skip force_plot tests for CRAN releases")
+}
 if (!requireNamespace("reticulate", quietly = TRUE)) {
   exit_file("Package \"reticulate\" is missing.")
 }
@@ -31,11 +34,9 @@ set.seed(102)  # for reproducibility
 shap_all <- explain(mars, X = X, pred_wrapper = pfun, nsim = 1)
 
 # Construct force plots
-preds <- pfun(mars, newdata =  X)
 expect_null(
   force_plot(
     object = shap_all[1L, ],
-    prediction = preds[1L],
     baseline = mean(preds),
     feature_values = X[1L, ]
   )

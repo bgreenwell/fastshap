@@ -50,7 +50,7 @@
 #' plot the explanation when \code{type = "contribution"}. If \code{NULL} (the 
 #' default) the explanation for the first row/instance will be used.
 #' 
-#' @param ... Additional optional arguments to be passed onto 
+#' @param ... Additional optional arguments to be passed on to 
 #' \code{\link[ggplot2]{geom_col}} (if \code{type = "importance"}) or 
 #' \code{\link[ggplot2]{geom_point}} (if \code{type = "dependence"}).
 #' 

@@ -83,8 +83,8 @@ explain_column <- function(object, X, column, pred_wrapper, newdata = NULL) {
 #' 
 #' Compute fast (approximate) Shapley values for a set of features.
 #' 
-#' @param object A fitted model object (e.g., a 
-#' \code{\link[randomForest]{randomForest}} object).
+#' @param object A fitted model object (e.g., a \code{\link[ranger]{ranger}} or
+#' an \code{\link[xgboost]{xgboost}} object).
 #'
 #' @param feature_names Character string giving the names of the predictor
 #' variables (i.e., features) of interest. If \code{NULL} (default) they will be
@@ -96,7 +96,7 @@ explain_column <- function(object, X, column, pred_wrapper, newdata = NULL) {
 #'
 #' @param pred_wrapper Prediction function that requires two arguments,
 #' \code{object} and \code{newdata}. \strong{NOTE:} This argument is required 
-#' whenever \code{exact = FALSE}.The output of this function should be 
+#' whenever \code{exact = FALSE}. The output of this function should be 
 #' determined according to:
 #'
 #' \describe{
@@ -108,17 +108,21 @@ explain_column <- function(object, X, column, pred_wrapper, newdata = NULL) {
 #' }
 #' 
 #' @param nsim The number of Monte Carlo repetitions to use for estimating each 
-#' Shapley value. Default is 1.
+#' Shapley value (only used when \code{exact = FALSE}). Default is 1. 
+#' \strong{NOTE:} To obtain the most accurate results, \code{nsim} should be set 
+#' as large as feasibly possible.
 #' 
 #' @param newdata A matrix-like R object (e.g., a data frame or matrix) 
-#' containing ONLY the feature columns for the observation(s) of interest. 
-#' Default is \code{NULL} which will produce approximate Shapley values for all 
-#' the rows in \code{X} (i.e., the training data).
+#' containing ONLY the feature columns for the observation(s) of interest; that 
+#' is, the observation(s) you want to compute explanations for. Default is 
+#' \code{NULL} which will produce approximate Shapley values for all the rows in 
+#' \code{X} (i.e., the training data).
 #' 
 #' @param adjust Logical indicating whether or not to adjust the sum of the 
-#' estimated Shapley values to satisfy the \emph{efficiency property}; that is,
-#' to equal the difference between the model's prediction for that sample and 
-#' the average prediction over all the training data (i.e., \code{X}).
+#' estimated Shapley values to satisfy the \emph{additivity} (or 
+#' \emph{local accuracy}) property; that is, to equal the difference between the 
+#' model's prediction for that sample and the average prediction over all the 
+#' training data (i.e., \code{X}).
 #' 
 #' @param exact Logical indicating whether to compute exact Shapley values. 
 #' Currently only available for \code{\link[stats]{lm}} and 
@@ -126,7 +130,7 @@ explain_column <- function(object, X, column, pred_wrapper, newdata = NULL) {
 #' that setting \code{exact = TRUE} will return explanations for each of the 
 #' \code{\link[stats]{terms}} in an \code{\link[stats]{lm}} object.
 #' 
-#' @param ... Additional optional arguments to be passed onto
+#' @param ... Additional optional arguments to be passed on to
 #' \code{\link[plyr]{laply}}.
 #' 
 #' @return A tibble with one column for each feature specified in 
@@ -198,7 +202,7 @@ explain.default <- function(object, feature_names = NULL, X = NULL, nsim = 1,
       if (isTRUE(adjust)) {
         # Compute average training prediction (fnull) and predictions associated
         # with each explanation (fx)
-        fx <- pred_wrapper(object, newdata = newdata[1L, ])
+        fx <- pred_wrapper(object, newdata = newdata[1L, , drop = FALSE])
         fnull <- mean(pred_wrapper(object, newdata = X))
         phi_var <- apply(res, MARGIN = 2, FUN = stats::var)
         err <- fx - sum(phi_avg) - fnull
@@ -235,14 +239,14 @@ explain.default <- function(object, feature_names = NULL, X = NULL, nsim = 1,
     }
     
     # Check for dependencies
-    if (!requireNamespace("abind", quietly = TRUE)) {
-      stop("Package \"abind\" needed for this function to work. Please ",
-           "install it.", call. = FALSE)
-    }
-    if (!requireNamespace("matrixStats", quietly = TRUE)) {
-      stop("Package \"matrixStats\" needed for this function to work. Please ",
-           "install it.", call. = FALSE)
-    }
+    # if (!requireNamespace("abind", quietly = TRUE)) {
+    #   stop("Package \"abind\" needed for this function to work. Please ",
+    #        "install it.", call. = FALSE)
+    # }
+    # if (!requireNamespace("matrixStats", quietly = TRUE)) {
+    #   stop("Package \"matrixStats\" needed for this function to work. Please ",
+    #        "install it.", call. = FALSE)
+    # }
     
     # Compute approximate Shapley values and variances
     res <- plyr::laply(feature_names, .fun = function(x) {
