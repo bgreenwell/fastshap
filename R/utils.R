@@ -63,7 +63,11 @@ copy_classes <- function(x, y) {
       }
       # Convert to logical
       if (is.logical(y[[name]])) {
-        x[[name]] <- as.logical(x[[name]])
+        x[[name]] <- if(getRversion() <= "3.6.0") {
+          as.logical(trimws(x[[name]]))  # " TRUE" -> "TRUE"
+        } else {
+          as.logical(x[[name]])
+        }
       }
     }
   }

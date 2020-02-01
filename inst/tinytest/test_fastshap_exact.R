@@ -15,9 +15,10 @@ suppressMessages({
 # Generate training data from the Friedman 1 benchmark problem
 trn <- gen_friedman(500, seed = 101)
 X <- subset(trn, select = -y)
+x <- X[1L, , drop = FALSE]
 
-# Fit a MARS model to the simulated Friedman benchmark data
-lin <- lm(y ~ ., data = trn)
+# Fit a linear model to the simulated Friedman benchmark data
+fit_lm <- lm(y ~ ., data = trn)
 
 # Prediction wrapper
 pfun <- function(object, newdata) {
@@ -25,31 +26,35 @@ pfun <- function(object, newdata) {
 }
 
 # Generate exact and approximate Shapley values for entire training set
-lin_shap <- explain(lin, exact = TRUE)
+ex_exact <- explain(fit_lm, exact = TRUE, newdata = x)
 set.seed(102)
-app_shap <- explain(lin, X = X, pred_wrapper = pfun, nsim = 10)
+ex_apprx <- explain(fit_lm, X = X, pred_wrapper = pfun, nsim = 1000,
+                    newdata = x, adjust = TRUE)
+
+# Check accuracy
+expect_true(cor(as.numeric(ex_exact), as.numeric((ex_apprx))) > 0.999)
 
 # Check dimensions
 expect_identical(
-  current = dim(lin_shap),
-  target = dim(app_shap)
+  current = dim(ex_exact),
+  target = dim(ex_apprx)
 )
 
 # Check column names
 expect_identical(
-  current = names(lin_shap),
+  current = names(ex_exact),
   target = names(X)
 )
 
 # Check class 
 expect_identical(
-  current = class(lin_shap),
+  current = class(ex_exact),
   target = c("tbl_df", "tbl", "data.frame", "explain")
 )
 
 # Fit model(s)
 set.seed(111)
-bst <- xgboost::xgboost(  # params found using `autoxgb::autoxgb()`
+fit_xgb <- xgboost::xgboost(  # params found using `autoxgb::autoxgb()`
   data = data.matrix(subset(trn, select = -y)),
   label = trn$y,
   max_depth = 3,
@@ -60,9 +65,9 @@ bst <- xgboost::xgboost(  # params found using `autoxgb::autoxgb()`
 
 # Generate exact and approximate Shapley values for entire training set
 x <- data.matrix(X)[1L, , drop = FALSE]
-ex_exact <- explain(bst, X = x, exact = TRUE)
+ex_exact <- explain(fit_xgb, X = x, exact = TRUE)
 set.seed(132)
-ex_apprx <- explain(bst, X = data.matrix(X), newdata = x, adjust = TRUE,
+ex_apprx <- explain(fit_xgb, X = data.matrix(X), newdata = x, adjust = TRUE,
                     pred_wrapper = pfun, nsim = 1000)
 
 # Check accuracy

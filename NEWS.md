@@ -1,4 +1,8 @@
-# fastshap 0.0.4.9000
+# fastshap 0.0.5
+
+## Bug fixes
+
+* Fixed a bug that occurred with logical columns in older version of R (<= 3.6.0) [(#9)](https://github.com/bgreenwell/fastshap/issues/9).
 
 # fastshap 0.0.4
 
