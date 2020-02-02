@@ -37,6 +37,9 @@ time2 <- system.time(
   shap2 <- fastshap::explain(rfo, X = X, pred_wrapper = pfun, nsim = 10,
                              .parallel = TRUE)
 )
+# > time2  # version 0.0.5
+#     user   system  elapsed 
+# 1267.633   14.429  173.389 
 
 library(ggplot2)
 
