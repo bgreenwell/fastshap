@@ -104,7 +104,12 @@ Shapley contribution: & \$9.50      & \$14.67      & \$5.83       \\ \bottomrule
 So the next time the bartender asks how you want to split the tab, whip out a pencil and do the math!
 
 
-### Estimating Shapley values via Monte Carlo simulation: SampleSHAP
+### Advantages
+
+### Disadvantages
+
+
+## Estimating Shapley values via Monte Carlo simulation: SampleSHAP
 
 A single estimate of the contribution of $x_i$ to $f\left(x\right)$ is nothing the more than the difference between two predictions, where each prediction is based on a sort of Frankenstein instance that' are's constructed by swapping out values between the instance being explained ($x$) and an instance selected at random from the training data. To help stabilize the results, the procedure is repeated a large number, say, $R$, times, and the result averaged together. 
 
@@ -129,12 +134,12 @@ A single estimate of the contribution of $x_i$ to $f\left(x\right)$ is nothing t
 If there are $p$ features and $m$ instanced to be explained, this requires $2 \times R \times p \times m$ predictions (or calls to a scoring function). In practice, this can be quite computationally demanding, especially since $R$ needs to be large enough to produce good approximations to each $\phi_i\left(x\right)$. In practice, this depends on the variance of each feature in the observed training data, but typically $R >= 50--100$ will suffice (**Need reference**).
 
 
-### Special cases
+## Special cases
 
 The following sections discuss two special cases where exact Shapley explanations can be computed efficiently: additive linear models, and shallow trees and tree ensembles.
 
 
-#### Linear models: LinearSHAP
+### Linear models: LinearSHAP
 
 Cite somewhere \cite{strumbelj-2014-explaining}.
 
@@ -155,14 +160,36 @@ Recall that the contribution of the $i$-th feature to the prediction $f\left(X\r
 where we estimate $\E\left(X_i\right)$ with the corresponding sample mean $\bar{X}_i$. The quantity $\phi_i\left(X\right)$ is also referred to as the \emph{situational importance of $X_i$} \citep{achen-1982-interpreting}.
 
 
-#### Tree-based models: TreeSHAP
+### Tree-based models: TreeSHAP
 
 TBD.
 
 
-## Shapley values in R
+### Kernal-based approximate Shapley values: KernelSHAP
 
-TBD.
+KernelSHAP \citep{lundberg-2017-KernelSHAP} uses a specially-weighted local linear regression to estimate SHAP values for any model. Unlike SampleSHAP...
+
+
+## Shapley values in R (and other lnaguages)
+
+The \CRANpkg{iml} package \citep{R-iml} provides the \code{Shapley()} function, which is a direct implementation of Algorithm~\ref{alg:SampleSHAP}. It is written in \CRANpkg{R6} \citep{R-R6}.
+
+Package \CRANpkg{iBreakDown} implements a general approach to explaining the predictions from supervised models, called \dfn{Break Down} \citep{gosiewska-2019-iBreakDown}. SampleSHAP values can be computed as a special case from random Break Down profiles; see \code{iBreakDown::\code{shap()} for details}. 
+
+\CRANpkg{shapper} provides an R interface to the Python \pkg{shap} library \citep{lundberg-2017-KernelSHAP} using \CRANpkg{reticulate} \citep{R-reticulate}; however, it currently only supports KernelSHAP (\pkg{shap} itself suppors SampleSHAP, TreeSHAP, LinearSHAP, as well as various other model-specific Shapley explanation methods).
+
+TreeSHAP has been directly incorporated into most implementations of XGBoost \citep{chen-2016-xgboost} (including \CRANpkg{xgboost} \citep{R-xgboost}), CatBoost \citep{eronika-2017-catboost}, and LightGBM \citep{ke-2017-lightgbm}. Both \CRANpkg{fastshap} \citep{R-fastshap} and \CRANpkg{SHAPforxgboost} \citep{R-SHAPforxgboost} provide an interface to \pkg{xgboost}'s TreeSHAP implementation.
+
+\CRANpkg{fastshap} provides an efficient implementation of SampleSHAP and makes it a viable option for explaining the predictions from model's where efficient model-specific Shapley methods do not exist or are not yet implemented.
+
+  
+On GitHub
+
+  * shapr
+  
+  * shapFlex
+
+In python, there's \pkg{shap}. In julia, there's \pkg{SampleSHAP.jl} (a lightweight port of \pkg{fastshap}), \pkg{ShapML.jl}, and \pkg{ShapleyValues.jl}.
 
 
 ### So why fastshap?

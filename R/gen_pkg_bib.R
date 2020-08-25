@@ -17,8 +17,13 @@ for (f in files) {
 
 # List of cited packages to include in the bibliography
 pkgs <- c(
+  "iBreakDown",
   "iml",
-  "Rcpp"
+  "fastshap",
+  "Rcpp",
+  "reticulate",
+  "SHAPforxgboost",
+  "shapper"
 )
 
 # Make sure the packages listed above are installed and up to date
