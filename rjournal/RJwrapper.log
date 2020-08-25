@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.18 (TeX Live 2017) (preloaded format=pdflatex 2017.5.23)  25 AUG 2020 15:06
+This is pdfTeX, Version 3.14159265-2.6-1.40.18 (TeX Live 2017) (preloaded format=pdflatex 2017.5.23)  25 AUG 2020 15:08
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -1521,7 +1521,7 @@ t/fonts/type1/urw/palatino/uplbi8a.pfb></usr/local/texlive/2017/texmf-dist/font
 s/type1/urw/palatino/uplr8a.pfb></usr/local/texlive/2017/texmf-dist/fonts/type1
 /urw/palatino/uplr8a.pfb></usr/local/texlive/2017/texmf-dist/fonts/type1/urw/pa
 latino/uplri8a.pfb>
-Output written on RJwrapper.pdf (8 pages, 197879 bytes).
+Output written on RJwrapper.pdf (8 pages, 197880 bytes).
 PDF statistics:
  277 PDF objects out of 1000 (max. 8388607)
  245 compressed objects within 3 object streams

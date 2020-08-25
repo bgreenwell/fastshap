@@ -186,7 +186,7 @@ TreeSHAP has been directly incorporated into most implementations of XGBoost \ci
 
 \CRANpkg{fastshap} provides an efficient implementation of SampleSHAP and makes it a viable option for explaining the predictions from model's where efficient model-specific Shapley methods do not exist or are not yet implemented.
 
-In julia, there's \pkg{SampleSHAP.jl}, which is a lightweight port of \pkg{fastshap}), \pkg{ShapML.jl}, which is another Julia implementation of SampleSHAP, and \pkg{ShapleyValues.jl}, which hasn't been updated since 2016.
+In Julia, there's \pkg{SampleSHAP.jl}, which is a lightweight port of \pkg{fastshap}; \pkg{ShapML.jl}, which is another Julia implementation of SampleSHAP; and \pkg{ShapleyValues.jl}, which hasn't been updated since 2016.
 
 
 ### So why fastshap?
