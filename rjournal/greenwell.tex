@@ -183,6 +183,13 @@ SampleSHAP\ldots{}
 \subsection{Shapley values in R (and other
 lnaguages)}\label{shapley-values-in-r-and-other-lnaguages}}
 
+Probably the first, and most widely used implementation of Shapley
+explanations is the Python \pkg{shap} library
+\citep{lundberg-2017-KernelSHAP}, which provides a Python implementation
+of SampleSHAP, KernelSHAP, TreeSHAP, and a few other model-specific
+Shapley methods (e.g., DeepSHAP, which is provides approximate Shapley
+values for deep learning models).
+
 The \CRANpkg{iml} package \citep{R-iml} provides the \code{Shapley()}
 function, which is a direct implementation of
 Algorithm\textasciitilde{}\ref{alg:SampleSHAP}. It is written in
@@ -195,10 +202,25 @@ a special case from random Break Down profiles; see
 \code{iBreakDown::\code{shap()} for details}.
 
 \CRANpkg{shapper} provides an R interface to the Python \pkg{shap}
-library \citep{lundberg-2017-KernelSHAP} using \CRANpkg{reticulate}
-\citep{R-reticulate}; however, it currently only supports KernelSHAP
-(\pkg{shap} itself suppors SampleSHAP, TreeSHAP, LinearSHAP, as well as
-various other model-specific Shapley explanation methods).
+library using \CRANpkg{reticulate} \citep{R-reticulate}; however, it
+currently only supports KernelSHAP (\pkg{shap} itself supports
+SampleSHAP, TreeSHAP, LinearSHAP, as well as various other
+model-specific Shapley explanation methods).
+
+I'm also aware of two experimental packages supporting Shapley
+explanations that are not currently on CRAN: \pkg{shapr}
+\citep{R-sellereite} and \pkg{shapFlex} \citep{R-shapFlex}. As
+previously discussed, one drawback of traditional Shapley values is the
+assumption of independent features (an assumption made by many IML
+procedures, in fact). To that end, the \pkg{shapr} package implements
+Shapley explanations that can account for the dependence between
+features \citep{aas-2019-explaining}, resulting in significantly more
+accurate approximations to the Shapley values. The package also includes
+an implementation of KernelSHAP that's consistent with the \pkg{shap}
+package for Python. The \pkg{shapFlex} package, short for Shapley
+flexibility, provides approximate Shapley values that incorporate causal
+constraints into the model's feature space, as described in
+\citet{frye-2019-asymmetric}.
 
 TreeSHAP has been directly incorporated into most implementations of
 XGBoost \citep{chen-2016-xgboost} (including \CRANpkg{xgboost}
@@ -212,18 +234,10 @@ and makes it a viable option for explaining the predictions from model's
 where efficient model-specific Shapley methods do not exist or are not
 yet implemented.
 
-On GitHub
-
-\begin{itemize}
-\item
-  shapr
-\item
-  shapFlex
-\end{itemize}
-
-In python, there's \pkg{shap}. In julia, there's \pkg{SampleSHAP.jl} (a
-lightweight port of \pkg{fastshap}), \pkg{ShapML.jl}, and
-\pkg{ShapleyValues.jl}.
+In julia, there's \pkg{SampleSHAP.jl}, which is a lightweight port of
+\pkg{fastshap}), \pkg{ShapML.jl}, which is another Julia implementation
+of SampleSHAP, and \pkg{ShapleyValues.jl}, which hasn't been updated
+since 2016.
 
 \hypertarget{so-why-fastshap}{%
 \subsubsection{So why fastshap?}\label{so-why-fastshap}}
