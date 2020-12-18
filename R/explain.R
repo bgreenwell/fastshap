@@ -83,8 +83,8 @@ explain_column <- function(object, X, column, pred_wrapper, newdata = NULL) {
 #' 
 #' Compute fast (approximate) Shapley values for a set of features.
 #' 
-#' @param object A fitted model object (e.g., a \code{\link[ranger]{ranger}} or
-#' an \code{\link[xgboost]{xgboost}} object).
+#' @param object A fitted model object (e.g., a \code{\link[ranger]{ranger}}, 
+#' an \code{\link[xgboost]{xgboost}}, or a \code{\link[lightgbm]{lightgbm}} object).
 #'
 #' @param feature_names Character string giving the names of the predictor
 #' variables (i.e., features) of interest. If \code{NULL} (default) they will be
@@ -125,9 +125,9 @@ explain_column <- function(object, X, column, pred_wrapper, newdata = NULL) {
 #' training data (i.e., \code{X}).
 #' 
 #' @param exact Logical indicating whether to compute exact Shapley values. 
-#' Currently only available for \code{\link[stats]{lm}} and 
-#' \code{\link[xgboost]{xgboost}} objects. Default is \code{FALSE}. Note 
-#' that setting \code{exact = TRUE} will return explanations for each of the 
+#' Currently only available for \code{\link[stats]{lm}},  
+#' \code{\link[xgboost]{xgboost}}, and \code{\link[lightgbm]{lightgbm}} objects. 
+#' Default is \code{FALSE}. Note that setting \code{exact = TRUE} will return explanations for each of the 
 #' \code{\link[stats]{terms}} in an \code{\link[stats]{lm}} object.
 #' 
 #' @param ... Additional optional arguments to be passed on to
@@ -356,6 +356,31 @@ explain.xgb.Booster <- function(object, feature_names = NULL, X = NULL, nsim = 1
     X <- if (is.null(X)) newdata else X
     res <- stats::predict(object, newdata = X, predcontrib = TRUE, 
                           approxcontrib = FALSE, ...)
+    res <- tibble::as_tibble(res)
+    attr(res, which = "baseline") <- res[["BIAS"]]
+    res[["BIAS"]] <- NULL
+    class(res) <- c(class(res), "explain")
+    res
+  } else {
+    explain.default(object, feature_names = feature_names, X = X, nsim = nsim,
+                    pred_wrapper = pred_wrapper, newdata = newdata, ...)
+  }
+}
+
+#' @rdname explain
+#' 
+#' @export
+explain.lgb.Booster <- function(object, feature_names = NULL, X = NULL, nsim = 1, 
+                                pred_wrapper, newdata = NULL, exact = FALSE, 
+                                ...) {
+  if (isTRUE(exact)) {  # use TreeSHAP
+    if (is.null(X) && is.null(newdata)) {
+      stop("Must supply `X` or `newdata` argument (but not both).", 
+           call. = FALSE)
+    }
+    X <- if (is.null(X)) newdata else X
+    res <- stats::predict(object, X, predcontrib = TRUE, ...)
+    colnames(res) <- c(colnames(X), "BIAS")
     res <- tibble::as_tibble(res)
     attr(res, which = "baseline") <- res[["BIAS"]]
     res[["BIAS"]] <- NULL

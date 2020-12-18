@@ -1,3 +1,9 @@
+# fastshap 0.0.6
+
+## Enhancements
+
+* Function `explain()` with `exact = TRUE` has received a method for LightGBM models.
+
 # fastshap 0.0.5
 
 ## Bug fixes
