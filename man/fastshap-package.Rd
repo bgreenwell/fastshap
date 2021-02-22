@@ -6,8 +6,6 @@
 \alias{fastshap-package}
 \title{fastshap: Fast Approximate Shapley Values}
 \description{
-\if{html}{\figure{logo.png}{options: align='right' alt='logo' width='120'}}
-
 Computes fast (relative to other implementations) approximate 
     Shapley values for any supervised learning model. Shapley values help to 
     explain the predictions from any black box model using ideas from game 

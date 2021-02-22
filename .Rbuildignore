@@ -13,3 +13,4 @@
 ^slowtests$
 ^TODO\.md$
 ^vignettes$
+^\.github$

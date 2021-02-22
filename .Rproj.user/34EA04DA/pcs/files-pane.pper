@@ -1,9 +1,9 @@
 {
-    "path" : "~/Desktop/devel/fastshap",
-    "sortOrder" : [
+    "path": "~/Desktop/devel/fastshap",
+    "sortOrder": [
         {
-            "ascending" : true,
-            "columnIndex" : 2
+            "columnIndex": 2,
+            "ascending": true
         }
     ]
 }

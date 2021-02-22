@@ -1,9 +1,8 @@
 # Load required packages
 library(doParallel)
 # library(fastshap)
+library(ggplot2)
 library(pdp)
-library(ranger)
-library(vip)
 
 # Load the Ames housing data
 ames <- as.data.frame(AmesHousing::make_ames())
@@ -11,7 +10,7 @@ X <- subset(ames, select = -Sale_Price)  # feature columns only
 
 # Fit a random forest model
 set.seed(101)  # for reproducibility
-rfo <- ranger(Sale_Price ~ ., data = ames, importance = "permutation")
+rfo <- ranger::ranger(Sale_Price ~ ., data = ames, importance = "permutation")
 
 # Prediction wrapper
 pfun <- function(object, newdata) {
@@ -24,9 +23,9 @@ time1 <- system.time(
   shap1 <- fastshap::explain(rfo, X = X, pred_wrapper = pfun, nsim = 10, 
                              .progress = "text")
 )
-# > time1
+# > time1  # version 0.0.5
 #     user   system  elapsed 
-# 1001.506   17.423  373.066 
+# 1069.390   14.840  418.975
 #
 # Version 0.0.3 reported 347.988 seconds
 
@@ -41,21 +40,6 @@ time2 <- system.time(
 #     user   system  elapsed 
 # 1267.633   14.429  173.389 
 
-library(ggplot2)
-
-shap3 <- reshape2::melt(shap2, measure.vars = names(shap2),
-                        variable.name = "Variable", value.name = "SHAP")
-
-
-shap_vi <- data.frame(
-  Variable = names(shap2),
-  Importance = apply(shap2, MARGIN = 2, FUN = function(x) mean(abs(x)))
-)
-
-shap4 <- merge(shap3, shap_vi, by = "Variable")
-
-ggplot(shap4, aes(x = SHAP, y = reorder(Variable, Importance))) +
-  ggbeeswarm::geom_quasirandom(groupOnX = FALSE, varwidth = TRUE, 
-                               size = 0.4, alpha = 0.25) +
-  xlab("SHAP value") +
-  ylab(NULL)
+# Shapley-based dependence plot
+autoplot(shap2, type = "dependence", feature = "Gr_Liv_Area", 
+         X = X, alpha = 0.3) + geom_smooth()

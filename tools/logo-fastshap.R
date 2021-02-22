@@ -11,19 +11,15 @@ hex <- data.frame(x = 1.35 * 1 * c(-sqrt(3) / 2, 0, rep(sqrt(3) / 2, 2), 0,
                                    rep(-sqrt(3) / 2, 2)),
                   y = 1.35 * 1 * c(0.5, 1, 0.5, -0.5, -1, -0.5, 0.5))
 
-# Color palettes
-reds <- RColorBrewer::brewer.pal(9, "Reds")
-greys <- RColorBrewer::brewer.pal(9, "Greys")
-
 # Hexagon logo
 hex_logo <- ggplot() +
   geom_polygon(data = hex, aes(x, y), color = "#351D7D", fill = "white",
-               size = 2) +
+               size = 3) +
   annotation_custom(img, xmin = -Inf, xmax = Inf, ymin = -Inf, ymax = Inf) +
   annotate(geom = "text", label = "fastshap", x = -0.4, y = -0.15,
-           # family = "Times", 
-           fontface = "bold.italic",
-           color = "#86AEC8", size = 4.5) +
+           family = "Comic Sans MS",
+           # fontface = "bold.italic",
+           color = "#86AEC8", size = 7) +
   coord_equal(xlim = range(hex$x), ylim = range(hex$y)) +
   scale_x_continuous(expand = c(0.04, 0)) +
   scale_y_reverse(expand = c(0.04, 0)) +
@@ -41,18 +37,12 @@ hex_logo <- ggplot() +
         panel.grid.minor = element_blank())
 print(hex_logo)
 
-# Function to save sticker
-save_sticker <- function(filename, sticker = last_plot(), ...) {
-  ggplot2::ggsave(
-    sticker, 
-    width = 43.9, 
-    height = 50.8,
-    filename = filename,
-    bg = "transparent",
-    units = "mm", 
-    ...
-  )
-}
+png("man/figures/logo-fastshap.png", width = 181, height = 209,
+    bg = "transparent", type = "quartz")
+print(hex_logo)
+dev.off()
 
-# Save sticker
-save_sticker("man/figures/logo.png", sticker = hex_logo)
+svg("man/figures/logo-fastshap.svg", width = 181 / 72, height = 209 / 72,
+    bg = "transparent", family = "Comic Sans MS")
+print(hex_logo)
+dev.off()

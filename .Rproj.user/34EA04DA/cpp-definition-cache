@@ -1,26 +1,26 @@
 [
     {
-        "definitions" : [
+        "file": "/Users/b780620/Desktop/devel/fastshap/src/fastshap.cpp",
+        "file_last_write": 1564258833.0,
+        "definitions": [
             {
-                "column" : 15,
-                "file" : "/Users/b780620/Desktop/devel/fastshap/src/fastshap.cpp",
-                "kind" : 6,
-                "line" : 6,
-                "name" : "genOMat(int, int)",
-                "parent_name" : "",
-                "usr" : "c:@F@genOMat#I#I#"
+                "usr": "c:@F@genOMat#I#I#",
+                "kind": 6,
+                "parent_name": "",
+                "name": "genOMat(int, int)",
+                "file": "/Users/b780620/Desktop/devel/fastshap/src/fastshap.cpp",
+                "line": 6,
+                "column": 15
             },
             {
-                "column" : 6,
-                "file" : "/Users/b780620/Desktop/devel/fastshap/src/fastshap.cpp",
-                "kind" : 6,
-                "line" : 52,
-                "name" : "genFrankensteinMatrices(arma::mat, arma::mat, arma::umat, int)",
-                "parent_name" : "",
-                "usr" : "c:@F@genFrankensteinMatrices#$@N@arma@S@Mat>#d#S0_#$@N@arma@S@Mat>#i#I#"
+                "usr": "c:@F@genFrankensteinMatrices#$@N@arma@S@Mat>#d#S0_#$@N@arma@S@Mat>#i#I#",
+                "kind": 6,
+                "parent_name": "",
+                "name": "genFrankensteinMatrices(arma::mat, arma::mat, arma::umat, int)",
+                "file": "/Users/b780620/Desktop/devel/fastshap/src/fastshap.cpp",
+                "line": 52,
+                "column": 6
             }
-        ],
-        "file" : "/Users/b780620/Desktop/devel/fastshap/src/fastshap.cpp",
-        "file_last_write" : 1564258833.000000
+        ]
     }
 ]

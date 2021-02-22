@@ -121,8 +121,15 @@ force_plot.explain <- function(object, baseline = NULL, feature_values = NULL,
   )
 
   # Display results
+  # FIXME: Is this the best way to determine/compare Python package versions?
+  shap_version <- reticulate::py_get_attr(shap, name = "__version__")
+  shap_version <- package_version(as.character(shap_version))
   tfile <- tempfile(fileext = ".html")
-  shap$save_html(tfile, plot_html = fp)
+  if (shap_version < "0.36.0") {
+    shap$save_html(tfile, plot_html = fp)
+  } else {
+    shap$save_html(tfile, plot = fp)
+  }
   display <- match.arg(display)
   # Check for dependencies
   if (display == "viewer") {

@@ -24,6 +24,11 @@
 #' @param X A matrix-like R object (e.g., a data frame or matrix) containing 
 #' ONLY the feature columns from the training data.
 #' 
+#' @param feature_values A matrix-like R object (e.g., a data frame or matrix) 
+#' containing the feature values correposnding to the instance being explained.
+#' Only used when \code{type = "dependence"}. \strong{NOTE:} Must contain the 
+#' same column structure (e.g., column names, order, etc.) as \code{X}.
+#' 
 #' @param color_by Character string specifying an optional feature column in 
 #' \code{X} to use for coloring whenever \code{type = "dependence"}.
 #' 
@@ -93,6 +98,7 @@ autoplot.explain <- function(
   feature = NULL, 
   num_features = NULL,
   X = NULL, 
+  feature_values = NULL,
   color_by = NULL, 
   smooth = FALSE, 
   smooth_color = "red", 
@@ -176,6 +182,22 @@ autoplot.explain <- function(
     # Construct data to plot
     if (is.null(row_num)) {
       row_num <- 1L
+    }
+    if (!is.null(feature_values)) {
+      if (ncol(feature_values) != ncol(object)) {
+        stop("`feature_values` should contain the same number of columns as `X`.",
+             call. = FALSE)
+      }
+      if (!identical(names(feature_values), names(object))) {
+        stop("`feature_values` should contain the same column names as `X`.",
+             call. = FALSE)
+      }
+      if (nrow(feature_values) > 1) {
+        stop("`feature_values` must contain a single row.", call. = FALSE)
+      }
+      names(object) <- paste0(names(feature_values), " = ", 
+                              # data.matrix(feature_values))
+                              as.matrix(feature_values))
     }
     shap_con <- data.frame(
       Variable = names(object),

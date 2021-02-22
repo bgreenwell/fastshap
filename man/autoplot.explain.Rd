@@ -10,6 +10,7 @@
   feature = NULL,
   num_features = NULL,
   X = NULL,
+  feature_values = NULL,
   color_by = NULL,
   smooth = FALSE,
   smooth_color = "red",
@@ -38,6 +39,11 @@ Default is \code{NULL} which will cause all variables to be displayed.}
 
 \item{X}{A matrix-like R object (e.g., a data frame or matrix) containing 
 ONLY the feature columns from the training data.}
+
+\item{feature_values}{A matrix-like R object (e.g., a data frame or matrix) 
+containing the feature values correposnding to the instance being explained.
+Only used when \code{type = "dependence"}. \strong{NOTE:} Must contain the 
+same column structure (e.g., column names, order, etc.) as \code{X}.}
 
 \item{color_by}{Character string specifying an optional feature column in 
 \code{X} to use for coloring whenever \code{type = "dependence"}.}

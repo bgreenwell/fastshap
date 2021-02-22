@@ -1,3 +1,13 @@
+# fastshap 0.0.5.9000
+
+## Bug fixes
+
+* The `force_plot()` function should now be compatible with **shap** (>=0.36.0); thanks to @hfshr and @jbwoillard for reporting [(#12)](https://github.com/bgreenwell/fastshap/issues/12).
+
+## Miscellaneous
+
+* Switched from Travis-CI to GitHub Actions for continuous integration.
+
 # fastshap 0.0.5
 
 ## Bug fixes

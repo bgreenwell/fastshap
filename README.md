@@ -1,16 +1,13 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
-# fastshap <img src='man/figures/logo.png' align="right" height="139" />
+# fastshap <img src='man/figures/logo-fastshap.png' align="right" height="139" />
 
 <!-- badges: start -->
 
 [![CRAN
 status](https://www.r-pkg.org/badges/version/fastshap)](https://CRAN.R-project.org/package=fastshap)
-[![Travis build
-status](https://travis-ci.org/bgreenwell/fastshap.svg?branch=master)](https://travis-ci.org/bgreenwell/fastshap)
-[![AppVeyor build
-status](https://ci.appveyor.com/api/projects/status/github/bgreenwell/fastshap?branch=master&svg=true)](https://ci.appveyor.com/project/bgreenwell/fastshap)
+[![R-CMD-check](https://github.com/bgreenwell/fastshap/workflows/R-CMD-check/badge.svg)](https://github.com/bgreenwell/fastshap/actions)
 [![Codecov test
 coverage](https://codecov.io/gh/bgreenwell/fastshap/branch/master/graph/badge.svg)](https://codecov.io/gh/bgreenwell/fastshap?branch=master)
 [![Lifecycle:
