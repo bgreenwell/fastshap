@@ -90,7 +90,7 @@ force_plot.explain <- function(object, baseline = NULL, feature_values = NULL,
   }
   
   # # Check dimension of explanations (for now, only a single row is allowed)
-  # if (nrow(ex) != 1) {
+  # if (nrow(object) != 1) {
   #   stop("Currently, only a single explanation is allowed to be plotted.",
   #        call. = FALSE)
   # }
@@ -124,6 +124,7 @@ force_plot.explain <- function(object, baseline = NULL, feature_values = NULL,
   # FIXME: Is this the best way to determine/compare Python package versions?
   shap_version <- reticulate::py_get_attr(shap, name = "__version__")
   shap_version <- package_version(as.character(shap_version))
+  message("Using shap version ", shap_version, ".")
   tfile <- tempfile(fileext = ".html")
   if (shap_version < "0.36.0") {
     shap$save_html(tfile, plot_html = fp)
@@ -131,6 +132,7 @@ force_plot.explain <- function(object, baseline = NULL, feature_values = NULL,
     shap$save_html(tfile, plot = fp)
   }
   display <- match.arg(display)
+  
   # Check for dependencies
   if (display == "viewer") {
     if (requireNamespace("rstudioapi", quietly = TRUE)) {

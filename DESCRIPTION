@@ -27,7 +27,7 @@ Suggests:
     htmltools,
     knitr,
     ranger,
-    reticulate,
+    reticulate (>= 1.14),
     rmarkdown,
     rstudioapi,
     tinytest,
@@ -37,3 +37,10 @@ LinkingTo:
     Rcpp,
     RcppArmadillo
 RoxygenNote: 7.1.1
+Encoding: UTF-8
+Config/reticulate:
+  list(
+    packages = list(
+      list(package = "shap")
+    )
+  )

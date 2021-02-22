@@ -9,7 +9,6 @@
 ^README\.Rmd$
 ^README\.md$
 ^README_cache$
-^rjournal$
 ^slowtests$
 ^TODO\.md$
 ^vignettes$
