@@ -1,9 +1,10 @@
+.DS_Store
 .Rproj.user
 .Rhistory
 .RData
 .Ruserdata
+inst/doc
+lightgbm.model
 src/*.o
 src/*.so
 src/*.dll
-inst/doc
-.DS_Store

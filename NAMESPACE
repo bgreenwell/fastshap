@@ -2,6 +2,7 @@
 
 S3method(autoplot,explain)
 S3method(explain,default)
+S3method(explain,lgb.Booster)
 S3method(explain,lm)
 S3method(explain,xgb.Booster)
 S3method(force_plot,explain)

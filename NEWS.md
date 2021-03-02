@@ -1,8 +1,14 @@
 # fastshap 0.0.5.9000
 
+## Enhancements
+
+* Thanks to Michael Mayer (@mayer79), function `explain()` now supports [lightgbm](https://cran.r-project.org/package=lightgbm) models [(#15)](https://github.com/bgreenwell/fastshap/issues/15).
+
 ## Bug fixes
 
 * The `force_plot()` function should now be compatible with **shap** (>=0.36.0); thanks to @hfshr and @jbwoillard for reporting [(#12)](https://github.com/bgreenwell/fastshap/issues/12).
+
+* Fixed minor name repair issue caused by [tibble](https://cran.r-project.org/package=tibble).
 
 ## Miscellaneous
 

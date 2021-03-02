@@ -22,7 +22,7 @@ trn <- gen_friedman(500, seed = 101)
 X <- subset(trn, select = -y)
 
 # Fit a MARS model to the simulated Friedman benchmark data
-mars <- eartth::earth(y ~ ., data = trn, degree = 2)
+mars <- earth::earth(y ~ ., data = trn, degree = 2)
 
 # Prediction wrapper
 pfun <- function(object, newdata) {
@@ -32,6 +32,9 @@ pfun <- function(object, newdata) {
 # Generate approximate Shapley values for entire training set
 set.seed(102)  # for reproducibility
 shap_all <- explain(mars, X = X, pred_wrapper = pfun, nsim = 1)
+
+explain(mars, X = X, newdata = X[1L:2L, ], pred_wrapper = pfun, nsim = 1000)
+
 
 # Construct force plots
 expect_null(

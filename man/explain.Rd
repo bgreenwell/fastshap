@@ -5,6 +5,7 @@
 \alias{explain.default}
 \alias{explain.lm}
 \alias{explain.xgb.Booster}
+\alias{explain.lgb.Booster}
 \title{Fast approximate Shapley values}
 \usage{
 explain(object, ...)
@@ -41,10 +42,22 @@ explain(object, ...)
   exact = FALSE,
   ...
 )
+
+\method{explain}{lgb.Booster}(
+  object,
+  feature_names = NULL,
+  X = NULL,
+  nsim = 1,
+  pred_wrapper,
+  newdata = NULL,
+  exact = FALSE,
+  ...
+)
 }
 \arguments{
-\item{object}{A fitted model object (e.g., a \code{\link[ranger]{ranger}} or
-an \code{\link[xgboost]{xgboost}} object).}
+\item{object}{A fitted model object (e.g., a \code{\link[ranger]{ranger}},
+\code{\link[xgboost]{xgboost}}, or \code{\link[earth]{earth}} object, to name
+a few).}
 
 \item{...}{Additional optional arguments to be passed on to
 \code{\link[plyr]{laply}}.}
@@ -88,10 +101,11 @@ model's prediction for that sample and the average prediction over all the
 training data (i.e., \code{X}).}
 
 \item{exact}{Logical indicating whether to compute exact Shapley values. 
-Currently only available for \code{\link[stats]{lm}} and 
-\code{\link[xgboost]{xgboost}} objects. Default is \code{FALSE}. Note 
-that setting \code{exact = TRUE} will return explanations for each of the 
-\code{\link[stats]{terms}} in an \code{\link[stats]{lm}} object.}
+Currently only available for \code{\link[stats]{lm}}, 
+\code{\link[xgboost]{xgboost}}, and \code{\link[lightgbm]{lightgbm}} objects. 
+Default is \code{FALSE}. Note that setting \code{exact = TRUE} will return 
+explanations for each of the \code{\link[stats]{terms}} in an 
+\code{\link[stats]{lm}} object.}
 }
 \value{
 A tibble with one column for each feature specified in 
