@@ -379,7 +379,7 @@ explain.lgb.Booster <- function(object, feature_names = NULL, X = NULL, nsim = 1
            call. = FALSE)
     }
     X <- if (is.null(X)) newdata else X
-    res <- stats::predict(object, X, predcontrib = TRUE, ...)
+    res <- stats::predict(object, data = X, predcontrib = TRUE, ...)
     colnames(res) <- c(colnames(X), "BIAS")
     res <- tibble::as_tibble(res)
     attr(res, which = "baseline") <- res[["BIAS"]]
