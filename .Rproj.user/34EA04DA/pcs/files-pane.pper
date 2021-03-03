@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 {
     "path": "~/Desktop/devel/fastshap",
     "sortOrder": [
@@ -6,4 +7,14 @@
             "ascending": true
         }
     ]
+=======
+{
+    "path": "~/Desktop/devel/fastshap/slowtests",
+    "sortOrder": [
+        {
+            "columnIndex": 2,
+            "ascending": true
+        }
+    ]
+>>>>>>> 055e47e1357b3c01cc9037813a081c75b8f9359a
 }

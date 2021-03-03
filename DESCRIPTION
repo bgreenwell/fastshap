@@ -39,9 +39,3 @@ LinkingTo:
     RcppArmadillo
 RoxygenNote: 7.1.1
 Encoding: UTF-8
-Config/reticulate:
-  list(
-    packages = list(
-      list(package = "shap")
-    )
-  )
