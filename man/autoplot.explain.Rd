@@ -6,7 +6,7 @@
 \usage{
 \method{autoplot}{explain}(
   object,
-  type = c("importance", "dependence", "contribution"),
+  type = c("importance", "dependence", "contribution", "beeswarm"),
   feature = NULL,
   num_features = NULL,
   X = NULL,
@@ -27,8 +27,10 @@
 \item{type}{Character string specifying which type of plot to construct. 
 Current options are \code{"importance"} (for Shapley-based variable 
 importance plots), \code{"dependence"} (for Shapley-based dependence 
-plots), and \code{"contribution"} (for visualizing the feature contributions
-to an individual prediction).}
+plots), \code{"contribution"} (for visualizing the feature contributions
+to an individual prediction), and \code{"beeswarm"} (for visualizing a 
+beeswarm plot for global Shapley-based variable imporance; this argument 
+requires to provide the original dataframe with the argument `orig_data`).}
 
 \item{feature}{Character string specifying which feature to use when 
 \code{type = "dependence"}. If \code{NULL} (default) the first feature will
@@ -104,4 +106,5 @@ library(ggplot2)
 autoplot(shap)  # Shapley-based importance plot
 autoplot(shap, type = "dependence", feature = "wt", X = mtcars)
 autoplot(shap, type = "contribution", row_num = 1)  # explain first row of X
+autoplot(object = shap, type = "beeswarm", X = mtcars)
 }

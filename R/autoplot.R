@@ -11,8 +11,10 @@
 #' @param type Character string specifying which type of plot to construct. 
 #' Current options are \code{"importance"} (for Shapley-based variable 
 #' importance plots), \code{"dependence"} (for Shapley-based dependence 
-#' plots), and \code{"contribution"} (for visualizing the feature contributions
-#' to an individual prediction).
+#' plots), \code{"contribution"} (for visualizing the feature contributions
+#' to an individual prediction), and \code{"beeswarm"} (for visualizing a 
+#' beeswarm plot for global Shapley-based variable imporance; this argument 
+#' requires to provide the original dataframe with the argument `orig_data`).
 #' 
 #' @param feature Character string specifying which feature to use when 
 #' \code{type = "dependence"}. If \code{NULL} (default) the first feature will
@@ -92,9 +94,10 @@
 #' autoplot(shap)  # Shapley-based importance plot
 #' autoplot(shap, type = "dependence", feature = "wt", X = mtcars)
 #' autoplot(shap, type = "contribution", row_num = 1)  # explain first row of X
+#' autoplot(object = shap, type = "beeswarm", X = mtcars)
 autoplot.explain <- function(
   object, 
-  type = c("importance", "dependence", "contribution"),
+  type = c("importance", "dependence", "contribution", "beeswarm"),
   feature = NULL, 
   num_features = NULL,
   X = NULL, 
@@ -199,22 +202,31 @@ autoplot.explain <- function(
                               # data.matrix(feature_values))
                               as.matrix(feature_values))
     }
-    shap_con <- data.frame(
-      Variable = names(object),
-      Shapley = t(object[row_num, , drop = TRUE])
-    )
-    shap_con <- shap_con[order(abs(shap_con$Shapley), decreasing = TRUE), ]  # sort in descending order
-    shap_con <- shap_con[seq_len(num_features), ]  # only retain num_features variable importance scores
-    
-    # Construct plot
-    x_string <- "reorder(Variable, abs(Shapley))"
-    p <- ggplot(shap_con, aes_string(x = x_string, y = "Shapley", 
-                                     color = "Shapley", fill = "Shapley")) +
-      geom_col(...) +
-      coord_flip() +
-      xlab("") +
-      ylab("Shapley value") +
-      guides(fill = FALSE, color = FALSE)
+    if (type == "contribution") {
+      shap_con <- data.frame(
+        Variable = names(object),
+        Shapley = t(object[row_num, , drop = TRUE])
+      )
+      shap_con <- shap_con[order(abs(shap_con$Shapley), decreasing = TRUE), ]  # sort in descending order
+      shap_con <- shap_con[seq_len(num_features), ]  # only retain num_features variable importance scores
+      
+      # Construct plot
+      x_string <- "reorder(Variable, abs(Shapley))"
+      p <- ggplot(shap_con, aes_string(x = x_string, y = "Shapley", 
+                                       color = "Shapley", fill = "Shapley")) +
+        geom_col(...) +
+        coord_flip() +
+        xlab("") +
+        ylab("Shapley value") +
+        guides(fill = FALSE, color = FALSE)
+    } else if (type == "beeswarm") {
+      stopifnot(!is.null(X))
+      
+      # TODO add support for num_features
+      
+      p <- beeswarm_prepare(object, X) %>%
+        beeswarm_plot()
+    }
 
   }
   

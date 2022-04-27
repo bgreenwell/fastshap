@@ -31,3 +31,6 @@ system.time(
 )
 #   user  system elapsed 
 # 81.318   7.091  19.778
+
+p <- autoplot(object = shap, type = "beeswarm", X = boston)
+p
