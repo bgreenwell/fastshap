@@ -19,7 +19,10 @@ Imports:
     matrixStats,
     plyr, 
     Rcpp (>= 1.0.1), 
-    tibble
+    tibble,
+    magrittr,
+    dplyr,
+    utils
 Suggests: 
     AmesHousing,
     covr,
@@ -37,5 +40,5 @@ Suggests:
 LinkingTo: 
     Rcpp,
     RcppArmadillo
-RoxygenNote: 7.1.1
+RoxygenNote: 7.1.2
 Encoding: UTF-8

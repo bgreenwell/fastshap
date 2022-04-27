@@ -1,4 +1,4 @@
-# The purpose of this script is tom compare the computating time and output
+# The purpose of this script is to compare the computating time and output
 # between fastshap and the Python shap library (using the kernel explainer and
 # the sampling explainer).
 
