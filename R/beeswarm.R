@@ -9,17 +9,26 @@
 #' 
 #' @importFrom magrittr `%>%`
 #'
-beeswarm_prepare <- function(object, X) {
-  stopifnot(nrow(object) == nrow(X))
-  
-  # TODO support this only for numeric / integer or factors
-  # throw error, when date or character
+beeswarm_prepare <- function(object, X, num_features) {
+  stopifnot(
+    nrow(object) == nrow(X),
+    ifelse(is.null(num_features), TRUE, is.integer(num_features))
+  )
   
   # prepare shapley values for plotting
   shap_vals <- object %>%
     tibble::as_tibble()
   original_data <- X %>%
     tibble::as_tibble()
+  
+  if (!is.null(num_features)) {
+    feature_names <- colnames(shap_vals)[1:num_features]
+    shap_vals <- shap_vals %>%
+      dplyr::select(feature_names)
+    original_data <- original_data %>%
+      dplyr::select(feature_names)
+  }
+  
   
   # sort variable names by mean(abs(shap_value))
   shap_order <- sapply(

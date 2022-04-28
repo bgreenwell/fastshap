@@ -1,7 +1,3 @@
-# TODO: 
-#
-#   1. Add \code{type = "beeswarm"}.
-
 #' Plotting Shapley values
 #' 
 #' Construct Shapley-based importance plots or Shap-based dependence plots.
@@ -224,7 +220,11 @@ autoplot.explain <- function(
       
       # TODO add support for num_features
       
-      p <- beeswarm_prepare(object, X) %>%
+      p <- beeswarm_prepare(
+        object = object,
+        X = X,
+        num_features = num_features
+      ) %>%
         beeswarm_plot()
     }
 

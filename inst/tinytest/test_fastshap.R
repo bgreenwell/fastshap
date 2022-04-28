@@ -205,5 +205,18 @@ expect_identical(
   target = c(ncol(X) * nrow(X), 4L)
 )
 
+
+p8 <- ggplot2::autoplot(
+  object = shap_all, type = "beeswarm", X = X, num_features = 4)
+
+expect_identical(
+  current = class(p8),
+  target = c("gg", "ggplot")
+)
+expect_identical(
+  current = dim(p8$data),
+  target = c(4L * nrow(X), 4L)
+)
+
 # Inspect plots
-gridExtra::grid.arrange(p1, p2, p3, p4, p5, p6, p7, nrow = 2)
+gridExtra::grid.arrange(p1, p2, p3, p4, p5, p6, p7, p8, nrow = 2)

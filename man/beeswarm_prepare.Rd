@@ -4,13 +4,16 @@
 \alias{beeswarm_prepare}
 \title{Internal function to prepare data for beeswarm plot}
 \usage{
-beeswarm_prepare(object, X)
+beeswarm_prepare(object, X, num_features)
 }
 \arguments{
 \item{object}{An object of class \code{"explain"}.}
 
 \item{X}{A matrix-like R object (e.g., a data frame or matrix) containing 
 ONLY the feature columns from the training data.}
+
+\item{num_features}{Integer specifying the number of variables to plot. 
+Default is \code{NULL} which will cause all variables to be displayed.}
 }
 \value{
 A tibble created with internal function
