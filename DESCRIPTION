@@ -38,7 +38,10 @@ Suggests:
     rstudioapi,
     tinytest,
     titanic,
-    xgboost
+    xgboost,
+    ggbeeswarm
+Remotes:
+    github:eclarke/ggbeeswarm
 LinkingTo: 
     Rcpp,
     RcppArmadillo

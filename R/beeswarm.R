@@ -106,7 +106,8 @@ beeswarm_plot <- function(plt_dat) {
     )) +
     ggplot2::coord_flip() +
     ggplot2::theme_minimal() +
-    ggplot2::geom_point(position = ggplot2::position_jitter()) +
+    #ggplot2::geom_point(position = ggplot2::position_jitter()) +
+    ggbeeswarm::geom_beeswarm(cex = 0.3, corral = "random") +
     #ggforce::geom_sina() +
     viridis::scale_color_viridis(
       option = "inferno",
