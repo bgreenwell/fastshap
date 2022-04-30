@@ -54,8 +54,9 @@ beeswarm_prepare <- function(object, X, num_features) {
   }
   
   # scale original data
-  original_data_scaled <- original_data %>%
-    scale() %>%
+  # original_data_scaled <- lapply(original_data, scale) %>%
+  #   tibble::as_tibble()
+  original_data_scaled <- lapply(original_data, beeswarm_normalize) %>%
     tibble::as_tibble()
   # create id
   original_data_scaled$shap_id <- 1:nrow(original_data)
@@ -110,7 +111,7 @@ beeswarm_plot <- function(plt_dat) {
     ggbeeswarm::geom_beeswarm(cex = 0.3, corral = "random") +
     #ggforce::geom_sina() +
     viridis::scale_color_viridis(
-      option = "inferno",
+      option = "plasma",
       breaks = c(min(plt_dat$value_original), max(plt_dat$value_original)),
       labels = c("Low", "High")) +
     ggplot2::xlab(ggplot2::element_blank()) + 
@@ -122,4 +123,8 @@ beeswarm_plot <- function(plt_dat) {
       title.hjust = 0.5
     ))
   return(p)
+}
+
+beeswarm_normalize <- function(x, na.rm = TRUE) {
+  return((x - min(x)) / (max(x) - min(x)))
 }
