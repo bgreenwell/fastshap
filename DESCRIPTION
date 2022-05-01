@@ -24,7 +24,8 @@ Imports:
     dplyr,
     utils,
     tidyr,
-    viridis
+    viridis,
+    ggbeeswarm
 Suggests: 
     AmesHousing,
     covr,
@@ -38,8 +39,7 @@ Suggests:
     rstudioapi,
     tinytest,
     titanic,
-    xgboost,
-    ggbeeswarm
+    xgboost
 Remotes:
     eclarke/ggbeeswarm
 LinkingTo: 
