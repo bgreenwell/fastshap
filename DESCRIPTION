@@ -24,8 +24,7 @@ Imports:
     dplyr,
     utils,
     tidyr,
-    viridis,
-    ggforce
+    viridis
 Suggests: 
     AmesHousing,
     covr,

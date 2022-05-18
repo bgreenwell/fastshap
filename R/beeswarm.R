@@ -136,11 +136,15 @@ beeswarm_plot <- function(plt_dat) {
     )) +
     ggplot2::coord_flip() +
     ggplot2::theme_minimal() +
-    #ggplot2::geom_point(position = "pos_x") +
-    #ggbeeswarm::geom_beeswarm(cex = 0.3, corral = "random") +
+    ggplot2::geom_point(position = ggplot2::position_jitterdodge(
+      jitter.width = 0.2,
+      jitter.height = 0.05
+    )) +
     #gginnards::stat_debug_group(geom = "null")
-    # geom_bee_swarm() +
-    ggforce::geom_sina(scale = FALSE) +
+    # ggforce::geom_sina(
+    #   scale = FALSE,
+    #   adjust = 1.1 # https://stackoverflow.com/a/67308690
+    # ) +
     viridis::scale_color_viridis(
       option = "plasma",
       breaks = c(min(plt_dat$value_original), max(plt_dat$value_original)),
@@ -159,35 +163,3 @@ beeswarm_plot <- function(plt_dat) {
 beeswarm_normalize <- function(x, na.rm = TRUE) {
   return((x - min(x)) / (max(x) - min(x)))
 }
-
-# GeomBeeSwarm <- ggplot2::ggproto(
-#   `_class` = "GeomBeeSwarm",
-#   `_inherit` = ggplot2::Position, 
-#   required_aes = c("x", "y"),
-#   compute_group = function(data, params, scales) {
-#     ret <- beeswarm(data$y ~ data$x)
-#     ret[, c("x", "y")]
-#   }
-# )
-# 
-# 
-# geom_bee_swarm <- function(
-#   mapping = NULL,
-#   data = NULL,
-#   stat = "identity",
-#   ...,
-#   na.rm = FALSE,
-#   show.legend = NA,
-#   inherit.aes = FALSE
-# ) {
-#   ggplot2::layer(
-#     position = GeomBeeSwarm,
-#     data = data,
-#     mapping = mapping,
-#     stat = stat,
-#     geom = ggplot2::GeomPoint,
-#     show.legend = show.legend,
-#     inherit.aes = inherit.aes,
-#     params = list(na.rm = na.rm, ...),
-#   )
-# }
