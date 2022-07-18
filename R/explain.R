@@ -318,7 +318,7 @@ explain.default <- function(object, feature_names = NULL, X = NULL, nsim = 1,
   names(res) <- feature_names
   
   # Add extra `"explain"` class for printing, plotting, etc.
-  class(res) <- c(class(res), "explain")
+  class(res) <- c("explain", class(res))
   res
 
 }
