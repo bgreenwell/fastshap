@@ -385,7 +385,14 @@ explain.lgb.Booster <- function(object, feature_names = NULL, X = NULL, nsim = 1
            call. = FALSE)
     }
     X <- if (is.null(X)) newdata else X
-    res <- stats::predict(object, X, predcontrib = TRUE, ...)
+    
+    # Adapt LightGBM predict() interface
+    if (utils::packageVersion("lightgbm") > package_version("3.3.2")) {
+      res <- stats::predict(object, X, type = "contrib", ...)
+    } else {
+      res <- stats::predict(object, X, predcontrib = TRUE, ...)
+    }
+    
     colnames(res) <- c(colnames(X), "BIAS")
     res <- tibble::as_tibble(res)
     attr(res, which = "baseline") <- res[["BIAS"]]

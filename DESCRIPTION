@@ -20,6 +20,7 @@ Imports:
     plyr, 
     Rcpp (>= 1.0.1), 
     tibble
+    utils
 Suggests: 
     AmesHousing,
     covr,
