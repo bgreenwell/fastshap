@@ -66,7 +66,7 @@ expect_identical(
 # Check class 
 expect_identical(
   current = class(shap_all),
-  target = c("tbl_df", "tbl", "data.frame", "explain")
+  target = c("explain", "tbl_df", "tbl", "data.frame")
 )
 
 # Check Shapley-based variable importance
@@ -107,7 +107,7 @@ expect_identical(
 # Check class 
 expect_identical(
   current = class(shap_single),
-  target = c("tbl_df", "tbl", "data.frame", "explain")
+  target = c("explain", "tbl_df", "tbl", "data.frame")
 )
 
 
