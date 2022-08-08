@@ -108,7 +108,7 @@ explanations for each of the \code{\link[stats]{terms}} in an
 \code{\link[stats]{lm}} object.}
 }
 \value{
-A tibble with one column for each feature specified in 
+A matrix with one column for each feature specified in 
 \code{feature_names} (if \code{feature_names = NULL}, the default, there will
 be one column for each feature in \code{X}) and one row for each observation
 in \code{newdata} (if \code{newdata = NULL}, the default, there will be one

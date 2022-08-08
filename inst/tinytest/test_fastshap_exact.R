@@ -1,16 +1,7 @@
 # Exits
-if (!requireNamespace("ggplot2", quietly = TRUE)) {
-  exit_file("Package ggplot2 missing")
-}
 if (!requireNamespace("xgboost", quietly = TRUE)) {
   exit_file("Package xgboost missing")
 }
-
-# Load required packages
-suppressMessages({
-  library(ggplot2)
-  # library(xgboost)
-})
 
 # Generate training data from the Friedman 1 benchmark problem
 trn <- gen_friedman(500, seed = 101)
@@ -42,14 +33,14 @@ expect_identical(
 
 # Check column names
 expect_identical(
-  current = names(ex_exact),
+  current = colnames(ex_exact),
   target = names(X)
 )
 
 # Check class 
 expect_identical(
   current = class(ex_exact),
-  target = c("tbl_df", "tbl", "data.frame", "explain")
+  target = c("matrix", "array")
 )
 
 # Fit model(s)
@@ -81,12 +72,12 @@ expect_identical(
 
 # Check column names
 expect_identical(
-  current = names(ex_exact),
+  current = colnames(ex_exact),
   target = colnames(X)
 )
 
 # Check class 
 expect_identical(
   current = class(ex_exact),
-  target = c("tbl_df", "tbl", "data.frame", "explain")
+  target = c("matrix", "array")
 )

@@ -137,7 +137,7 @@ explain_column <- function(object, X, column, pred_wrapper, newdata = NULL) {
 #' @param ... Additional optional arguments to be passed on to
 #' \code{\link[plyr]{laply}}.
 #' 
-#' @return A tibble with one column for each feature specified in 
+#' @return A matrix with one column for each feature specified in 
 #' \code{feature_names} (if \code{feature_names = NULL}, the default, there will
 #' be one column for each feature in \code{X}) and one row for each observation
 #' in \code{newdata} (if \code{newdata = NULL}, the default, there will be one
@@ -198,26 +198,24 @@ explain.default <- function(object, feature_names = NULL, X = NULL, nsim = 1,
   
   # Experimental patch for more efficiently computing single-row explanations
   if (!is.null(newdata)) {
-    if (nrow(newdata) == 1L && nsim > 1) {
+    if (nrow(newdata) == 1L && nsim > 1L) {
       newdata <- newdata[rep(1L, times = nsim), ]  # replicate row `nsim` times
-      res <- explain.default(object, feature_names = feature_names, X = X, 
-                             nsim = 1L, pred_wrapper = pred_wrapper, 
-                             newdata = newdata, adjust = FALSE, ...)
-      phi_avg <- colMeans(res)
+      phis <- explain.default(object, feature_names = feature_names, X = X, 
+                              nsim = 1L, pred_wrapper = pred_wrapper, 
+                              newdata = newdata, adjust = FALSE, ...)
+      phi.avg <- t(colMeans(phis))  # transpose to keep as row matrix
       if (isTRUE(adjust)) {
         # Compute average training prediction (fnull) and predictions associated
         # with each explanation (fx)
         fx <- pred_wrapper(object, newdata = newdata[1L, , drop = FALSE])
         fnull <- mean(pred_wrapper(object, newdata = X))
-        phi_var <- apply(res, MARGIN = 2, FUN = stats::var)
-        err <- fx - sum(phi_avg) - fnull
-        v <- (phi_var / max(phi_var)) * 1e6
+        phi.var <- apply(phis, MARGIN = 2, FUN = stats::var)
+        err <- fx - sum(phi.avg) - fnull
+        v <- (phi.var / max(phi.var)) * 1e6
         adj <- err * (v - (v * sum(v)) / (1 + sum(v)))
-        phi_avg <- phi_avg + adj
+        phi.avg <- phi.avg + adj
       }
-      res <- tibble::as_tibble(t(phi_avg))
-      class(res) <- c(class(res), "explain")
-      return(res)
+      return(phi.avg)
     }
   }
   
@@ -244,13 +242,14 @@ explain.default <- function(object, feature_names = NULL, X = NULL, nsim = 1,
     }
     
     # Compute approximate Shapley values and variances
-    res <- plyr::laply(feature_names, .fun = function(x) {
+    phis <- plyr::laply(feature_names, .fun = function(x) {
       reps <- replicate(nsim, {  # replace later with vapply()
         explain_column(object, X = X, column = x, pred_wrapper = pred_wrapper,
                        newdata = newdata)  # numeric(nrow(X))
       })
       if (is.matrix(reps)) {
-        abind(rowMeans(reps), matrixStats::rowVars(reps), along = 2)
+        # abind(rowMeans(reps), matrixStats::rowVars(reps), along = 2)
+        abind(rowMeans(reps), apply(reps, MARGIN = 1, FUN = var), along = 2)
       } else {
         cbind(mean.default(reps), stats::var(reps))
       }
@@ -266,26 +265,26 @@ explain.default <- function(object, feature_names = NULL, X = NULL, nsim = 1,
     }
     
     # Adjust sum of approximate Shapley values
-    if (length(dim(res)) == 3L) {  # multiple explanations
-      for (i in seq_len(dim(res)[2L])) {
-        err <- fx[i] - sum(res[, i, 1L]) - fnull
-        v <- (res[, i, 2L] / max(res[, i, 2L])) * 1e6
+    if (length(dim(phis)) == 3L) {  # multiple explanations
+      for (i in seq_len(dim(phis)[2L])) {
+        err <- fx[i] - sum(phis[, i, 1L]) - fnull
+        v <- (phis[, i, 2L] / max(phis[, i, 2L])) * 1e6
         adj <- err * (v - (v * sum(v)) / (1 + sum(v)))
-        res[, i, 1L] <- res[, i, 1L] + adj
+        phis[, i, 1L] <- phis[, i, 1L] + adj
       }
-      res <- res[, , 1L]
+      phis <- phis[, , 1L]
     } else {
-      err <- fx - sum(res[, 1L]) - fnull
-      v <- (res[, 2L] / max(res[, 2L])) * 1e6
+      err <- fx - sum(phis[, 1L]) - fnull
+      v <- (phis[, 2L] / max(phis[, 2L])) * 1e6
       adj <- err * (v - (v * sum(v)) / (1 + sum(v)))
-      res[, 1L] <- res[, 1L] + adj
-      res <- res[, 1L]
+      phis[, 1L] <- phis[, 1L] + adj
+      phis <- phis[, 1L]
     }
     
   } else {  # don't adjust
     
     # Compute approximate Shapley values
-    res <- plyr::laply(feature_names, .fun = function(x) {
+    phis <- plyr::laply(feature_names, .fun = function(x) {
       reps <- replicate(nsim, {  # replace later with vapply()
         explain_column(object, X = X, column = x, pred_wrapper = pred_wrapper,
                        newdata = newdata)  # numeric(nrow(X))
@@ -300,16 +299,19 @@ explain.default <- function(object, feature_names = NULL, X = NULL, nsim = 1,
   }
   
   # Reformat into a tibble and fix column names
-  res <- if (length(feature_names) == 1L) {
-    tibble::enframe(res, name = NULL)
+  # phis <- if (length(feature_names) == 1L) {
+  #   tibble::enframe(phis, name = NULL)
+  # } else {
+  #   phis <- tibble::as_tibble(t(phis), .name_repair = "minimal")
+  # }
+  phis <- if (length(feature_names) == 1L) {
+    as.matrix(phis) 
   } else {
-    res <- tibble::as_tibble(t(res), .name_repair = "minimal")
+    t(phis)  # coerce to row matrix
   }
-  names(res) <- feature_names
+  colnames(phis) <- feature_names
   
-  # Add extra `"explain"` class for printing, plotting, etc.
-  class(res) <- c(class(res), "explain")
-  res
+  return(phis)
 
 }
 
@@ -319,17 +321,15 @@ explain.default <- function(object, feature_names = NULL, X = NULL, nsim = 1,
 #' @export
 explain.lm <- function(object, feature_names = NULL, X, nsim = 1, 
                        pred_wrapper, newdata = NULL, exact = FALSE, ...) {
-  if (isTRUE(exact)) {  # use LinearSHAP
-    res <- if (is.null(newdata)) {
+  if (isTRUE(exact)) {  # use Linear SHAP
+    phis <- if (is.null(newdata)) {
       stats::predict(object, type = "terms", ...)
     } else {
       stats::predict(object, newdata = newdata, type = "terms", ...)
     }
-    baseline <- attr(res, which = "constant")  # mean response for all training data
-    res <- tibble::as_tibble(res)
-    attr(res, which = "baseline") <- baseline
-    class(res) <- c(class(res), "explain")
-    res
+    baseline <- attr(phis, which = "constant")  # mean response for all training data
+    attr(phis, which = "baseline") <- baseline
+    return(phis)
   } else {
     explain.default(object, feature_names = feature_names, X = X, nsim = nsim,
                     pred_wrapper = pred_wrapper, newdata = newdata, ...)
@@ -349,13 +349,11 @@ explain.xgb.Booster <- function(object, feature_names = NULL, X = NULL, nsim = 1
            call. = FALSE)
     }
     X <- if (is.null(X)) newdata else X
-    res <- stats::predict(object, newdata = X, predcontrib = TRUE, 
-                          approxcontrib = FALSE, ...)
-    res <- tibble::as_tibble(res)
-    attr(res, which = "baseline") <- res[["BIAS"]]
-    res[["BIAS"]] <- NULL
-    class(res) <- c(class(res), "explain")
-    res
+    phis <- stats::predict(object, newdata = X, predcontrib = TRUE, 
+                           approxcontrib = FALSE, ...)
+    attr(phis, which = "baseline") <- phis[, "BIAS"]
+    phis <- phis[, colnames(phis) != "BIAS", drop = FALSE]
+    return(phis)
   } else {
     explain.default(object, feature_names = feature_names, X = X, nsim = nsim,
                     pred_wrapper = pred_wrapper, newdata = newdata, ...)
@@ -378,17 +376,15 @@ explain.lgb.Booster <- function(object, feature_names = NULL, X = NULL, nsim = 1
     
     # Adapt LightGBM predict() interface
     if (utils::packageVersion("lightgbm") > package_version("3.3.2")) {
-      res <- stats::predict(object, X, type = "contrib", ...)
+      phis <- stats::predict(object, X, type = "contrib", ...)
     } else {
-      res <- stats::predict(object, X, predcontrib = TRUE, ...)
+      phis <- stats::predict(object, X, predcontrib = TRUE, ...)
     }
     
-    colnames(res) <- c(colnames(X), "BIAS")
-    res <- tibble::as_tibble(res)
-    attr(res, which = "baseline") <- res[["BIAS"]]
-    res[["BIAS"]] <- NULL
-    class(res) <- c(class(res), "explain")
-    res
+    colnames(phis) <- c(colnames(X), "BIAS")
+    attr(phis, which = "baseline") <- phis[, "BIAS"]
+    phis <- phis[, colnames(phis) != "BIAS", drop = FALSE]
+    return(phis)
   } else {
     explain.default(object, feature_names = feature_names, X = X, nsim = nsim,
                     pred_wrapper = pred_wrapper, newdata = newdata, ...)
