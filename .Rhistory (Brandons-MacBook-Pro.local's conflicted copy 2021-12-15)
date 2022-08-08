@@ -1,0 +1,512 @@
+# Fit a linear model to the simulated Friedman benchmark data
+fit_lm <- lm(y ~ ., data = trn)
+# Prediction wrapper
+pfun <- function(object, newdata) {
+predict(object, newdata = newdata)
+}
+# Fit model(s)
+set.seed(111)
+fit_xgb <- xgboost::xgboost(  # params found using `autoxgb::autoxgb()`
+data = data.matrix(subset(trn, select = -y)),
+label = trn$y,
+max_depth = 3,
+eta = 0.1,
+nrounds = 301,
+verbose = 0
+)
+# Generate exact and approximate Shapley values for entire training set
+x <- data.matrix(X)[1L, , drop = FALSE]
+ex_exact <- explain(fit_xgb, X = x, exact = TRUE)
+ex_exact
+predict(fit_xgb, newdata = x)
+predict(fit_xgb, newdata = X)
+predict(fit_xgb, newdata = data.matrix(X))
+predict(fit_xgb, newdata = X)
+predict(fit_xgb, newdata = x)
+class(predict(fit_xgb, newdata = x))
+install.packages("xgboost")
+install.packages("xgboost")
+library(fastmap)
+library(fastshap)
+# Generate training data from the Friedman 1 benchmark problem
+trn <- gen_friedman(500, seed = 101)
+X <- subset(trn, select = -y)
+x <- X[1L, , drop = FALSE]
+# Fit a linear model to the simulated Friedman benchmark data
+fit_lm <- lm(y ~ ., data = trn)
+# Prediction wrapper
+pfun <- function(object, newdata) {
+predict(object, newdata = newdata)
+}
+# Fit model(s)
+set.seed(111)
+fit_xgb <- xgboost::xgboost(  # params found using `autoxgb::autoxgb()`
+data = data.matrix(subset(trn, select = -y)),
+label = trn$y,
+max_depth = 3,
+eta = 0.1,
+nrounds = 301,
+verbose = 0
+)
+# Generate exact and approximate Shapley values for entire training set
+x <- data.matrix(X)[1L, , drop = FALSE]
+ex_exact <- explain(fit_xgb, X = x, exact = TRUE)
+ex_exact
+package_version("xgboost")
+packageVersion("xgboost")
+predict(fit_xgb, newdata = x)
+predict(fit_xgb, newdata = x, predcontrib = TRUE, approxcontrib = FALSE)
+predict(fit_xgb, newdata = rbind(x, x), predcontrib = TRUE, approxcontrib = FALSE)
+t(predict(fit_xgb, newdata = x, predcontrib = TRUE, approxcontrib = FALSE))
+tibble::as_tibble(t(predict(fit_xgb, newdata = x, predcontrib = TRUE, approxcontrib = FALSE)))
+tibble::as_tibble(predict(fit_xgb, newdata = x, predcontrib = TRUE, approxcontrib = FALSE))
+lifecycle::last_lifecycle_warnings()
+packageVersion("xgboost")
+res
+p <- predict(fit_xgb, newdata = x, predcontrib = TRUE, approxcontrib = FALSE)
+p
+dim(p)
+x
+class(x)
+dim(x)
+ncol(p)
+packageVersion("xgboost")
+library(fastshap)
+ex_exact <- explain(fit_xgb, X = x, exact = TRUE)
+ex_exact
+p <- predict(fit_xgb, newdata = x, predcontrib = TRUE, approxcontrib = FALSE)
+p
+library(xgboost)
+aq <- airquality[!is.na(airquality$Ozone), ]
+X <- data.matrix(subset(aq, select = -Ozone))
+fit <- xgboost(X, labels = aq$Ozone)
+fit <- xgboost(X, label = aq$Ozone)
+fit <- xgboost(X, label = aq$Ozone, nrounds = 10)
+predict(fit, newdata = X[1:2, ], predcontrib = TRUE)
+predict(fit, newdata = X[1, , drop = FALSE], predcontrib = TRUE)
+Sys.info()
+predict(fit, newdata = X[1:2, ], predcontrib = TRUE)
+library(fastshap)
+install.packages("lightgbm")
+library(rhub)
+check_for_cran()
+1,780.23 * 3
+1780.23 * 2
+install.packages("lightgbm")
+?lightgbm::lightgbm
+set.seed(753)
+fit_lgbm <- lightgbm:::lightgbm(  # params found using `autoxgb::autoxgb()`
+data = data.matrix(subset(trn, select = -y)),
+label = trn$y,
+max_depth = 3,
+eta = 0.1,
+nrounds = 301,
+verbose = 0
+)
+head(trn)
+fit_lgbm <- lightgbm:::lightgbm(  # params found using `autoxgb::autoxgb()`
+data = data.matrix(subset(trn, select = -y)),
+label = trn$y,
+max_depth = 3,
+eta = 0.1,
+nrounds = 301,
+objective = "rmse",
+verbose = 0
+)
+fit_lgbm <- lightgbm:::lightgbm(  # params found using `autoxgb::autoxgb()`
+data = data.matrix(subset(trn, select = -y)),
+label = trn$y,
+params = list(
+max_depth = 3,
+eta = 0.1,
+nrounds = 301,
+objective = "rmse",
+)
+verbose = 0
+)
+fit_lgbm <- lightgbm:::lightgbm(  # params found using `autoxgb::autoxgb()`
+data = data.matrix(subset(trn, select = -y)),
+label = trn$y,
+params = list(
+max_depth = 3,
+eta = 0.1,
+nrounds = 301,
+objective = "rmse",
+),
+verbose = 0
+)
+fit_lgbm <- lightgbm:::lightgbm(  # params found using `autoxgb::autoxgb()`
+data = data.matrix(subset(trn, select = -y)),
+label = trn$y,
+verbose = 0,
+params = list(
+max_depth = 3,
+eta = 0.1,
+nrounds = 301,
+objective = "rmse"
+)
+)
+fit_lgbm <- lightgbm:::lightgbm(  # params found using `autoxgb::autoxgb()`
+data = data.matrix(subset(trn, select = -y)),
+label = trn$y,
+verbose = 0,
+params = list(
+max_depth = 3,
+eta = 0.1,
+nrounds = 301
+# objective = "rmse"
+)
+)
+fit_lgbm <- lightgbm:::lightgbm(  # params found using `autoxgb::autoxgb()`
+data = data.matrix(subset(trn, select = -y)),
+label = trn$y,
+verbose = 0,
+params = list(
+max_depth = 3,
+eta = 0.1,
+nrounds = 301,
+objective = "regression"
+)
+)
+fit_lgbm <- lightgbm:::lightgbm(  # params found using `autoxgb::autoxgb()`
+data = data.matrix(subset(trn, select = -y)),
+label = trn$y,
+nrounds = 301,
+verbose = 0,
+params = list(
+max_depth = 3,
+eta = 0.1,
+objective = "regression"
+)
+)
+# Generate exact and approximate Shapley values for entire training set
+ex_exact <- explain(fit_xgb, X = x, exact = TRUE)
+fit_lgbm <- lightgbm:::lightgbm(  # params found using `autoxgb::autoxgb()`
+data = data.matrix(subset(trn, select = -y)),
+label = trn$y,
+nrounds = 301,
+verbose = 0,
+params = list(
+max_depth = 3,
+eta = 0.1,
+objective = "regression"
+)
+)
+fit_lgbm <- lightgbm:::lightgbm(  # params found using `autoxgb::autoxgb()`
+data = data.matrix(subset(trn, select = -y)),
+label = trn$y,
+nrounds = 301,
+verbose = -1,
+params = list(
+max_depth = 3,
+eta = 0.1,
+objective = "regression"
+)
+)
+fit_lgbm
+# Generate exact and approximate Shapley values for entire training set
+ex_exact <- explain(fit_lgbm, X = x, exact = TRUE)
+ex_exact
+ex_exact <- explain(fit_lgbm, X = x, exact = TRUE)
+set.seed(758)
+ex_apprx <- explain(fit_lgbm, X = data.matrix(X), newdata = x, adjust = TRUE,
+pred_wrapper = pfun, nsim = 1000)
+?predict.lgb.Booster
+# Prediction wrapper
+pfun.lgb <- function(object, newdata) {
+predict(object, data = newdata)
+}
+ex_apprx <- explain(fit_lgb, X = data.matrix(X), newdata = x, adjust = TRUE,
+pred_wrapper = pfun.lgb, nsim = 1000)
+# Fit a basic lightgbm model
+set.seed(753)
+fit_lgb <- lightgbm:::lightgbm(  # params found using `autoxgb::autoxgb()`
+data = data.matrix(subset(trn, select = -y)),
+label = trn$y,
+nrounds = 301,
+verbose = -1,
+params = list(
+max_depth = 3,
+eta = 0.1,
+objective = "regression"
+)
+)
+# Prediction wrapper
+pfun.lgb <- function(object, newdata) {
+predict(object, data = newdata)
+}
+# Generate exact and approximate Shapley values for entire training set
+ex_exact <- explain(fit_lgb, X = x, exact = TRUE)
+set.seed(758)
+ex_apprx <- explain(fit_lgb, X = data.matrix(X), newdata = x, adjust = TRUE,
+pred_wrapper = pfun.lgb, nsim = 1000)
+head(X)
+X <- subset(trn, select = -y)
+ex_apprx <- explain(fit_lgb, X = data.matrix(X), newdata = x, adjust = TRUE,
+pred_wrapper = pfun.lgb, nsim = 1000)
+ex_apprx
+# Check dimensions
+expect_identical(
+current = dim(ex_exact),
+target = dim(ex_apprx)
+)
+library(tinytest)
+# Check dimensions
+expect_identical(
+current = dim(ex_exact),
+target = dim(ex_apprx)
+)
+# Check column names
+expect_identical(
+current = names(ex_exact),
+target = colnames(X)
+)
+# Check class
+expect_identical(
+current = class(ex_exact),
+target = c("tbl_df", "tbl", "data.frame", "explain")
+)
+library(fastshap)
+# Exits
+if (!requireNamespace("ggplot2", quietly = TRUE)) {
+exit_file("Package ggplot2 missing")
+}
+if (!requireNamespace("xgboost", quietly = TRUE)) {
+exit_file("Package xgboost missing")
+}
+if (!requireNamespace("lightgbm", quietly = TRUE)) {
+exit_file("Package lightgbm missing")
+}
+# Load required packages
+suppressMessages({
+library(ggplot2)
+# library(xgboost)
+})
+# Generate training data from the Friedman 1 benchmark problem
+trn <- gen_friedman(500, seed = 101)
+X <- subset(trn, select = -y)
+x <- X[1L, , drop = FALSE]
+# Fit a linear model to the simulated Friedman benchmark data
+fit_lm <- lm(y ~ ., data = trn)
+# Prediction wrapper
+pfun <- function(object, newdata) {
+predict(object, newdata = newdata)
+}
+# Generate exact and approximate Shapley values for entire training set
+ex_exact <- explain(fit_lm, exact = TRUE, newdata = x)
+set.seed(102)
+ex_apprx <- explain(fit_lm, X = X, pred_wrapper = pfun, nsim = 1000,
+newdata = x, adjust = TRUE)
+# Check accuracy
+expect_true(cor(as.numeric(ex_exact), as.numeric((ex_apprx))) > 0.999)
+# Check dimensions
+expect_identical(
+current = dim(ex_exact),
+target = dim(ex_apprx)
+)
+# Check column names
+expect_identical(
+current = names(ex_exact),
+target = names(X)
+)
+# Check class
+expect_identical(
+current = class(ex_exact),
+target = c("tbl_df", "tbl", "data.frame", "explain")
+)
+# Package: xgboost -------------------------------------------------------------
+# Fit model(s)
+set.seed(111)
+fit_xgb <- xgboost::xgboost(  # params found using `autoxgb::autoxgb()`
+data = data.matrix(subset(trn, select = -y)),
+label = trn$y,
+max_depth = 3,
+eta = 0.1,
+nrounds = 301,
+verbose = 0
+)
+# Generate exact and approximate Shapley values for entire training set
+x <- data.matrix(X)[1L, , drop = FALSE]
+ex_exact <- explain(fit_xgb, X = x, exact = TRUE)
+set.seed(132)
+ex_apprx <- explain(fit_xgb, X = data.matrix(X), newdata = x, adjust = TRUE,
+pred_wrapper = pfun, nsim = 1000)
+# Check accuracy
+expect_true(cor(as.numeric(ex_exact), as.numeric((ex_apprx))) > 0.999)
+# Check dimensions
+expect_identical(
+current = dim(ex_exact),
+target = dim(ex_apprx)
+)
+# Check column names
+expect_identical(
+current = names(ex_exact),
+target = colnames(X)
+)
+# Check class
+expect_identical(
+current = class(ex_exact),
+target = c("tbl_df", "tbl", "data.frame", "explain")
+)
+# Package: lightgbm ------------------------------------------------------------
+# Fit a basic lightgbm model
+set.seed(753)
+fit_lgb <- lightgbm:::lightgbm(  # params found using `autoxgb::autoxgb()`
+data = data.matrix(subset(trn, select = -y)),
+label = trn$y,
+nrounds = 301,
+verbose = -1,
+params = list(
+max_depth = 3,
+eta = 0.1,
+objective = "regression"
+)
+)
+# Prediction wrapper
+pfun.lgb <- function(object, newdata) {
+predict(object, data = newdata)
+}
+# Generate exact and approximate Shapley values for entire training set
+ex_exact <- explain(fit_lgb, X = x, exact = TRUE)
+set.seed(758)
+ex_apprx <- explain(fit_lgb, X = data.matrix(X), newdata = x, adjust = TRUE,
+pred_wrapper = pfun.lgb, nsim = 1000)
+# Check accuracy
+expect_true(cor(as.numeric(ex_exact), as.numeric((ex_apprx))) > 0.999)
+# Check dimensions
+expect_identical(
+current = dim(ex_exact),
+target = dim(ex_apprx)
+)
+# Check column names
+expect_identical(
+current = names(ex_exact),
+target = colnames(X)
+)
+# Check class
+expect_identical(
+current = class(ex_exact),
+target = c("tbl_df", "tbl", "data.frame", "explain")
+)
+cor(as.numeric(ex_exact), as.numeric((ex_apprx)))
+library(fastshap)
+install.packages("roxygen2")
+plot(1:3)
+plot(1:3)
+library(tinytest)
+test_all
+test_all()
+library(fastshap)
+test_all()
+warnings()
+# Fit a linear regression model
+fit <- lm(Sale_Price ~ Gr_Liv_Area + Overall_Qual, data = ames)
+install.packages("testthat")
+test_all()
+# Read in the data and clean it up a bit
+ames <- as.data.frame(AmesHousing::make_ames())
+# Features only
+X <- subset(ames, select = -Sale_Price)
+# Check column classes
+table(unlist(sapply(X, class)))
+# Fit a linear regression model
+fit <- lm(Sale_Price ~ Gr_Liv_Area + Overall_Qual, data = ames)
+# Define prediction wrapper
+pfun <- function(object, newdata) {
+predict(object, newdata = newdata)
+}
+# Compute predictions
+preds <- pfun(fit, newdata = X)
+# Observation to explain
+x <- X[which.max(preds), , drop = FALSE]
+set.seed(954)  # for reproducibility
+ex0 <- fastshap::explain(fit, X = X, newdata = x, pred_wrapper = pfun)
+ex0
+?mlbench::mlbench.friedman1
+?force_plot
+library(fastshap)
+?force_plot
+library(fastshap)
+test_all()
+library(fastshap)
+test_all()
+library(fastshap)
+install.packages("titanic")
+test_all()
+?geom_smooth
+install.packages("covr")
+install.packages("rmarkdown")
+library(fastshap)
+library(tinytest)
+# Generate training data from the Friedman 1 benchmark problem
+trn <- gen_friedman(500, seed = 101)
+X <- subset(trn, select = -y)
+x <- X[1L, , drop = FALSE]
+# Fit a basic lightgbm model
+set.seed(753)
+fit_lgb <- lightgbm:::lightgbm(  # params found using `autoxgb::autoxgb()`
+data = data.matrix(subset(trn, select = -y)),
+label = trn$y,
+nrounds = 301,
+verbose = -1,
+params = list(
+max_depth = 3,
+eta = 0.1,
+objective = "regression"
+)
+)
+# Prediction wrapper
+pfun.lgb <- function(object, newdata) {
+predict(object, data = newdata)
+}
+# Generate exact and approximate Shapley values for entire training set
+ex_exact <- explain(fit_lgb, X = x, exact = TRUE)
+# Generate exact and approximate Shapley values for entire training set
+x <- data.matrix(X)[1L, , drop = FALSE]
+ex_exact <- explain(fit_lgb, X = x, exact = TRUE)
+set.seed(758)
+ex_apprx <- explain(fit_lgb, X = data.matrix(X), newdata = x, adjust = TRUE,
+pred_wrapper = pfun.lgb, nsim = 1000)
+# Check accuracy
+expect_true(cor(as.numeric(ex_exact), as.numeric((ex_apprx))) > 0.99)
+# Check dimensions
+expect_identical(
+current = dim(ex_exact),
+target = dim(ex_apprx)
+)
+# Check column names
+expect_identical(
+current = names(ex_exact),
+target = colnames(X)
+)
+# Check class
+expect_identical(
+current = class(ex_exact),
+target = c("tbl_df", "tbl", "data.frame", "explain")
+)
+lightgbm:::predict.lgb.Booster
+library(fastshap)
+library(rhub)
+check_for_cran()
+library(fastshap)
+library(ggplot2)
+library(lightgbm)
+# Simulate (numeric) training data
+trn <- gen_friedman(seed = 1548)
+# Create feature-only matrix
+X <- data.matrix(subset(trn, select = -y))
+# Fit a LightGBM model
+set.seed(1615)  # for reproducibility
+bst <- lightgbm(X, label = trn$y, num_leaves = 4L, learning_rate = 0.3,
+nrounds = 200L, objective = "regression")
+# Compute feature contributions from LightGBM directly
+p <- predict(bst, data = X, predcontrib = TRUE)
+# Extract feature contributions using fastshap
+ex <- explain(bst, X = X, exact = TRUE)
+# Some plots
+p1 <- autoplot(ex)
+p2 <- autoplot(ex, type = "dependence", feature = "x1", color_by = "x2",
+X = as.data.frame(X))
+p3 <- autoplot(ex, type = "contribution", row_num = 1)
+gridExtra::grid.arrange(p1, p2, p3, nrow = 1)
+library(fastshap)

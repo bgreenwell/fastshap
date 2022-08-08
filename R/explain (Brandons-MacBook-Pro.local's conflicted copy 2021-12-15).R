@@ -243,6 +243,16 @@ explain.default <- function(object, feature_names = NULL, X = NULL, nsim = 1,
       stop("Need `nsim > 1` whenever `adjust = TRUE`.", call. = FALSE)
     }
     
+    # Check for dependencies
+    # if (!requireNamespace("abind", quietly = TRUE)) {
+    #   stop("Package \"abind\" needed for this function to work. Please ",
+    #        "install it.", call. = FALSE)
+    # }
+    # if (!requireNamespace("matrixStats", quietly = TRUE)) {
+    #   stop("Package \"matrixStats\" needed for this function to work. Please ",
+    #        "install it.", call. = FALSE)
+    # }
+    
     # Compute approximate Shapley values and variances
     res <- plyr::laply(feature_names, .fun = function(x) {
       reps <- replicate(nsim, {  # replace later with vapply()
@@ -250,7 +260,7 @@ explain.default <- function(object, feature_names = NULL, X = NULL, nsim = 1,
                        newdata = newdata)  # numeric(nrow(X))
       })
       if (is.matrix(reps)) {
-        abind(rowMeans(reps), matrixStats::rowVars(reps), along = 2)
+        abind::abind(rowMeans(reps), matrixStats::rowVars(reps), along = 2)
       } else {
         cbind(mean.default(reps), stats::var(reps))
       }
@@ -351,6 +361,9 @@ explain.xgb.Booster <- function(object, feature_names = NULL, X = NULL, nsim = 1
     X <- if (is.null(X)) newdata else X
     res <- stats::predict(object, newdata = X, predcontrib = TRUE, 
                           approxcontrib = FALSE, ...)
+    if (ncol(res) == 1) {  # some versions provide explanations in column vector
+      res <- t(res)
+    }
     res <- tibble::as_tibble(res)
     attr(res, which = "baseline") <- res[["BIAS"]]
     res[["BIAS"]] <- NULL
@@ -375,14 +388,7 @@ explain.lgb.Booster <- function(object, feature_names = NULL, X = NULL, nsim = 1
            call. = FALSE)
     }
     X <- if (is.null(X)) newdata else X
-    
-    # Adapt LightGBM predict() interface
-    if (utils::packageVersion("lightgbm") > package_version("3.3.2")) {
-      res <- stats::predict(object, X, type = "contrib", ...)
-    } else {
-      res <- stats::predict(object, X, predcontrib = TRUE, ...)
-    }
-    
+    res <- stats::predict(object, X, predcontrib = TRUE, ...)
     colnames(res) <- c(colnames(X), "BIAS")
     res <- tibble::as_tibble(res)
     attr(res, which = "baseline") <- res[["BIAS"]]
