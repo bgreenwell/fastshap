@@ -1,5 +1,5 @@
 # Generate training data from the Friedman 1 benchmark problem
-trn <- gen_friedman(500, seed = 101)
+trn <- gen_friedman(50, seed = 101)
 X <- subset(trn, select = -y)
 
 # Fit a linear model to the simulated Friedman benchmark data
@@ -25,7 +25,7 @@ shap1 <- fastshap::explain(  # explain all rows
   adjust = TRUE
 )
 set.seed(1439)
-shap2 <- fastshap::explain(  # explaiin a single row
+shap2 <- fastshap::explain(  # explain a single row
   object = fit,
   X = X,
   nsim = 30,

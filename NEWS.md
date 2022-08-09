@@ -10,7 +10,9 @@
 
 * Minor change to `explain.lgb.Booster()` to support breaking changes in [lightgbm](https://cran.r-project.org/package=lightgbm) v4.0.0. (Thanks to @jameslamb and @Mayer79.)
 
-* The dependency on [matrixStats](https://cran.r-project.org/package=matrixStats)) has been removed in favor of using R's internal `apply()` and `var()` functions.
+* The dependency on [matrixStats](https://cran.r-project.org/package=matrixStats) has been removed in favor of using R's internal `apply()` and `var()` functions.
+
+* The dependency on [plyr](https://cran.r-project.org/package=plyr), which has been retired, has been removed in favor of using [foreach](https://cran.r-project.org/package=foreach) directly.
 
 # fastshap 0.0.7
 
