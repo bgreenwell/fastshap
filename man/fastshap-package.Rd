@@ -6,11 +6,7 @@
 \alias{fastshap-package}
 \title{fastshap: Fast Approximate Shapley Values}
 \description{
-Computes fast (relative to other implementations) approximate 
-    Shapley values for any supervised learning model. Shapley values help to 
-    explain the predictions from any black box model using ideas from game 
-    theory; see Strumbel and Kononenko (2014) <doi:10.1007/s10115-013-0679-x> 
-    for details.
+Computes fast (relative to other implementations) approximate Shapley values for any supervised learning model. Shapley values help to explain the predictions from any black box model using ideas from game theory; see Strumbel and Kononenko (2014) \doi{10.1007/s10115-013-0679-x} for details.
 }
 \seealso{
 Useful links:

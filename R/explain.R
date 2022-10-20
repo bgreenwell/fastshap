@@ -3,6 +3,7 @@
 #' @useDynLib fastshap, .registration = TRUE
 #' 
 #' @importFrom Rcpp sourceCpp
+#' @importFrom foreach foreach %do% %dopar%
 explain_column <- function(object, X, column, pred_wrapper, newdata = NULL) {
   
   # Check types
@@ -83,23 +84,28 @@ explain_column <- function(object, X, column, pred_wrapper, newdata = NULL) {
 
 #' Fast approximate Shapley values
 #' 
-#' Compute fast (approximate) Shapley values for a set of features.
+#' Compute fast (approximate) Shapley values for a set of features using the 
+#' Monte Carlo algorithm described in Strumbelj and Igor (2014). An efficient 
+#' algorithm for tree-based models, commonly referred to as Tree SHAP, is also 
+#' supported for [lightgbm](https://cran.r-project.org/package=lightgbm) and
+#' [xgboost](https://cran.r-project.org/package=xgboost) models; see Lundberg 
+#' et. al. (2020) for details.
 #' 
-#' @param object A fitted model object (e.g., a \code{\link[ranger]{ranger}},
-#' \code{\link[xgboost]{xgboost}}, or \code{\link[earth]{earth}} object, to name
+#' @param object A fitted model object (e.g., a [ranger::ranger()],
+#' [xgboost::xgboost()], or [earth::earth()] object, to name
 #' a few).
 #'
 #' @param feature_names Character string giving the names of the predictor
-#' variables (i.e., features) of interest. If \code{NULL} (default) they will be
-#' taken from the column names of \code{X}.
+#' variables (i.e., features) of interest. If `NULL` (default) they will be
+#' taken from the column names of `X`.
 #'
 #' @param X A matrix-like R object (e.g., a data frame or matrix) containing 
-#' ONLY the feature columns from the training data. \strong{NOTE:} This argument
-#' is required whenever \code{exact = FALSE}.
+#' ONLY the feature columns from the training data. **NOTE:** This argument
+#' is required whenever `exact = FALSE`.
 #'
 #' @param pred_wrapper Prediction function that requires two arguments,
-#' \code{object} and \code{newdata}. \strong{NOTE:} This argument is required 
-#' whenever \code{exact = FALSE}. The output of this function should be 
+#' `object` and `newdata`. **NOTE:** This argument is required 
+#' whenever `exact = FALSE`. The output of this function should be 
 #' determined according to:
 #'
 #' \describe{
@@ -111,48 +117,75 @@ explain_column <- function(object, X, column, pred_wrapper, newdata = NULL) {
 #' }
 #' 
 #' @param nsim The number of Monte Carlo repetitions to use for estimating each 
-#' Shapley value (only used when \code{exact = FALSE}). Default is 1. 
-#' \strong{NOTE:} To obtain the most accurate results, \code{nsim} should be set 
+#' Shapley value (only used when `exact = FALSE`). Default is 1. 
+#' **NOTE:** To obtain the most accurate results, `nsim` should be set 
 #' as large as feasibly possible.
 #' 
 #' @param newdata A matrix-like R object (e.g., a data frame or matrix) 
 #' containing ONLY the feature columns for the observation(s) of interest; that 
 #' is, the observation(s) you want to compute explanations for. Default is 
-#' \code{NULL} which will produce approximate Shapley values for all the rows in 
-#' \code{X} (i.e., the training data).
+#' `NULL` which will produce approximate Shapley values for all the rows in 
+#' `X` (i.e., the training data).
 #' 
 #' @param adjust Logical indicating whether or not to adjust the sum of the 
-#' estimated Shapley values to satisfy the \emph{additivity} (or 
-#' \emph{local accuracy}) property; that is, to equal the difference between the 
+#' estimated Shapley values to satisfy the *additivity* (or 
+#' *local accuracy*) property; that is, to equal the difference between the 
 #' model's prediction for that sample and the average prediction over all the 
-#' training data (i.e., \code{X}).
+#' training data (i.e., `X`).
 #' 
 #' @param exact Logical indicating whether to compute exact Shapley values. 
-#' Currently only available for \code{\link[stats]{lm}}, 
-#' \code{\link[xgboost]{xgboost}}, and \code{\link[lightgbm]{lightgbm}} objects. 
-#' Default is \code{FALSE}. Note that setting \code{exact = TRUE} will return 
-#' explanations for each of the \code{\link[stats]{terms}} in an 
-#' \code{\link[stats]{lm}} object.
+#' Currently only available for [stats::lm()], 
+#' [xgboost::xgboost()], and [lightgbm::lightgbm()] objects. 
+#' Default is `FALSE`. Note that setting `exact = TRUE` will return 
+#' explanations for each of the [stats::terms()] in an 
+#' [stats::lm()] object.
 #' 
-#' @param ... Additional optional arguments to be passed on to
-#' \code{\link[plyr]{laply}}.
+#' @param baseline Numeric baseline to use in determining the additive property 
+#' of the adjust Shapley estimates. Adjust Shapley values for a single 
+#' prediction (`fx`) sum to the difference `fx - baseline`.
+#' Defaults to `NULL` which corresponds to the average training prediction.
 #' 
-#' @return A tibble with one column for each feature specified in 
-#' \code{feature_names} (if \code{feature_names = NULL}, the default, there will
-#' be one column for each feature in \code{X}) and one row for each observation
-#' in \code{newdata} (if \code{newdata = NULL}, the default, there will be one
-#' row for each observation in \code{X}). 
+#' @param parallel Logical indicating whether or not to compute the approximate
+#' Shapley values in parallel across features; default is `FALSE`. **NOTE:**
+#' setting `parallel = TRUE` requires setting up an appropriate (i.e., 
+#' system-specific) *parallel backend* as described in the 
+#' [foreach](https://cran.r-project.org/package=foreach); for details, see
+#' `vignette("foreach", package = "foreach")` in R.
+#' 
+#' @param ... Additional optional arguments to be passed on to 
+#' [foreach::foreach()] whenever `parallel = TRUE`. For example, you may need
+#' to supply additional packages that the parallel task depends on via the
+#' `.packages` argument to [foreach::foreach()]. **NOTE:** 
+#' [foreach::foreach()]'s `.combine` argument is already set internally by 
+#' `explain()`, so passing it via the `...` argument would likely result in an
+#' error.
+#' 
+#' @return A matrix with one column for each feature specified in 
+#' `feature_names` (if `feature_names = NULL`, the default, there will
+#' be one column for each feature in `X`) and one row for each observation
+#' in `newdata` (if `newdata = NULL`, the default, there will be one
+#' row for each observation in `X`). 
 #' 
 #' @seealso You can find more examples (with larger and more realistic data 
-#' sets) on the \strong{fastshap} GitHub repository: 
-#' \url{https://github.com/bgreenwell/fastshap}.
+#' sets) on the **fastshap** GitHub repository: 
+#' <https://github.com/bgreenwell/fastshap>.
 #' 
 #' @note 
-#' Setting \code{exact = TRUE} with a linear model (i.e., an 
-#' \code{\link[stats]{lm}} or \code{\link[stats]{glm}} object) assumes that the
-#' input features are independent. Also, setting \code{adjust = TRUE} is 
+#' Setting `exact = TRUE` with a linear model (i.e., an 
+#' [stats::lm()] or [stats::glm()] object) assumes that the
+#' input features are independent. Also, setting `adjust = TRUE` is 
 #' experimental and we follow the same approach as in
-#' \href{https://github.com/slundberg/shap}{shap}.
+#' [shap](https://github.com/slundberg/shap).
+#' 
+#' @references 
+#' Strumbelj, E., and Igor K. (2014). Explaining prediction models and 
+#' individual predictions with feature contributions. Knowledge and information 
+#' systems, 41(3), 647-665.
+#' 
+#' Lundberg, S. M., Erion, G., Chen, H., DeGrave, A., Prutkin, J. M., Nair, B.,
+#' Katz, R., Himmelfarb, J., Bansal, N., and Lee, Su-In (2020). From local 
+#' explanations to global understanding with explainable AI for trees. 
+#' Nature Machine Intelligence, 2(1), 2522–5839.
 #' 
 #' @rdname explain
 #' 
@@ -178,12 +211,6 @@ explain_column <- function(object, X, column, pred_wrapper, newdata = NULL) {
 #' # Compute exact Shapley (i.e., LinearSHAP) values
 #' shap <- explain(fit, exact = TRUE)
 #' shap
-#' 
-#' # Shapley-based plots
-#' library(ggplot2)
-#' autoplot(shap)  # Shapley-based importance plot
-#' autoplot(shap, type = "dependence", feature = "wt", X = mtcars)
-#' autoplot(shap, type = "contribution", row_num = 1)  # explain first row of X
 explain <- function(object, ...) {
   UseMethod("explain")
 } 
@@ -194,30 +221,47 @@ explain <- function(object, ...) {
 #' @export
 explain.default <- function(object, feature_names = NULL, X = NULL, nsim = 1, 
                             pred_wrapper = NULL, newdata = NULL, adjust = FALSE,
-                            ...) {
+                            baseline = NULL, parallel = FALSE, ...) {
+
+  # FIXME: Can probably increase speed for cases where `nsim` and number of 
+  # instances to explain are both greater than one.
   
+  # Initialize baseline to 0
+  fnull <- 0
+  
+  # Set up the 'foreach' "do" operator
+  `%.do%` <- if (isTRUE(parallel)) `%dopar%` else `%do%`
+
   # Experimental patch for more efficiently computing single-row explanations
   if (!is.null(newdata)) {
-    if (nrow(newdata) == 1L && nsim > 1) {
-      newdata <- newdata[rep(1L, times = nsim), ]  # replicate row `nsim` times
-      res <- explain.default(object, feature_names = feature_names, X = X, 
-                             nsim = 1L, pred_wrapper = pred_wrapper, 
-                             newdata = newdata, adjust = FALSE, ...)
-      phi_avg <- colMeans(res)
+    if (nrow(newdata) == 1L && nsim > 1L) {
+      newdata <- newdata[rep(1L, times = nsim), ]  # replicate obs `nsim` times
+      phis <- explain.default(object, feature_names = feature_names, X = X, 
+                              nsim = 1L, pred_wrapper = pred_wrapper, 
+                              newdata = newdata, adjust = FALSE, ...)
+      phi.avg <- t(colMeans(phis))  # transpose to keep as row matrix
       if (isTRUE(adjust)) {
-        # Compute average training prediction (fnull) and predictions associated
-        # with each explanation (fx)
+        # Adjust sum of approximate Shapley values using the same technique from 
+        # the Python {shap} library. For details, see the explanation at
+        # https://github.com/slundberg/shap/blob/master/shap/explainers/_sampling.py.
         fx <- pred_wrapper(object, newdata = newdata[1L, , drop = FALSE])
-        fnull <- mean(pred_wrapper(object, newdata = X))
-        phi_var <- apply(res, MARGIN = 2, FUN = stats::var)
-        err <- fx - sum(phi_avg) - fnull
-        v <- (phi_var / max(phi_var)) * 1e6
+        fnull <- if (is.null(baseline)) {
+          mean(pred_wrapper(object, newdata = X))
+        } else {
+          baseline
+        }
+        phi.var <- apply(phis, MARGIN = 2, FUN = stats::var)
+        err <- fx - sum(phi.avg) - fnull
+        v <- (phi.var / max(phi.var)) * 1e6
         adj <- err * (v - (v * sum(v)) / (1 + sum(v)))
-        phi_avg <- phi_avg + adj
+        phi.avg <- phi.avg + adj
       }
-      res <- tibble::as_tibble(t(phi_avg))
-      class(res) <- c(class(res), "explain")
-      return(res)
+      # if (isTRUE(variance)) {
+      #   attr(phi.avg, which = "variance") <- phi.var
+      # }
+      attr(phi.avg, which = "baseline") <- fnull
+      class(phi.avg) <- c("explain", class(phi.avg))
+      return(phi.avg)
     }
   }
   
@@ -243,83 +287,94 @@ explain.default <- function(object, feature_names = NULL, X = NULL, nsim = 1,
       stop("Need `nsim > 1` whenever `adjust = TRUE`.", call. = FALSE)
     }
     
-    # Check for dependencies
-    # if (!requireNamespace("abind", quietly = TRUE)) {
-    #   stop("Package \"abind\" needed for this function to work. Please ",
-    #        "install it.", call. = FALSE)
-    # }
-    # if (!requireNamespace("matrixStats", quietly = TRUE)) {
-    #   stop("Package \"matrixStats\" needed for this function to work. Please ",
-    #        "install it.", call. = FALSE)
-    # }
-    
-    # Compute approximate Shapley values and variances
-    res <- plyr::laply(feature_names, .fun = function(x) {
+    # Compute approximate Shapley value averages and variances for each feature
+    # across all nsim replications. Output will be an array with dimensions
+    # nrow(newdata) x 2 x length(feature_names); the second dimension holds the
+    # averages (i.e., unadjusted Shapley estimates) and variances.
+    acomb <- function(...) abind(..., along = 3)
+    phis.stats <- foreach(i = feature_names, .combine = "acomb", ...) %.do% {
       reps <- replicate(nsim, {  # replace later with vapply()
-        explain_column(object, X = X, column = x, pred_wrapper = pred_wrapper,
-                       newdata = newdata)  # numeric(nrow(X))
+        explain_column(object, X = X, column = i, pred_wrapper = pred_wrapper,
+                       newdata = newdata)
       })
       if (is.matrix(reps)) {
-        abind::abind(rowMeans(reps), matrixStats::rowVars(reps), along = 2)
+        # abind(rowMeans(reps), apply(reps, MARGIN = 1, FUN = var), along = 2)
+        cbind(rowMeans(reps), apply(reps, MARGIN = 1, FUN = var))
       } else {
         cbind(mean.default(reps), stats::var(reps))
       }
-    }, ...)
-    
+    }
+
     # Compute average training prediction (fnull) and predictions associated
     # with each explanation (fx)
     if (is.null(newdata)) {  # explain all training rows
-      fnull <- mean(fx <- pred_wrapper(object, newdata = X))
+      fx <- pred_wrapper(object, newdata = X)
+      fnull <- if (is.null(baseline)) {
+        mean(fx) 
+      } else {
+        baseline
+      }
     } else {  # explain new observation(s)
       fx <- pred_wrapper(object, newdata = newdata)
-      fnull <- mean(pred_wrapper(object, newdata = X))
+      fnull <- if (is.null(baseline)) {
+        mean(pred_wrapper(object, newdata = X))
+      } else {
+        baseline
+      }
     }
     
-    # Adjust sum of approximate Shapley values
-    if (length(dim(res)) == 3L) {  # multiple explanations
-      for (i in seq_len(dim(res)[2L])) {
-        err <- fx[i] - sum(res[, i, 1L]) - fnull
-        v <- (res[, i, 2L] / max(res[, i, 2L])) * 1e6
-        adj <- err * (v - (v * sum(v)) / (1 + sum(v)))
-        res[, i, 1L] <- res[, i, 1L] + adj
+    # Adjust sum of approximate Shapley values using the same technique 
+    # described above
+    if (length(dim(phis.stats)) == 3L) {  # multiple explanations
+      for (i in seq_len(dim(phis.stats)[1L])) {  # loop through each observation
+        err <- fx - sum(phis.stats[i, 1L, ]) - fnull
+        v <- (phis.stats[i, 2L, ] / max(phis.stats[i, 2L, ])) * 1e6
+        adj <- err[i] * (v - (v * sum(v)) / (1 + sum(v)))
+        phis.stats[i, 1L, ] <- phis.stats[i, 1L, ] + adj  # adjust Shapley estimate
       }
-      res <- res[, , 1L]
-    } else {
-      err <- fx - sum(res[, 1L]) - fnull
-      v <- (res[, 2L] / max(res[, 2L])) * 1e6
+      phis <- phis.stats[, 1L, ]
+      # if (isTRUE(variance)) {
+      #   attr(phis, which = "variance") <- phis.stats[, 2L, ]
+      # }
+    } else {  # single explanation
+      err <- fx - sum(phis[, 1L]) - fnull
+      v <- (phis.stats[, 2L] / max(phis.stats[, 2L])) * 1e6
       adj <- err * (v - (v * sum(v)) / (1 + sum(v)))
-      res[, 1L] <- res[, 1L] + adj
-      res <- res[, 1L]
+      phis.stats[, 1L] <- phis.stats[, 1L] + adj
+      phis <- phis.stats[, 1L]  # adjust Shapley estimate
+      # if (isTRUE(variance)) {
+      #   attr(phis, which = "variance") <- phis.stats[, 2L]
+      # }
     }
     
   } else {  # don't adjust
     
     # Compute approximate Shapley values
-    res <- plyr::laply(feature_names, .fun = function(x) {
+    phis <- foreach(i = feature_names, .combine = 'cbind', ...) %.do% {
       reps <- replicate(nsim, {  # replace later with vapply()
-        explain_column(object, X = X, column = x, pred_wrapper = pred_wrapper,
-                       newdata = newdata)  # numeric(nrow(X))
+        explain_column(object, X = X, column = i, pred_wrapper = pred_wrapper,
+                       newdata = newdata)
       })
       if (is.matrix(reps)) {
         rowMeans(reps)
       } else {
         mean.default(reps)
       }
-    }, ...)
+    }
     
   }
   
-  # Reformat into a tibble and fix column names
-  res <- if (length(feature_names) == 1L) {
-    tibble::enframe(res, name = NULL)
-  } else {
-    res <- tibble::as_tibble(t(res), .name_repair = "minimal")
-  }
-  names(res) <- feature_names
+  # Reformat if necessary and fix column names
+  if (length(feature_names) == 1L) {
+    phis <- as.matrix(phis) 
+  } 
+  colnames(phis) <- feature_names
   
-  # Add extra `"explain"` class for printing, plotting, etc.
-  class(res) <- c(class(res), "explain")
-  res
+  # Add baseline and class attributes
+  attr(phis, which = "baseline") <- fnull
+  class(phis) <- c("explain", class(phis))
+  
+  return(phis)
 
 }
 
@@ -328,21 +383,22 @@ explain.default <- function(object, feature_names = NULL, X = NULL, nsim = 1,
 #' 
 #' @export
 explain.lm <- function(object, feature_names = NULL, X, nsim = 1, 
-                       pred_wrapper, newdata = NULL, exact = FALSE, ...) {
-  if (isTRUE(exact)) {  # use LinearSHAP
-    res <- if (is.null(newdata)) {
+                       pred_wrapper, newdata = NULL, adjust = FALSE, 
+                       exact = FALSE, ...) {
+  if (isTRUE(exact)) {  # use Linear SHAP
+    phis <- if (is.null(newdata)) {
       stats::predict(object, type = "terms", ...)
     } else {
       stats::predict(object, newdata = newdata, type = "terms", ...)
     }
-    baseline <- attr(res, which = "constant")  # mean response for all training data
-    res <- tibble::as_tibble(res)
-    attr(res, which = "baseline") <- baseline
-    class(res) <- c(class(res), "explain")
-    res
+    baseline <- attr(phis, which = "constant")  # mean response for all training data
+    attr(phis, which = "baseline") <- baseline
+    class(phis) <- c("explain", class(phis))
+    return(phis)
   } else {
     explain.default(object, feature_names = feature_names, X = X, nsim = nsim,
-                    pred_wrapper = pred_wrapper, newdata = newdata, ...)
+                    pred_wrapper = pred_wrapper, newdata = newdata, 
+                    adjust = adjust, ...)
   }
 }
 
@@ -351,24 +407,24 @@ explain.lm <- function(object, feature_names = NULL, X, nsim = 1,
 #' 
 #' @export
 explain.xgb.Booster <- function(object, feature_names = NULL, X = NULL, nsim = 1, 
-                                pred_wrapper, newdata = NULL, exact = FALSE, 
-                                ...) {
-  if (isTRUE(exact)) {  # use TreeSHAP
+                                pred_wrapper, newdata = NULL, adjust = FALSE, 
+                                exact = FALSE, ...) {
+  if (isTRUE(exact)) {  # use Tree SHAP
     if (is.null(X) && is.null(newdata)) {
       stop("Must supply `X` or `newdata` argument (but not both).", 
            call. = FALSE)
     }
     X <- if (is.null(X)) newdata else X
-    res <- stats::predict(object, newdata = X, predcontrib = TRUE, 
-                          approxcontrib = FALSE, ...)
-    res <- tibble::as_tibble(res)
-    attr(res, which = "baseline") <- res[["BIAS"]]
-    res[["BIAS"]] <- NULL
-    class(res) <- c(class(res), "explain")
-    res
+    phis <- stats::predict(object, newdata = X, predcontrib = TRUE, 
+                           approxcontrib = FALSE, ...)
+    attr(phis, which = "baseline") <- phis[, "BIAS"]
+    class(phis) <- c("explain", class(phis))
+    phis <- phis[, colnames(phis) != "BIAS", drop = FALSE]
+    return(phis)
   } else {
     explain.default(object, feature_names = feature_names, X = X, nsim = nsim,
-                    pred_wrapper = pred_wrapper, newdata = newdata, ...)
+                    pred_wrapper = pred_wrapper, newdata = newdata, 
+                    adjust = adjust, ...)
   }
 }
 
@@ -377,9 +433,9 @@ explain.xgb.Booster <- function(object, feature_names = NULL, X = NULL, nsim = 1
 #' 
 #' @export
 explain.lgb.Booster <- function(object, feature_names = NULL, X = NULL, nsim = 1, 
-                                pred_wrapper, newdata = NULL, exact = FALSE, 
-                                ...) {
-  if (isTRUE(exact)) {  # use TreeSHAP
+                                pred_wrapper, newdata = NULL, adjust = FALSE, 
+                                exact = FALSE, ...) {
+  if (isTRUE(exact)) {  # use Tree SHAP
     if (is.null(X) && is.null(newdata)) {
       stop("Must supply `X` or `newdata` argument (but not both).", 
            call. = FALSE)
@@ -388,19 +444,19 @@ explain.lgb.Booster <- function(object, feature_names = NULL, X = NULL, nsim = 1
     
     # Adapt LightGBM predict() interface
     if (utils::packageVersion("lightgbm") > package_version("3.3.2")) {
-      res <- stats::predict(object, X, type = "contrib", ...)
+      phis <- stats::predict(object, X, type = "contrib", ...)
     } else {
-      res <- stats::predict(object, X, predcontrib = TRUE, ...)
+      phis <- stats::predict(object, X, predcontrib = TRUE, ...)
     }
     
-    colnames(res) <- c(colnames(X), "BIAS")
-    res <- tibble::as_tibble(res)
-    attr(res, which = "baseline") <- res[["BIAS"]]
-    res[["BIAS"]] <- NULL
-    class(res) <- c(class(res), "explain")
-    res
+    colnames(phis) <- c(colnames(X), "BIAS")
+    attr(phis, which = "baseline") <- phis[, "BIAS"]
+    phis <- phis[, colnames(phis) != "BIAS", drop = FALSE]
+    class(phis) <- c("explain", class(phis))
+    return(phis)
   } else {
     explain.default(object, feature_names = feature_names, X = X, nsim = nsim,
-                    pred_wrapper = pred_wrapper, newdata = newdata, ...)
+                    pred_wrapper = pred_wrapper, newdata = newdata, 
+                    adjust = adjust, ...)
   }
 }

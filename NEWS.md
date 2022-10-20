@@ -1,4 +1,26 @@
-# fastshap 0.0.5.9000
+# fastshap 0.0.8
+
+## Breaking changes
+
+* Since Shapley values are ALWAYS numeric the `explain()` function now returns a matrix, as opposed to a [tibble](https://cran.r-project.org/package=tibble); data frames (and [tibbles](https://cran.r-project.org/package=tibble)'s) are really only necessary when the data are heterogenous.
+
+* The plotting functions have all been deprecated in favor of the (far superior) [shapviz](https://cran.r-project.org/package=shapviz) package by @Mayer79 (`grid.arrange()` is also no longer imported from [gridExtra](https://cran.r-project.org/package=gridExtra)). Consequently, the output from `explain()` no longer needs to have its own `"explain"` class (only an ordinary `c("matrix", "array")` object is returned).
+
+## Miscellaneous
+
+* Minor change to `explain.lgb.Booster()` to support breaking changes in [lightgbm](https://cran.r-project.org/package=lightgbm) v4.0.0. (Thanks to @jameslamb and @Mayer79.)
+
+* The dependency on [matrixStats](https://cran.r-project.org/package=matrixStats) has been removed in favor of using R's internal `apply()` and `var()` functions.
+
+* The dependency on [plyr](https://cran.r-project.org/package=plyr), which has been retired, has been removed in favor of using [foreach](https://cran.r-project.org/package=foreach) directly.
+
+# fastshap 0.0.7
+
+## Miscellaneous
+
+* Move [lightgbm](https://cran.r-project.org/package=lightgbm) tests to `slowtests/` directory (for now).
+
+# fastshap 0.0.6
 
 ## Enhancements
 

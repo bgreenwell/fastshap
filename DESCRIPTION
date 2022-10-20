@@ -13,30 +13,27 @@ License: GPL (>= 2)
 URL: https://github.com/bgreenwell/fastshap
 BugReports: https://github.com/bgreenwell/fastshap/issues
 Imports: 
-    abind,
-    ggplot2, 
-    gridExtra,
-    matrixStats,
-    plyr, 
+    foreach,
     Rcpp (>= 1.0.1), 
-    tibble,
     utils
 Suggests: 
     AmesHousing,
     covr,
     earth,
-    htmltools,
     knitr,
     lightgbm,
     ranger,
-    reticulate (>= 1.14),
     rmarkdown,
-    rstudioapi,
+    shapviz,
     tinytest,
     titanic,
     xgboost
 LinkingTo: 
     Rcpp,
     RcppArmadillo
-RoxygenNote: 7.1.1
+RoxygenNote: 7.2.1
 Encoding: UTF-8
+Depends: 
+    R (>= 2.10)
+LazyData: true
+Roxygen: list(markdown = TRUE)

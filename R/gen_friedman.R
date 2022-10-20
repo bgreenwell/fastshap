@@ -4,7 +4,7 @@
 #'
 #' @param x A numeric vector.
 #'
-#' @param Integer specifying the number of bins to split \code{x} into.
+#' @param Integer specifying the number of bins to split `x` into.
 #'
 #' @keywords internal
 bin <- function(x, n_bins) {
@@ -19,7 +19,7 @@ bin <- function(x, n_bins) {
 #'
 #' Simulate data from the Friedman 1 benchmark problem. These data were 
 #' originally described in Friedman (1991) and Breiman (1996). For details, see
-#' \href{https://scikit-learn.org/stable/modules/generated/sklearn.datasets.make_friedman1.html}{sklearn.datasets.make_friedman1}.
+#' [sklearn.datasets.make_friedman1](https://scikit-learn.org/stable/modules/generated/sklearn.datasets.make_friedman1.html).
 #'
 #' @param n_samples Integer specifying the number of samples (i.e., rows) to
 #' generate. Default is 100.
@@ -28,13 +28,13 @@ bin <- function(x, n_bins) {
 #' Default is 10.
 #'
 #' @param n_bins Integer specifying the number of (roughly) equal sized bins to
-#' split the response into. Default is \code{NULL} for no binning. Setting to
+#' split the response into. Default is `NULL` for no binning. Setting to
 #' a positive integer > 1 effectively turns this into a classification problem
-#' where \code{n_bins} gives the number of classes.
+#' where `n_bins` gives the number of classes.
 #'
 #' @param sigma Numeric specifying the standard deviation of the noise.
 #'
-#' @param seed Integer specifying the random seed. If \code{NULL} (the default)
+#' @param seed Integer specifying the random seed. If `NULL` (the default)
 #' the results will be different each time the function is run.
 #'
 #' @note This function is mostly used for internal testing.
@@ -51,6 +51,8 @@ bin <- function(x, n_bins) {
 #' gen_friedman()
 gen_friedman <- function(n_samples = 100, n_features = 10, n_bins = NULL,
                          sigma = 0.1, seed = NULL) {
+  # FIXME: Eventually need to deprecate the `nbins` argument (it's bad practice
+  # anyway)
   if (!is.null(seed)) {
     set.seed(seed)
   }

@@ -1,0 +1,10 @@
+\documentclass{article}
+\usepackage{pdfpages}
+%\VignetteIndexEntry{fastshap-introduction}
+%\VignetteKeywords{R, Shapley values, feature contributions, prediction explanations}
+%\VignettePackage{fastshap}
+%\VignetteEncoding{UTF-8}
+
+\begin{document}
+\includepdf[pages=-, fitpaper=true]{pdf/fastshap-intro.pdf}
+\end{document}

@@ -1,0 +1,83 @@
+\begin{thebibliography}{10}
+\providecommand{\natexlab}[1]{#1}
+\providecommand{\url}[1]{\texttt{#1}}
+\expandafter\ifx\csname urlstyle\endcsname\relax
+  \providecommand{\doi}[1]{doi: #1}\else
+  \providecommand{\doi}{doi: \begingroup \urlstyle{rm}\Url}\fi
+
+\bibitem[Aas et~al.(2019)Aas, Jullum, and Løland]{aas-2019-explaining}
+K.~Aas, M.~Jullum, and A.~Løland.
+\newblock Explaining individual predictions when features are dependent: More
+  accurate approximations to shapley values, 2019.
+
+\bibitem[Aas et~al.(2020)Aas, Jullum, and Løland]{aas-2020-explaining}
+K.~Aas, M.~Jullum, and A.~Løland.
+\newblock Explaining individual predictions when features are dependent: More
+  accurate approximations to shapley values, 2020.
+
+\bibitem[Chen and Guestrin(2016)]{chen-2016-xgboost}
+T.~Chen and C.~Guestrin.
+\newblock Xgboost: {A} scalable tree boosting system.
+\newblock \emph{CoRR}, abs/1603.02754, 2016.
+\newblock URL \url{http://arxiv.org/abs/1603.02754}.
+
+\bibitem[Chen et~al.(2020)Chen, He, Benesty, Khotilovich, Tang, Cho, Chen,
+  Mitchell, Cano, Zhou, Li, Xie, Lin, Geng, and Li]{R-xgboost}
+T.~Chen, T.~He, M.~Benesty, V.~Khotilovich, Y.~Tang, H.~Cho, K.~Chen,
+  R.~Mitchell, I.~Cano, T.~Zhou, M.~Li, J.~Xie, M.~Lin, Y.~Geng, and Y.~Li.
+\newblock \emph{xgboost: Extreme Gradient Boosting}, 2020.
+\newblock URL \url{https://github.com/dmlc/xgboost}.
+\newblock R package version 1.2.0.1.
+
+\bibitem[Efron and Hastie(2016)]{efron-2016-computer}
+B.~Efron and T.~Hastie.
+\newblock \emph{Computer Age Statistical Inference: Algorithms, Evidence, and
+  Data Science}.
+\newblock Institute of Mathematical Statistics Monographs. Cambridge University
+  Press, 2016.
+\newblock \doi{10.1017/CBO9781316576533}.
+
+\bibitem[Greenwell(2020)]{R-fastshap}
+B.~Greenwell.
+\newblock \emph{fastshap: Fast Approximate Shapley Values}, 2020.
+\newblock URL \url{https://github.com/bgreenwell/fastshap}.
+\newblock R package version 0.0.5.9000.
+
+\bibitem[Ke et~al.(2017)Ke, Meng, Finley, Wang, Chen, Ma, Ye, and
+  Liu]{ke-2017-lightgbm}
+G.~Ke, Q.~Meng, T.~Finley, T.~Wang, W.~Chen, W.~Ma, Q.~Ye, and T.-Y. Liu.
+\newblock Lightgbm: A highly efficient gradient boosting decision tree.
+\newblock In I.~Guyon, U.~V. Luxburg, S.~Bengio, H.~Wallach, R.~Fergus,
+  S.~Vishwanathan, and R.~Garnett, editors, \emph{Advances in Neural
+  Information Processing Systems 30}, pages 3146--3154. Curran Associates,
+  Inc., 2017.
+\newblock URL
+  \url{http://papers.nips.cc/paper/6907-lightgbm-a-highly-efficient-gradient-boosting-decision-tree.pdf}.
+
+\bibitem[Lundberg and Lee(2017)]{lundberg-2017-KernelSHAP}
+S.~M. Lundberg and S.-I. Lee.
+\newblock A unified approach to interpreting model predictions.
+\newblock In I.~Guyon, U.~V. Luxburg, S.~Bengio, H.~Wallach, R.~Fergus,
+  S.~Vishwanathan, and R.~Garnett, editors, \emph{Advances in Neural
+  Information Processing Systems 30}, pages 4765--4774. Curran Associates,
+  Inc., 2017.
+\newblock URL
+  \url{http://papers.nips.cc/paper/7062-a-unified-approach-to-interpreting-model-predictions.pdf}.
+
+\bibitem[Sellereite and Jullum(2019)]{R-sellereite}
+N.~Sellereite and M.~Jullum.
+\newblock shapr: An r-package for explaining machine learning models with
+  dependence-aware shapley values.
+\newblock \emph{Journal of Open Source Software}, 5\penalty0 (46):\penalty0
+  2027, 2019.
+\newblock \doi{10.21105/joss.02027}.
+\newblock URL \url{https://doi.org/10.21105/joss.02027}.
+
+\bibitem[Sellereite et~al.(2021)Sellereite, Jullum, and Redelmeier]{R-shapr}
+N.~Sellereite, M.~Jullum, and A.~Redelmeier.
+\newblock \emph{shapr: Prediction Explanation with Dependence-Aware Shapley
+  Values}, 2021.
+\newblock URL \url{https://CRAN.R-project.org/package=shapr}.
+\newblock R package version 0.2.0.
+
+\end{thebibliography}

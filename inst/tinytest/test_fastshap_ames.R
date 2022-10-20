@@ -2,9 +2,6 @@
 if (!requireNamespace("AmesHousing", quietly = TRUE)) {
   exit_file("Package AmesHousing missing")
 }
-if (!requireNamespace("ggplot2", quietly = TRUE)) {
-  exit_file("Package ggplot2 missing")
-}
 
 # Read in the data and clean it up a bit
 ames <- as.data.frame(AmesHousing::make_ames())
@@ -36,7 +33,7 @@ ex0 <- fastshap::explain(fit, X = X, newdata = x, pred_wrapper = pfun)
 # Explain x using 10000 replications with adjustment
 set.seed(955)  # for reproducibility
 ex1 <- fastshap::explain(fit, X = X, newdata = x, pred_wrapper = pfun,
-                         nsim = 1000, adjust = TRUE)
+                         nsim = 100, adjust = TRUE)
 
 # Explain x exactly 
 ex2 <- fastshap::explain(fit, exact = TRUE, newdata = x)
