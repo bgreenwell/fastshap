@@ -18,6 +18,8 @@ explain(object, ...)
   pred_wrapper = NULL,
   newdata = NULL,
   adjust = FALSE,
+  baseline = NULL,
+  parallel = FALSE,
   ...
 )
 
@@ -28,6 +30,7 @@ explain(object, ...)
   nsim = 1,
   pred_wrapper,
   newdata = NULL,
+  adjust = FALSE,
   exact = FALSE,
   ...
 )
@@ -39,6 +42,7 @@ explain(object, ...)
   nsim = 1,
   pred_wrapper,
   newdata = NULL,
+  adjust = FALSE,
   exact = FALSE,
   ...
 )
@@ -50,77 +54,100 @@ explain(object, ...)
   nsim = 1,
   pred_wrapper,
   newdata = NULL,
+  adjust = FALSE,
   exact = FALSE,
   ...
 )
 }
 \arguments{
-\item{object}{A fitted model object (e.g., a \code{\link[ranger]{ranger}},
-\code{\link[xgboost]{xgboost}}, or \code{\link[earth]{earth}} object, to name
+\item{object}{A fitted model object (e.g., a \code{\link[ranger:ranger]{ranger::ranger()}},
+\code{\link[xgboost:xgb.train]{xgboost::xgboost()}}, or \code{\link[earth:earth]{earth::earth()}} object, to name
 a few).}
 
 \item{...}{Additional optional arguments to be passed on to
-\code{\link[plyr]{laply}}.}
+\code{\link[foreach:foreach]{foreach::foreach()}} whenever \code{parallel = TRUE}. For example, you may need
+to supply additional packages that the parallel task depends on via the
+\code{.packages} argument to \code{\link[foreach:foreach]{foreach::foreach()}}. \strong{NOTE:}
+\code{\link[foreach:foreach]{foreach::foreach()}}'s \code{.combine} argument is already set internally by
+\code{explain()}, so passing it via the \code{...} argument would likely result in an
+error.}
 
 \item{feature_names}{Character string giving the names of the predictor
 variables (i.e., features) of interest. If \code{NULL} (default) they will be
 taken from the column names of \code{X}.}
 
-\item{X}{A matrix-like R object (e.g., a data frame or matrix) containing 
+\item{X}{A matrix-like R object (e.g., a data frame or matrix) containing
 ONLY the feature columns from the training data. \strong{NOTE:} This argument
 is required whenever \code{exact = FALSE}.}
 
-\item{nsim}{The number of Monte Carlo repetitions to use for estimating each 
-Shapley value (only used when \code{exact = FALSE}). Default is 1. 
-\strong{NOTE:} To obtain the most accurate results, \code{nsim} should be set 
+\item{nsim}{The number of Monte Carlo repetitions to use for estimating each
+Shapley value (only used when \code{exact = FALSE}). Default is 1.
+\strong{NOTE:} To obtain the most accurate results, \code{nsim} should be set
 as large as feasibly possible.}
 
 \item{pred_wrapper}{Prediction function that requires two arguments,
-\code{object} and \code{newdata}. \strong{NOTE:} This argument is required 
-whenever \code{exact = FALSE}. The output of this function should be 
+\code{object} and \code{newdata}. \strong{NOTE:} This argument is required
+whenever \code{exact = FALSE}. The output of this function should be
 determined according to:
 
 \describe{
-  \item{Regression}{A numeric vector of predicted outcomes.}
-  \item{Binary classification}{A vector of predicted class probabilities
-  for the reference class.}
-  \item{Multiclass classification}{A vector of predicted class probabilities
-  for the reference class.}
+\item{Regression}{A numeric vector of predicted outcomes.}
+\item{Binary classification}{A vector of predicted class probabilities
+for the reference class.}
+\item{Multiclass classification}{A vector of predicted class probabilities
+for the reference class.}
 }}
 
-\item{newdata}{A matrix-like R object (e.g., a data frame or matrix) 
-containing ONLY the feature columns for the observation(s) of interest; that 
-is, the observation(s) you want to compute explanations for. Default is 
-\code{NULL} which will produce approximate Shapley values for all the rows in 
+\item{newdata}{A matrix-like R object (e.g., a data frame or matrix)
+containing ONLY the feature columns for the observation(s) of interest; that
+is, the observation(s) you want to compute explanations for. Default is
+\code{NULL} which will produce approximate Shapley values for all the rows in
 \code{X} (i.e., the training data).}
 
-\item{adjust}{Logical indicating whether or not to adjust the sum of the 
-estimated Shapley values to satisfy the \emph{additivity} (or 
-\emph{local accuracy}) property; that is, to equal the difference between the 
-model's prediction for that sample and the average prediction over all the 
+\item{adjust}{Logical indicating whether or not to adjust the sum of the
+estimated Shapley values to satisfy the \emph{additivity} (or
+\emph{local accuracy}) property; that is, to equal the difference between the
+model's prediction for that sample and the average prediction over all the
 training data (i.e., \code{X}).}
 
-\item{exact}{Logical indicating whether to compute exact Shapley values. 
-Currently only available for \code{\link[stats]{lm}}, 
-\code{\link[xgboost]{xgboost}}, and \code{\link[lightgbm]{lightgbm}} objects. 
-Default is \code{FALSE}. Note that setting \code{exact = TRUE} will return 
-explanations for each of the \code{\link[stats]{terms}} in an 
-\code{\link[stats]{lm}} object.}
+\item{baseline}{Numeric baseline to use in determining the additive property
+of the adjust Shapley estimates. Adjust Shapley values for a single
+prediction (\code{fx}) sum to the difference \code{fx - baseline}.
+Defaults to \code{NULL} which corresponds to the average training prediction.}
+
+\item{parallel}{Logical indicating whether or not to compute the approximate
+Shapley values in parallel across features; default is \code{FALSE}. \strong{NOTE:}
+setting \code{parallel = TRUE} requires setting up an appropriate (i.e.,
+system-specific) \emph{parallel backend} as described in the
+\href{https://cran.r-project.org/package=foreach}{foreach}; for details, see
+\code{vignette("foreach", package = "foreach")} in R.}
+
+\item{exact}{Logical indicating whether to compute exact Shapley values.
+Currently only available for \code{\link[stats:lm]{stats::lm()}},
+\code{\link[xgboost:xgb.train]{xgboost::xgboost()}}, and \code{\link[lightgbm:lightgbm]{lightgbm::lightgbm()}} objects.
+Default is \code{FALSE}. Note that setting \code{exact = TRUE} will return
+explanations for each of the \code{\link[stats:terms]{stats::terms()}} in an
+\code{\link[stats:lm]{stats::lm()}} object.}
 }
 \value{
-A matrix with one column for each feature specified in 
+A matrix with one column for each feature specified in
 \code{feature_names} (if \code{feature_names = NULL}, the default, there will
 be one column for each feature in \code{X}) and one row for each observation
 in \code{newdata} (if \code{newdata = NULL}, the default, there will be one
 row for each observation in \code{X}).
 }
 \description{
-Compute fast (approximate) Shapley values for a set of features.
+Compute fast (approximate) Shapley values for a set of features using the
+Monte Carlo algorithm described in Strumbelj and Igor (2014). An efficient
+algorithm for tree-based models, commonly referred to as Tree SHAP, is also
+supported for \href{https://cran.r-project.org/package=lightgbm}{lightgbm} and
+\href{https://cran.r-project.org/package=xgboost}{xgboost} models; see Lundberg
+et. al. (2020) for details.
 }
 \note{
-Setting \code{exact = TRUE} with a linear model (i.e., an 
-\code{\link[stats]{lm}} or \code{\link[stats]{glm}} object) assumes that the
-input features are independent. Also, setting \code{adjust = TRUE} is 
+Setting \code{exact = TRUE} with a linear model (i.e., an
+\code{\link[stats:lm]{stats::lm()}} or \code{\link[stats:glm]{stats::glm()}} object) assumes that the
+input features are independent. Also, setting \code{adjust = TRUE} is
 experimental and we follow the same approach as in
 \href{https://github.com/slundberg/shap}{shap}.
 }
@@ -144,15 +171,19 @@ shap
 # Compute exact Shapley (i.e., LinearSHAP) values
 shap <- explain(fit, exact = TRUE)
 shap
+}
+\references{
+Strumbelj, E., and Igor K. (2014). Explaining prediction models and
+individual predictions with feature contributions. Knowledge and information
+systems, 41(3), 647-665.
 
-# Shapley-based plots
-library(ggplot2)
-autoplot(shap)  # Shapley-based importance plot
-autoplot(shap, type = "dependence", feature = "wt", X = mtcars)
-autoplot(shap, type = "contribution", row_num = 1)  # explain first row of X
+Lundberg, S. M., Erion, G., Chen, H., DeGrave, A., Prutkin, J. M., Nair, B.,
+Katz, R., Himmelfarb, J., Bansal, N., and Lee, Su-In (2020). From local
+explanations to global understanding with explainable AI for trees.
+Nature Machine Intelligence, 2(1), 2522–5839.
 }
 \seealso{
-You can find more examples (with larger and more realistic data 
-sets) on the \strong{fastshap} GitHub repository: 
+You can find more examples (with larger and more realistic data
+sets) on the \strong{fastshap} GitHub repository:
 \url{https://github.com/bgreenwell/fastshap}.
 }

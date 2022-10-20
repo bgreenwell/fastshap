@@ -1,27 +1,6 @@
-#' Arrange multiple grobs on a page
-#'
-#' See \code{\link[gridExtra]{grid.arrange}} for more details.
-#' 
-#' @return A \code{"gtable"} object; see 
-#' \code{\link[gridExtra]{gridExtra-package}} for details.
-#'
-#' @name grid.arrange
-#' 
-#' @rdname grid.arrange
-#' 
-#' @keywords internal
-#' 
-#' @export
-#' 
-#' @importFrom gridExtra grid.arrange
-#' 
-#' @usage grid.arrange(..., newpage = TRUE)
-NULL
-
-
 #' Copy column classes
 #' 
-#' Copy column classes of \code{y} on to \code{x}.
+#' Copy column classes of `y` on to `x`.
 #' 
 #' @param x A data frame.
 #' 
@@ -82,15 +61,15 @@ copy_classes <- function(x, y) {
 
 #' Combine multi-dimensional arrays
 #' 
-#' Combine multi-dimensional arrays. This is a generalization of \code{cbind()} 
-#' and \code{rbind()}. Takes a sequence of vectors, matrices, or arrays and 
+#' Combine multi-dimensional arrays. This is a generalization of `cbind()` 
+#' and `rbind()`. Takes a sequence of vectors, matrices, or arrays and 
 #' produces a single array of the same or higher dimension.
 #' 
 #' @param x A data frame.
 #' 
 #' @param y A data frame.
 #' 
-#' @note Taken directly from \code{abind::abine()}, which was written by Tony 
+#' @note Taken directly from `abind::abine()`, which was written by Tony 
 #' Plate and Richard Heiberger.
 #' 
 #' @keywords internal

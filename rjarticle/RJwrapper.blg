@@ -1,0 +1,50 @@
+This is BibTeX, Version 0.99d (TeX Live 2022/dev/Debian)
+Capacity: max_strings=200000, hash_size=200000, hash_prime=170003
+The top-level auxiliary file: RJwrapper.aux
+The style file: abbrvnat.bst
+Database file #1: greenwell.bib
+Warning--I didn't find a database entry for "R-reticulate"
+Warning--I didn't find a database entry for "eronika-2017-catboost"
+Warning--I didn't find a database entry for "R-SHAPforxgboost"
+You've used 10 entries,
+            2773 wiz_defined-function locations,
+            661 strings with 6875 characters,
+and the built_in function-call counts, 5529 in all, are:
+= -- 469
+> -- 443
+< -- 7
++ -- 147
+- -- 137
+* -- 469
+:= -- 885
+add.period$ -- 40
+call.type$ -- 10
+change.case$ -- 67
+chr.to.int$ -- 10
+cite$ -- 20
+duplicate$ -- 215
+empty$ -- 358
+format.name$ -- 155
+if$ -- 1138
+int.to.chr$ -- 1
+int.to.str$ -- 1
+missing$ -- 6
+newline$ -- 65
+num.names$ -- 44
+pop$ -- 139
+preamble$ -- 1
+purify$ -- 61
+quote$ -- 0
+skip$ -- 200
+stack$ -- 0
+substring$ -- 112
+swap$ -- 35
+text.length$ -- 2
+text.prefix$ -- 0
+top$ -- 0
+type$ -- 105
+warning$ -- 0
+while$ -- 39
+width$ -- 0
+write$ -- 148
+(There were 3 warnings)

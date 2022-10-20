@@ -30,7 +30,7 @@ where \code{n_bins} gives the number of classes.}
 the results will be different each time the function is run.}
 }
 \description{
-Simulate data from the Friedman 1 benchmark problem. These data were 
+Simulate data from the Friedman 1 benchmark problem. These data were
 originally described in Friedman (1991) and Breiman (1996). For details, see
 \href{https://scikit-learn.org/stable/modules/generated/sklearn.datasets.make_friedman1.html}{sklearn.datasets.make_friedman1}.
 }
@@ -43,6 +43,6 @@ gen_friedman()
 \references{
 Breiman, Leo (1996) Bagging predictors. Machine Learning 24, pages 123-140.
 
-Friedman, Jerome H. (1991) Multivariate adaptive regression splines. The 
+Friedman, Jerome H. (1991) Multivariate adaptive regression splines. The
 Annals of Statistics 19 (1), pages 1-67.
 }

@@ -13,6 +13,7 @@ License: GPL (>= 2)
 URL: https://github.com/bgreenwell/fastshap
 BugReports: https://github.com/bgreenwell/fastshap/issues
 Imports: 
+    foreach,
     Rcpp (>= 1.0.1), 
     utils
 Suggests: 
@@ -32,3 +33,7 @@ LinkingTo:
     RcppArmadillo
 RoxygenNote: 7.2.1
 Encoding: UTF-8
+Depends: 
+    R (>= 2.10)
+LazyData: true
+Roxygen: list(markdown = TRUE)
