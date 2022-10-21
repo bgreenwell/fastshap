@@ -2,12 +2,18 @@
 % Please edit documentation in R/explain.R
 \name{explain}
 \alias{explain}
+\alias{explain_prep}
+\alias{explain_column}
 \alias{explain.default}
 \alias{explain.lm}
 \alias{explain.xgb.Booster}
 \alias{explain.lgb.Booster}
 \title{Fast approximate Shapley values}
 \usage{
+explain_prep(object, X, column, newdata = NULL)
+
+explain_column(object, X, column, pred_wrapper, newdata = NULL)
+
 explain(object, ...)
 
 \method{explain}{default}(
@@ -64,26 +70,15 @@ explain(object, ...)
 \code{\link[xgboost:xgb.train]{xgboost::xgboost()}}, or \code{\link[earth:earth]{earth::earth()}} object, to name
 a few).}
 
-\item{...}{Additional optional arguments to be passed on to
-\code{\link[foreach:foreach]{foreach::foreach()}} whenever \code{parallel = TRUE}. For example, you may need
-to supply additional packages that the parallel task depends on via the
-\code{.packages} argument to \code{\link[foreach:foreach]{foreach::foreach()}}. \strong{NOTE:}
-\code{\link[foreach:foreach]{foreach::foreach()}}'s \code{.combine} argument is already set internally by
-\code{explain()}, so passing it via the \code{...} argument would likely result in an
-error.}
-
-\item{feature_names}{Character string giving the names of the predictor
-variables (i.e., features) of interest. If \code{NULL} (default) they will be
-taken from the column names of \code{X}.}
-
 \item{X}{A matrix-like R object (e.g., a data frame or matrix) containing
 ONLY the feature columns from the training data. \strong{NOTE:} This argument
 is required whenever \code{exact = FALSE}.}
 
-\item{nsim}{The number of Monte Carlo repetitions to use for estimating each
-Shapley value (only used when \code{exact = FALSE}). Default is 1.
-\strong{NOTE:} To obtain the most accurate results, \code{nsim} should be set
-as large as feasibly possible.}
+\item{newdata}{A matrix-like R object (e.g., a data frame or matrix)
+containing ONLY the feature columns for the observation(s) of interest; that
+is, the observation(s) you want to compute explanations for. Default is
+\code{NULL} which will produce approximate Shapley values for all the rows in
+\code{X} (i.e., the training data).}
 
 \item{pred_wrapper}{Prediction function that requires two arguments,
 \code{object} and \code{newdata}. \strong{NOTE:} This argument is required
@@ -98,11 +93,22 @@ for the reference class.}
 for the reference class.}
 }}
 
-\item{newdata}{A matrix-like R object (e.g., a data frame or matrix)
-containing ONLY the feature columns for the observation(s) of interest; that
-is, the observation(s) you want to compute explanations for. Default is
-\code{NULL} which will produce approximate Shapley values for all the rows in
-\code{X} (i.e., the training data).}
+\item{...}{Additional optional arguments to be passed on to
+\code{\link[foreach:foreach]{foreach::foreach()}} whenever \code{parallel = TRUE}. For example, you may need
+to supply additional packages that the parallel task depends on via the
+\code{.packages} argument to \code{\link[foreach:foreach]{foreach::foreach()}}. \strong{NOTE:}
+\code{\link[foreach:foreach]{foreach::foreach()}}'s \code{.combine} argument is already set internally by
+\code{explain()}, so passing it via the \code{...} argument would likely result in an
+error.}
+
+\item{feature_names}{Character string giving the names of the predictor
+variables (i.e., features) of interest. If \code{NULL} (default) they will be
+taken from the column names of \code{X}.}
+
+\item{nsim}{The number of Monte Carlo repetitions to use for estimating each
+Shapley value (only used when \code{exact = FALSE}). Default is 1.
+\strong{NOTE:} To obtain the most accurate results, \code{nsim} should be set
+as large as feasibly possible.}
 
 \item{adjust}{Logical indicating whether or not to adjust the sum of the
 estimated Shapley values to satisfy the \emph{additivity} (or
@@ -187,3 +193,4 @@ You can find more examples (with larger and more realistic data
 sets) on the \strong{fastshap} GitHub repository:
 \url{https://github.com/bgreenwell/fastshap}.
 }
+\keyword{internal}

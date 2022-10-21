@@ -4,7 +4,12 @@
 #' 
 #' @importFrom Rcpp sourceCpp
 #' @importFrom foreach foreach %do% %dopar%
-explain_column <- function(object, X, column, pred_wrapper, newdata = NULL) {
+#' @name explain
+
+#' @rdname explain
+#'
+#' @export
+explain_prep <- function(object, X, column, newdata = NULL) {
   
   # Check types
   if (!is.null(newdata) && !identical(class(X), class(newdata))) {
@@ -75,12 +80,19 @@ explain_column <- function(object, X, column, pred_wrapper, newdata = NULL) {
   B[[1L]] <- copy_classes(B[[1L]], y = X)
   B[[2L]] <- copy_classes(B[[2L]], y = X)
   
-  # Return differences in predictions
-  pred_wrapper(object, newdata = B[[1L]]) - 
-    pred_wrapper(object, newdata = B[[2L]])  
-  
+  return(B)
 }
 
+#' @rdname explain
+#'
+#' @export
+explain_column <- function(object, X, column, pred_wrapper, newdata = NULL) {
+  B <- explain_prep(object, X, column, newdata = NULL)
+
+  # Return differences in predictions
+  pred_wrapper(object, newdata = B[[1L]]) -
+    pred_wrapper(object, newdata = B[[2L]])
+}
 
 #' Fast approximate Shapley values
 #' 
