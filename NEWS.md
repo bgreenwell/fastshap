@@ -2,7 +2,11 @@
 
 ## Breaking changes
 
-* Since Shapley values are ALWAYS numeric the `explain()` function now returns a matrix, as opposed to a [tibble](https://cran.r-project.org/package=tibble); data frames (and [tibbles](https://cran.r-project.org/package=tibble)'s) are really only necessary when the data are heterogenous.
+* Since Shapley values are ALWAYS numeric the `explain()` function now returns a matrix, as opposed to a [tibble](https://cran.r-project.org/package=tibble); data frames (and [tibbles](https://cran.r-project.org/package=tibble)'s) are really only necessary when the data are heterogeneous. In essence, the output from `explain()` will act like an R matrix but with class structure `c("explain", "matrix", "array")`.
+
+* The output from `explain()` now contains a `"baseline"` attribute, which, unless supplied by the user, contains the average training response. When `adjust = TRUE`, then the sum of a row of Shapley values is equal to the difference between the corresponding prediction, $\hat{f}\left(\boldsymbol{x}\right)$, and the baseline.
+
+* Two new data sets, `titanic` and `titanic_mice`, were added to the package; see the corresponding help pages for details.
 
 * The plotting functions have all been deprecated in favor of the (far superior) [shapviz](https://cran.r-project.org/package=shapviz) package by @Mayer79 (`grid.arrange()` is also no longer imported from [gridExtra](https://cran.r-project.org/package=gridExtra)). Consequently, the output from `explain()` no longer needs to have its own `"explain"` class (only an ordinary `c("matrix", "array")` object is returned).
 
