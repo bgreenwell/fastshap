@@ -114,12 +114,12 @@ estimated Shapley values to satisfy the \emph{additivity} (or
 model's prediction for that sample and the average prediction over all the
 training data (i.e., \code{X}).}
 
-\item{baseline}{Numeric baseline to use in determining the additive property
-of the adjust Shapley estimates. Adjust Shapley values for a single
-prediction (\code{fx}) sum to the difference \code{fx - baseline}.
-Defaults to \code{NULL} which corresponds to the average predictions computed
-from \code{X} (e.g., if \code{X} is the training feature set, then \code{baseline} will
-correspond to the average training prediction).}
+\item{baseline}{Numeric baseline to use when adjusting the computed Shapley
+values to meet the additivity property. Adjusted Shapley values for a single
+prediction (\code{fx}) will sum to the difference \code{fx - baseline}. Defaults to
+\code{NULL}, which corresponds to the average predictions computed from \code{X}, and
+zero otherwise (i.e., no additional predictions will be computed and the
+baseline attribute of the output will be set to zero).}
 
 \item{shap_only}{Logical indicating whether or not to include additional
 output useful for plotting (i.e., \code{newdata} and the \code{baseline} value.). This

@@ -2,13 +2,21 @@
 
 ## Breaking changes
 
-* Since Shapley values are ALWAYS numeric the `explain()` function now returns a matrix, as opposed to a [tibble](https://cran.r-project.org/package=tibble); data frames (and [tibbles](https://cran.r-project.org/package=tibble)'s) are really only necessary when the data are heterogeneous. In essence, the output from `explain()` will act like an R matrix but with class structure `c("explain", "matrix", "array")`.
+* The `explain()` function now returns a matrix, as opposed to a [tibble](https://cran.r-project.org/package=tibble), which makes more sense since Since values are ALWAYS numeric; data frames (and [tibbles](https://cran.r-project.org/package=tibble)'s) are really only necessary when the data are heterogeneous. In essence, the output from `explain()` will act like an R matrix but with class structure `c("explain", "matrix", "array")`; you could always convert the results to a tibble using `tibble::as_tibble(result)`.
 
-* The output from `explain()` now contains a `"baseline"` attribute, which, unless supplied by the user, contains the average training response. When `adjust = TRUE`, then the sum of a row of Shapley values is equal to the difference between the corresponding prediction, $\hat{f}\left(\boldsymbol{x}\right)$, and the baseline.
+* The output from `explain()` now contains a `"baseline"` attribute. When `adjust = TRUE`, the baseline defaults to the average training prediction (unless specified by the user), otherwise it defaults to zero to avoid having to compute (potentially expensive) predictions when `X` is large; the sum of a row of Shapley values when `adjust = TRUE` is equal to the difference between the corresponding prediction, $\hat{f}\left(\boldsymbol{x}\right)$, and the baseline.
 
 * Two new data sets, `titanic` and `titanic_mice`, were added to the package; see the corresponding help pages for details.
 
 * The plotting functions have all been deprecated in favor of the (far superior) [shapviz](https://cran.r-project.org/package=shapviz) package by @Mayer79 (`grid.arrange()` is also no longer imported from [gridExtra](https://cran.r-project.org/package=gridExtra)). Consequently, the output from `explain()` no longer needs to have its own `"explain"` class (only an ordinary `c("matrix", "array")` object is returned).
+
+* The `explain()` function gained three new arguments:
+
+  - `baseline`, which defaults to `NULL`, containing the baseline to use when adjusting Shapley values to meet the additivity property. If `NULL` and `adjust = TRUE`, it will default to the average training prediction (i.e., the average prediction over `X`.)
+
+  - `shap_only`, which defaults to `TRUE`, determines whether to return a matrix of Shapley values (`TRUE`) or a list containing the Shapley values, corresponding feature values, and baseline (`FALSE`); setting to `FALSE` is a conveneience when using the [shapviz](https://cran.r-project.org/package=shapviz) package.
+
+  - `parallel`, which defaults to `FALSE` for determining whether or not to coompute Shapley values in parallel (across features) using any suitable parallel backend supported by [foreach](https://cran.r-project.org/package=foreach).
 
 ## Miscellaneous
 
@@ -16,7 +24,7 @@
 
 * The dependency on [matrixStats](https://cran.r-project.org/package=matrixStats) has been removed in favor of using R's internal `apply()` and `var()` functions.
 
-* The dependency on [plyr](https://cran.r-project.org/package=plyr), which has been retired, has been removed in favor of using [foreach](https://cran.r-project.org/package=foreach) directly.
+* The dependency on [plyr](https://cran.r-project.org/package=plyr), which has been retired, has been removed in favor of using [foreach](https://cran.r-project.org/package=foreach) directly. 
 
 # fastshap 0.0.7
 

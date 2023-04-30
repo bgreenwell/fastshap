@@ -141,12 +141,12 @@ explain_column <- function(object, X, column, pred_wrapper, newdata = NULL) {
 #' explanations for each of the [stats::terms()] in an 
 #' [stats::lm()] object.
 #' 
-#' @param baseline Numeric baseline to use in determining the additive property 
-#' of the adjust Shapley estimates. Adjust Shapley values for a single 
-#' prediction (`fx`) sum to the difference `fx - baseline`.
-#' Defaults to `NULL` which corresponds to the average predictions computed
-#' from `X` (e.g., if `X` is the training feature set, then `baseline` will
-#' correspond to the average training prediction).
+#' @param baseline Numeric baseline to use when adjusting the computed Shapley
+#' values to meet the additivity property. Adjusted Shapley values for a single 
+#' prediction (`fx`) will sum to the difference `fx - baseline`. Defaults to 
+#' `NULL`, which corresponds to the average predictions computed from `X`, and
+#' zero otherwise (i.e., no additional predictions will be computed and the 
+#' baseline attribute of the output will be set to zero).
 #' 
 #' @param shap_only Logical indicating whether or not to include additional 
 #' output useful for plotting (i.e., `newdata` and the `baseline` value.). This 
