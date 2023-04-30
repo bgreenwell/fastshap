@@ -3,12 +3,14 @@
 ^\.github$
 ^_pkgdown\.yml$
 ^codecov\.yml$
+^data-raw$
 ^docs$
 ^lightgbm\.model$
 ^pkgdown$
 ^README\.Rmd$
 ^README\.md$
 ^README_cache$
+^rjarticle$
 ^slowtests$
 ^TODO\.md$
 ^vignettes$

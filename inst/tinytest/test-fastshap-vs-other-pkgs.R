@@ -9,6 +9,7 @@ if (!requireNamespace("lightgbm", quietly = TRUE)) {
 library(fastshap)
 library(iml)
 library(lightgbm)
+library(ranger)
 
 # Use one of the available (imputed) versions of the Titanic data
 titanic <- titanic_mice[[1L]]
@@ -23,7 +24,8 @@ X <- data.matrix(subset(titanic, select = -survived))
 params <- list(
   num_leaves = 10L,
   learning_rate = 0.1,
-  objective = "binary"
+  objective = "binary",
+  force_row_wise = TRUE
 )
 
 set.seed(1420)  # for reproducibility
@@ -61,14 +63,14 @@ jack.dawson <- data.matrix(jack.dawson)
 
 # Compute feature contributions using MC SHAP using the fastshap package
 set.seed(1306)  # for reproducibility
-ex.fastshap <- explain(bst, X = X, nsim = 100, pred_wrapper = pfun,
-                       newdata = x, adjust = FALSE)
+ex.fastshap <- explain(bst, X = X, nsim = 1000, pred_wrapper = pfun,
+                       newdata = jack.dawson, adjust = FALSE)
 
 # Compute feature contributions using MC SHAP using the iml package
 pred <- Predictor$new(bst, data = as.data.frame(X), predict.fun = pfun)
 set.seed(1316)  # for reproducibility
 ex.iml <- Shapley$new(pred, x.interest = data.frame(jack.dawson), 
-                      sample.size = 100)
+                      sample.size = 1000)
 
 # Compare results
 res <- cbind(

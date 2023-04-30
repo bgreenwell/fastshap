@@ -19,6 +19,7 @@ explain(object, ...)
   newdata = NULL,
   adjust = FALSE,
   baseline = NULL,
+  shap_only = TRUE,
   parallel = FALSE,
   ...
 )
@@ -32,6 +33,7 @@ explain(object, ...)
   newdata = NULL,
   adjust = FALSE,
   exact = FALSE,
+  shap_only = TRUE,
   ...
 )
 
@@ -44,6 +46,7 @@ explain(object, ...)
   newdata = NULL,
   adjust = FALSE,
   exact = FALSE,
+  shap_only = TRUE,
   ...
 )
 
@@ -56,6 +59,7 @@ explain(object, ...)
   newdata = NULL,
   adjust = FALSE,
   exact = FALSE,
+  shap_only = TRUE,
   ...
 )
 }
@@ -77,8 +81,8 @@ variables (i.e., features) of interest. If \code{NULL} (default) they will be
 taken from the column names of \code{X}.}
 
 \item{X}{A matrix-like R object (e.g., a data frame or matrix) containing
-ONLY the feature columns from the training data. \strong{NOTE:} This argument
-is required whenever \code{exact = FALSE}.}
+ONLY the feature columns from the training data (or suitable background data
+set). \strong{NOTE:} This argument is required whenever \code{exact = FALSE}.}
 
 \item{nsim}{The number of Monte Carlo repetitions to use for estimating each
 Shapley value (only used when \code{exact = FALSE}). Default is 1.
@@ -113,7 +117,13 @@ training data (i.e., \code{X}).}
 \item{baseline}{Numeric baseline to use in determining the additive property
 of the adjust Shapley estimates. Adjust Shapley values for a single
 prediction (\code{fx}) sum to the difference \code{fx - baseline}.
-Defaults to \code{NULL} which corresponds to the average training prediction.}
+Defaults to \code{NULL} which corresponds to the average predictions computed
+from \code{X} (e.g., if \code{X} is the training feature set, then \code{baseline} will
+correspond to the average training prediction).}
+
+\item{shap_only}{Logical indicating whether or not to include additional
+output useful for plotting (i.e., \code{newdata} and the \code{baseline} value.). This
+is convenient, for example, when interfacing with \code{\link[shapviz:shapviz]{shapviz::shapviz()}}}
 
 \item{parallel}{Logical indicating whether or not to compute the approximate
 Shapley values in parallel across features; default is \code{FALSE}. \strong{NOTE:}

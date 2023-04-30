@@ -31,7 +31,7 @@ Suggests:
 LinkingTo: 
     Rcpp,
     RcppArmadillo
-RoxygenNote: 7.2.1
+RoxygenNote: 7.2.3
 Encoding: UTF-8
 Depends: 
     R (>= 2.10)

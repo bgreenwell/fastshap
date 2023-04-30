@@ -1,8 +1,10 @@
+# Install required packages
 pkgs <- c("AmesHousing", "doParallel", "ranger")
 required <- setdiff(pkgs, installed.packages()[, "Package"])
 install.packages(required)
 
 # Load required packages
+library(doParallel)
 library(fastshap)
 library(ranger)
 
@@ -19,29 +21,19 @@ pfun <- function(object, newdata) {
   predict(object, data = newdata)$predictions
 }
 
-# Use forking approach
-library(doParallel)
-registerDoParallel(cores = 16)
+# Without parallelism
+set.seed(1706)
+system.time({  # estimate run time
+  ex.par <- explain(rfo, X = X, pred_wrapper = pfun, nsim = 10)
+})
+#    user  system elapsed 
+# 483.029  39.370 179.009 
+
+# With parallelism
+registerDoParallel(cores = 12)
 set.seed(5038)
 system.time({  # estimate run time
-  shap <- fastshap(rfo, X = X, pred_wrapper = pfun, nsim = 10, .parallel = TRUE)
+  ex.par <- explain(rfo, X = X, pred_wrapper = pfun, nsim = 10, parallel = TRUE)
 })
-#     user   system  elapsed 
-# 1369.551   56.341  101.875
-
-
-library(parallel)
-cl <- makeCluster(5, type = "PSOCK")  
-clusterExport(cl, c("fastshap", "X", "pfun", "rfo"))
-clusterEvalQ(cl, {
-  library(ranger)
-})
-set.seed(5038)
-system.time({
-  res <- parLapply(cl,X = names(X), fun = function(x) {
-    fastshap(rfo, feature_names = x, X = X, pred_wrapper = pfun, nsim = 10)
-  })
-})
-stopCluster(cl)
-#  user  system elapsed 
-# 1.974   0.085 161.037
+#    user  system elapsed 
+# 576.077  17.517  53.234

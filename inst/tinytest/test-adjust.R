@@ -70,7 +70,7 @@ expect_equal(sum(ex.fastshap), jack.logit.lgb - baseline.lgb, tolerance = 1e-06)
 X.new <- X[1L:5L, ]
 set.seed(2033)  # for reproducibility
 ex.new <- explain(bst.lgb, X = X, nsim = 2, pred_wrapper = pfun.lgb,
-                  newdata = X.new, adjust = F)  # nsim = 2 here ONLY for speed
+                  newdata = X.new, adjust = TRUE)  # nsim = 2 here ONLY for speed
 
 # Expectations
 expect_equal(rowSums(ex.new), pfun.lgb(bst.lgb, newdata = X.new) - baseline.lgb,
