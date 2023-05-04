@@ -417,7 +417,7 @@ explain.lm <- function(object, feature_names = NULL, X, nsim = 1,
   } else {
     explain.default(object, feature_names = feature_names, X = X, nsim = nsim,
                     pred_wrapper = pred_wrapper, newdata = newdata, 
-                    adjust = adjust, ...)
+                    adjust = adjust, shap_only = shap_only, ...)
   }
 }
 
@@ -451,7 +451,7 @@ explain.xgb.Booster <- function(object, feature_names = NULL, X = NULL, nsim = 1
   } else {
     explain.default(object, feature_names = feature_names, X = X, nsim = nsim,
                     pred_wrapper = pred_wrapper, newdata = newdata, 
-                    adjust = adjust, ...)
+                    adjust = adjust, shap_only = shap_only, ...)
   }
 }
 
