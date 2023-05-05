@@ -239,10 +239,18 @@ explain.default <- function(object, feature_names = NULL, X = NULL, nsim = 1,
                             pred_wrapper = NULL, newdata = NULL, adjust = FALSE,
                             baseline = NULL, shap_only = TRUE, parallel = FALSE, 
                             ...) {
-
+  
   # Compute baseline/average training prediction (fnull) and predictions 
   # associated with each explanation (fx); if `adjust = FALSE`, then the 
   # baseline is not needed and defaults to zero.
+  if (is.null(X)) {
+    stop("Training features required for approximate Shapley values. Please ",
+         "supply them via the `X` argument; see `?fastshap::explain` for ",
+         "details.", call. = FALSE)
+  }
+  if (inherits(X, what = "tbl_df")) {
+    X <- as.data.frame(X)
+  }
   if (is.null(newdata)) { 
     newdata <- X  # explain all rows of background data set
   } 
@@ -260,11 +268,6 @@ explain.default <- function(object, feature_names = NULL, X = NULL, nsim = 1,
   }
   
   # Deal with other NULL arguments
-  if (is.null(X)) {
-    stop("Training features required for approximate Shapley values. Please ",
-         "supply them via the `X` argument; see `?fastshap::explain` for ",
-         "details.", call. = FALSE)
-  }
   if (is.null(feature_names)) {
     feature_names = colnames(X)
   }

@@ -18,6 +18,8 @@
 
 ## Miscellaneous
 
+* The `X` and `newdata` arguments of `explain()` should now work with [tibble](https://cran.r-project.org/package=tibble) [(#20)](https://github.com/bgreenwell/fastshap/issues/20).
+
 * Minor change to `explain.lgb.Booster()` to support breaking changes in [lightgbm](https://cran.r-project.org/package=lightgbm) v4.0.0. (Thanks to @jameslamb and @Mayer79.)
 
 * The dependency on [matrixStats](https://cran.r-project.org/package=matrixStats) has been removed in favor of using R's internal `apply()` and `var()` functions.
