@@ -5,6 +5,7 @@ library(ranger)
 
 # Use one of fastshap's imputed versions of the Titanic data
 head(titanic <- titanic_mice[[1L]])
+titanic$sex <- ifelse(titanic$sex == "male", 1, 0)
 
 # Matrix of only predictor values
 X <- subset(titanic, select = -survived)
@@ -13,10 +14,11 @@ X <- subset(titanic, select = -survived)
 set.seed(1420)  # for reproducibility
 rfo <- ranger(survived ~ ., data = titanic, probability = TRUE)
 
+# New passenger, Jack, whose outcome we want to explain
 jack.dawson <- data.frame(
   pclass = 3L,     # third-class passenger
   age = 20.0,      # twenty years old
-  sex = factor("male", levels = c("female", "male")),
+  sex = 1L,
   sibsp = 0L,      # no siblings/spouses aboard
   parch = 0L       # no parents/children aboard
 )
@@ -37,6 +39,7 @@ explainer <- DALEX::explain(rfo, data = X, y = titanic$survived,
 predictor <- iml::Predictor$new(rfo, data = titanic, y = "survived",
                                 predict.fun = pfun)
 
+# Compute times
 nsims <- c(1, 5, 10, 25, 50, 75, 100, seq(from = 200, to = 1000, by = 100))
 times1 <- times2 <- times3 <- numeric(length(nsims))
 set.seed(904)
@@ -60,11 +63,15 @@ benchmark <- data.frame(
   "fastshap" = times3
 )
 saveRDS(benchmark, file = "rjarticle/data/benchmark.rds")
+
+# Plot results
+palette("Okabe-Ito")
 plot(nsims, times1, type = "b", xlab = "Number of Monte Carlo repetitions",
-     ylab = "Time (in seconds)", las = 1,
+     ylab = "Time (in seconds)", las = 1, col = 1,
      xlim = c(0, max(nsims)), ylim = c(0, max(times1, times2, times3)))
-lines(nsims, times2, type = "b", col = "red")
-lines(nsims, times3, type = "b", col = "blue")
+lines(nsims, times2, type = "b", col = 2)
+lines(nsims, times3, type = "b", col = 3)
 legend("topleft",
        legend = c("iBreakDown", "iml", "fastshap"),
-       lty = c(1, 1, 1), col = c("black", "red", "blue"), inset = 0.02)
+       lty = c(1, 1, 1), col = 1:3, inset = 0.02)
+palette("default")

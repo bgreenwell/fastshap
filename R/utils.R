@@ -72,6 +72,8 @@ copy_classes <- function(x, y) {
 #' @note Taken directly from `abind::abine()`, which was written by Tony 
 #' Plate and Richard Heiberger.
 #' 
+#' @importFrom utils object.size
+#' 
 #' @keywords internal
 #' 
 #' @noRd
@@ -181,7 +183,7 @@ abind <- function(..., along=N, rev.along=NULL, new.names=NULL,
       arg.alt.names <- arg.names
       for (i in seq(along=arg.names)) {
         if (arg.alt.names[i]=="") {
-          if (object.size(dot.args[[i]])<1000) {
+          if (utils::object.size(dot.args[[i]])<1000) {
             arg.alt.names[i] <- paste(deparse(dot.args[[i]], 40), collapse=";")
           } else {
             arg.alt.names[i] <- paste("X", i, sep="")

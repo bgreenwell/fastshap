@@ -3,12 +3,16 @@
 ^\.github$
 ^_pkgdown\.yml$
 ^codecov\.yml$
+^data-raw$
 ^docs$
 ^lightgbm\.model$
 ^pkgdown$
 ^README\.Rmd$
 ^README\.md$
 ^README_cache$
+^rjarticle$
 ^slowtests$
+^tools$
 ^TODO\.md$
-^vignettes$
+^vignettes/fastshap\.Rmd\.orig$
+^vignettes/figure$

@@ -4,6 +4,7 @@
 #' 
 #' @importFrom Rcpp sourceCpp
 #' @importFrom foreach foreach %do% %dopar%
+#' @importFrom stats var
 explain_column <- function(object, X, column, pred_wrapper, newdata = NULL) {
   
   # Check types
@@ -100,8 +101,8 @@ explain_column <- function(object, X, column, pred_wrapper, newdata = NULL) {
 #' taken from the column names of `X`.
 #'
 #' @param X A matrix-like R object (e.g., a data frame or matrix) containing 
-#' ONLY the feature columns from the training data. **NOTE:** This argument
-#' is required whenever `exact = FALSE`.
+#' ONLY the feature columns from the training data (or suitable background data 
+#' set). **NOTE:** This argument is required whenever `exact = FALSE`.
 #'
 #' @param pred_wrapper Prediction function that requires two arguments,
 #' `object` and `newdata`. **NOTE:** This argument is required 
@@ -128,22 +129,29 @@ explain_column <- function(object, X, column, pred_wrapper, newdata = NULL) {
 #' `X` (i.e., the training data).
 #' 
 #' @param adjust Logical indicating whether or not to adjust the sum of the 
-#' estimated Shapley values to satisfy the *additivity* (or 
-#' *local accuracy*) property; that is, to equal the difference between the 
-#' model's prediction for that sample and the average prediction over all the 
-#' training data (i.e., `X`).
+#' estimated Shapley values to satisfy the *local accuracy* property; that is, 
+#' to equal the difference between the model's prediction for that sample and 
+#' the average prediction over all the training data (i.e., `X`). Default is 
+#' `FALSE` and setting to `TRUE` requires `nsim` > 1.
 #' 
 #' @param exact Logical indicating whether to compute exact Shapley values. 
 #' Currently only available for [stats::lm()], 
 #' [xgboost::xgboost()], and [lightgbm::lightgbm()] objects. 
 #' Default is `FALSE`. Note that setting `exact = TRUE` will return 
 #' explanations for each of the [stats::terms()] in an 
-#' [stats::lm()] object.
+#' [stats::lm()] object. Default is `FALSE`.
 #' 
-#' @param baseline Numeric baseline to use in determining the additive property 
-#' of the adjust Shapley estimates. Adjust Shapley values for a single 
-#' prediction (`fx`) sum to the difference `fx - baseline`.
-#' Defaults to `NULL` which corresponds to the average training prediction.
+#' @param baseline Numeric baseline to use when adjusting the computed Shapley
+#' values to achieve *local accuracy*. Adjusted Shapley values for a single 
+#' prediction (`fx`) will sum to the difference `fx - baseline`. Defaults to 
+#' `NULL`, which corresponds to the average predictions computed from `X`, and
+#' zero otherwise (i.e., no additional predictions will be computed and the 
+#' baseline attribute of the output will be set to zero).
+#' 
+#' @param shap_only Logical indicating whether or not to include additional 
+#' output useful for plotting (i.e., `newdata` and the `baseline` value.). This 
+#' is convenient, for example, when using [shapviz::shapviz()] for plotting.
+#' Default is `TRUE`.
 #' 
 #' @param parallel Logical indicating whether or not to compute the approximate
 #' Shapley values in parallel across features; default is `FALSE`. **NOTE:**
@@ -160,11 +168,19 @@ explain_column <- function(object, X, column, pred_wrapper, newdata = NULL) {
 #' `explain()`, so passing it via the `...` argument would likely result in an
 #' error.
 #' 
-#' @return A matrix with one column for each feature specified in 
-#' `feature_names` (if `feature_names = NULL`, the default, there will
+#' @return If `shap_only = TRUE` (the default), a matrix is returned with one 
+#' column for each feature specified in `feature_names` (if 
+#' `feature_names = NULL`, the default, there will
 #' be one column for each feature in `X`) and one row for each observation
 #' in `newdata` (if `newdata = NULL`, the default, there will be one
-#' row for each observation in `X`). 
+#' row for each observation in `X`). Additionally, the returned matrix will
+#' have an attribute called `"baseline"` containing the baseline value. If 
+#' `shap_only = FALSE`, then a list is returned with three components:
+#' * `shapley_values` - a matrix of Shapley values (as described above);
+#' * `feature_values` - the corresponding feature values (for plotting with 
+#' [shapviz::shapviz()]);
+#' * `baseline` - the corresponding baseline value (for plotting with 
+#' [shapviz::shapviz()]).
 #' 
 #' @seealso You can find more examples (with larger and more realistic data 
 #' sets) on the **fastshap** GitHub repository: 
@@ -221,13 +237,42 @@ explain <- function(object, ...) {
 #' @export
 explain.default <- function(object, feature_names = NULL, X = NULL, nsim = 1, 
                             pred_wrapper = NULL, newdata = NULL, adjust = FALSE,
-                            baseline = NULL, parallel = FALSE, ...) {
+                            baseline = NULL, shap_only = TRUE, parallel = FALSE, 
+                            ...) {
 
-  # FIXME: Can probably increase speed for cases where `nsim` and number of 
-  # instances to explain are both greater than one.
+  # Compute baseline/average training prediction (fnull) and predictions 
+  # associated with each explanation (fx); if `adjust = FALSE`, then the 
+  # baseline is not needed and defaults to zero.
+  if (is.null(newdata)) { 
+    newdata <- X  # explain all rows of background data set
+  } 
+  if (isTRUE(adjust)) {
+    fx <- pred_wrapper(object, newdata = newdata)
+  }
+  fnull <- if (isTRUE(adjust)) {
+    if (is.null(baseline)) {  # baseline value (i.e., avg training prediction)
+      mean(pred_wrapper(object, newdata = X))
+    } else {
+      baseline
+    }
+  } else {
+    0  # FIXME: Is it really necessary to return zero?
+  }
   
-  # Initialize baseline to 0
-  fnull <- 0
+  # Deal with other NULL arguments
+  if (is.null(X)) {
+    stop("Training features required for approximate Shapley values. Please ",
+         "supply them via the `X` argument; see `?fastshap::explain` for ",
+         "details.", call. = FALSE)
+  }
+  if (is.null(feature_names)) {
+    feature_names = colnames(X)
+  }
+  if (is.null(pred_wrapper)) {
+    stop("Prediction function required for approximate Shapley values. Please ",
+         "supply one via the `pred_wrapper` argument; see ",
+         "`?fastshap::explain` for details.", call. = FALSE)
+  }
   
   # Set up the 'foreach' "do" operator
   `%.do%` <- if (isTRUE(parallel)) `%dopar%` else `%do%`
@@ -235,21 +280,15 @@ explain.default <- function(object, feature_names = NULL, X = NULL, nsim = 1,
   # Experimental patch for more efficiently computing single-row explanations
   if (!is.null(newdata)) {
     if (nrow(newdata) == 1L && nsim > 1L) {
-      newdata <- newdata[rep(1L, times = nsim), ]  # replicate obs `nsim` times
+      newdata.stacked <- newdata[rep(1L, times = nsim), ]  # replicate obs `nsim` times
       phis <- explain.default(object, feature_names = feature_names, X = X, 
                               nsim = 1L, pred_wrapper = pred_wrapper, 
-                              newdata = newdata, adjust = FALSE, ...)
+                              newdata = newdata.stacked, adjust = FALSE, ...)
       phi.avg <- t(colMeans(phis))  # transpose to keep as row matrix
       if (isTRUE(adjust)) {
         # Adjust sum of approximate Shapley values using the same technique from 
         # the Python {shap} library. For details, see the explanation at
         # https://github.com/slundberg/shap/blob/master/shap/explainers/_sampling.py.
-        fx <- pred_wrapper(object, newdata = newdata[1L, , drop = FALSE])
-        fnull <- if (is.null(baseline)) {
-          mean(pred_wrapper(object, newdata = X))
-        } else {
-          baseline
-        }
         phi.var <- apply(phis, MARGIN = 2, FUN = stats::var)
         err <- fx - sum(phi.avg) - fnull
         v <- (phi.var / max(phi.var)) * 1e6
@@ -259,25 +298,18 @@ explain.default <- function(object, feature_names = NULL, X = NULL, nsim = 1,
       # if (isTRUE(variance)) {
       #   attr(phi.avg, which = "variance") <- phi.var
       # }
-      attr(phi.avg, which = "baseline") <- fnull
-      class(phi.avg) <- c("explain", class(phi.avg))
-      return(phi.avg)
+      if (isFALSE(shap_only)) {
+        return(structure(list(  # convenient structure for shapviz
+          "shapley_values" = phi.avg,
+          "feature_values" = newdata[, feature_names, drop = FALSE],
+          "baseline" = fnull
+        ), class = "explain"))
+      } else {
+        attr(phi.avg, which = "baseline") <- fnull
+        class(phi.avg) <- c("explain", class(phi.avg))
+        return(phi.avg)
+      }
     }
-  }
-  
-  # Deal with NULL arguments
-  if (is.null(feature_names)) {
-    feature_names = colnames(X)
-  }
-  if (is.null(X)) {
-    stop("Training features required for approximate Shapley values. Please ",
-         "supply them via the `X` argument; see `?fastshap::explain` for ",
-         "details.", call. = FALSE)
-  }
-  if (is.null(pred_wrapper)) {
-    stop("Prediction function required for approximate Shapley values. Please ",
-         "supply one via the `pred_wrapper` argument; see ",
-         "`?fastshap::explain` for details.", call. = FALSE)
   }
   
   if (isTRUE(adjust)) {  # compute variances and adjust the sum
@@ -302,24 +334,6 @@ explain.default <- function(object, feature_names = NULL, X = NULL, nsim = 1,
         cbind(rowMeans(reps), apply(reps, MARGIN = 1, FUN = var))
       } else {
         cbind(mean.default(reps), stats::var(reps))
-      }
-    }
-
-    # Compute average training prediction (fnull) and predictions associated
-    # with each explanation (fx)
-    if (is.null(newdata)) {  # explain all training rows
-      fx <- pred_wrapper(object, newdata = X)
-      fnull <- if (is.null(baseline)) {
-        mean(fx) 
-      } else {
-        baseline
-      }
-    } else {  # explain new observation(s)
-      fx <- pred_wrapper(object, newdata = newdata)
-      fnull <- if (is.null(baseline)) {
-        mean(pred_wrapper(object, newdata = X))
-      } else {
-        baseline
       }
     }
     
@@ -370,11 +384,18 @@ explain.default <- function(object, feature_names = NULL, X = NULL, nsim = 1,
   } 
   colnames(phis) <- feature_names
   
-  # Add baseline and class attributes
-  attr(phis, which = "baseline") <- fnull
-  class(phis) <- c("explain", class(phis))
-  
-  return(phis)
+  if (isFALSE(shap_only)) {
+    return(structure(list(
+      "shapley_values" = phis,
+      "feature_values" = newdata[, feature_names, drop = FALSE],
+      "baseline" = fnull
+    ), class = "explain"))
+  } else {
+    # Add baseline and class attributes
+    attr(phis, which = "baseline") <- fnull
+    class(phis) <- c("explain", class(phis))
+    return(phis)
+  }
 
 }
 
@@ -384,7 +405,7 @@ explain.default <- function(object, feature_names = NULL, X = NULL, nsim = 1,
 #' @export
 explain.lm <- function(object, feature_names = NULL, X, nsim = 1, 
                        pred_wrapper, newdata = NULL, adjust = FALSE, 
-                       exact = FALSE, ...) {
+                       exact = FALSE, shap_only = TRUE, ...) {
   if (isTRUE(exact)) {  # use Linear SHAP
     phis <- if (is.null(newdata)) {
       stats::predict(object, type = "terms", ...)
@@ -392,9 +413,16 @@ explain.lm <- function(object, feature_names = NULL, X, nsim = 1,
       stats::predict(object, newdata = newdata, type = "terms", ...)
     }
     baseline <- attr(phis, which = "constant")  # mean response for all training data
-    attr(phis, which = "baseline") <- baseline
-    class(phis) <- c("explain", class(phis))
-    return(phis)
+    if (isFALSE(shap_only)) {
+      return(structure(list(
+        "shapley_values" = phis,
+        "feature_values" = newdata[, feature_names, drop = FALSE]
+      ), class = "explain"))
+    } else {
+      attr(phis, which = "baseline") <- baseline
+      class(phis) <- c("explain", class(phis))
+      return(phis)
+    }
   } else {
     explain.default(object, feature_names = feature_names, X = X, nsim = nsim,
                     pred_wrapper = pred_wrapper, newdata = newdata, 
@@ -408,7 +436,7 @@ explain.lm <- function(object, feature_names = NULL, X, nsim = 1,
 #' @export
 explain.xgb.Booster <- function(object, feature_names = NULL, X = NULL, nsim = 1, 
                                 pred_wrapper, newdata = NULL, adjust = FALSE, 
-                                exact = FALSE, ...) {
+                                exact = FALSE, shap_only = TRUE, ...) {
   if (isTRUE(exact)) {  # use Tree SHAP
     if (is.null(X) && is.null(newdata)) {
       stop("Must supply `X` or `newdata` argument (but not both).", 
@@ -417,10 +445,18 @@ explain.xgb.Booster <- function(object, feature_names = NULL, X = NULL, nsim = 1
     X <- if (is.null(X)) newdata else X
     phis <- stats::predict(object, newdata = X, predcontrib = TRUE, 
                            approxcontrib = FALSE, ...)
-    attr(phis, which = "baseline") <- phis[, "BIAS"]
-    class(phis) <- c("explain", class(phis))
-    phis <- phis[, colnames(phis) != "BIAS", drop = FALSE]
-    return(phis)
+    if (isFALSE(shap_only)) {
+      return(structure(list(
+        "shapley_values" = phis,
+        "feature_values" = newdata[, feature_names, drop = FALSE],
+        "baseline" = phis[, "BIAS"]
+      ), class = "explain"))
+    } else {
+      attr(phis, which = "baseline") <- phis[, "BIAS"]
+      class(phis) <- c("explain", class(phis))
+      phis <- phis[, colnames(phis) != "BIAS", drop = FALSE]
+      return(phis)
+    }
   } else {
     explain.default(object, feature_names = feature_names, X = X, nsim = nsim,
                     pred_wrapper = pred_wrapper, newdata = newdata, 
@@ -434,7 +470,7 @@ explain.xgb.Booster <- function(object, feature_names = NULL, X = NULL, nsim = 1
 #' @export
 explain.lgb.Booster <- function(object, feature_names = NULL, X = NULL, nsim = 1, 
                                 pred_wrapper, newdata = NULL, adjust = FALSE, 
-                                exact = FALSE, ...) {
+                                exact = FALSE, shap_only = TRUE, ...) {
   if (isTRUE(exact)) {  # use Tree SHAP
     if (is.null(X) && is.null(newdata)) {
       stop("Must supply `X` or `newdata` argument (but not both).", 
@@ -450,13 +486,21 @@ explain.lgb.Booster <- function(object, feature_names = NULL, X = NULL, nsim = 1
     }
     
     colnames(phis) <- c(colnames(X), "BIAS")
-    attr(phis, which = "baseline") <- phis[, "BIAS"]
-    phis <- phis[, colnames(phis) != "BIAS", drop = FALSE]
-    class(phis) <- c("explain", class(phis))
-    return(phis)
+    if (isFALSE(shap_only)) {
+      return(structure(list(
+        "shapley_values" = phis,
+        "feature_values" = newdata[, feature_names, drop = FALSE],
+        "baseline" = phis[, "BIAS"]
+      ), class = "explain"))
+    } else {
+      attr(phis, which = "baseline") <- phis[, "BIAS"]
+      phis <- phis[, colnames(phis) != "BIAS", drop = FALSE]
+      class(phis) <- c("explain", class(phis))
+      return(phis)
+    }
   } else {
     explain.default(object, feature_names = feature_names, X = X, nsim = nsim,
                     pred_wrapper = pred_wrapper, newdata = newdata, 
-                    adjust = adjust, ...)
+                    adjust = adjust, shap_only = shap_only, ...)
   }
 }

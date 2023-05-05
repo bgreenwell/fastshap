@@ -40,7 +40,7 @@ expect_identical(
 # Check class 
 expect_identical(
   current = class(ex_exact),
-  target = c("matrix", "array")
+  target = c("explain", "matrix", "array")
 )
 
 # Fit model(s)

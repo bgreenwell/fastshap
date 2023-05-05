@@ -19,6 +19,7 @@ explain(object, ...)
   newdata = NULL,
   adjust = FALSE,
   baseline = NULL,
+  shap_only = TRUE,
   parallel = FALSE,
   ...
 )
@@ -32,6 +33,7 @@ explain(object, ...)
   newdata = NULL,
   adjust = FALSE,
   exact = FALSE,
+  shap_only = TRUE,
   ...
 )
 
@@ -44,6 +46,7 @@ explain(object, ...)
   newdata = NULL,
   adjust = FALSE,
   exact = FALSE,
+  shap_only = TRUE,
   ...
 )
 
@@ -56,6 +59,7 @@ explain(object, ...)
   newdata = NULL,
   adjust = FALSE,
   exact = FALSE,
+  shap_only = TRUE,
   ...
 )
 }
@@ -77,8 +81,8 @@ variables (i.e., features) of interest. If \code{NULL} (default) they will be
 taken from the column names of \code{X}.}
 
 \item{X}{A matrix-like R object (e.g., a data frame or matrix) containing
-ONLY the feature columns from the training data. \strong{NOTE:} This argument
-is required whenever \code{exact = FALSE}.}
+ONLY the feature columns from the training data (or suitable background data
+set). \strong{NOTE:} This argument is required whenever \code{exact = FALSE}.}
 
 \item{nsim}{The number of Monte Carlo repetitions to use for estimating each
 Shapley value (only used when \code{exact = FALSE}). Default is 1.
@@ -105,15 +109,22 @@ is, the observation(s) you want to compute explanations for. Default is
 \code{X} (i.e., the training data).}
 
 \item{adjust}{Logical indicating whether or not to adjust the sum of the
-estimated Shapley values to satisfy the \emph{additivity} (or
-\emph{local accuracy}) property; that is, to equal the difference between the
-model's prediction for that sample and the average prediction over all the
-training data (i.e., \code{X}).}
+estimated Shapley values to satisfy the \emph{local accuracy} property; that is,
+to equal the difference between the model's prediction for that sample and
+the average prediction over all the training data (i.e., \code{X}). Default is
+\code{FALSE} and setting to \code{TRUE} requires \code{nsim} > 1.}
 
-\item{baseline}{Numeric baseline to use in determining the additive property
-of the adjust Shapley estimates. Adjust Shapley values for a single
-prediction (\code{fx}) sum to the difference \code{fx - baseline}.
-Defaults to \code{NULL} which corresponds to the average training prediction.}
+\item{baseline}{Numeric baseline to use when adjusting the computed Shapley
+values to achieve \emph{local accuracy}. Adjusted Shapley values for a single
+prediction (\code{fx}) will sum to the difference \code{fx - baseline}. Defaults to
+\code{NULL}, which corresponds to the average predictions computed from \code{X}, and
+zero otherwise (i.e., no additional predictions will be computed and the
+baseline attribute of the output will be set to zero).}
+
+\item{shap_only}{Logical indicating whether or not to include additional
+output useful for plotting (i.e., \code{newdata} and the \code{baseline} value.). This
+is convenient, for example, when using \code{\link[shapviz:shapviz]{shapviz::shapviz()}} for plotting.
+Default is \code{TRUE}.}
 
 \item{parallel}{Logical indicating whether or not to compute the approximate
 Shapley values in parallel across features; default is \code{FALSE}. \strong{NOTE:}
@@ -127,14 +138,24 @@ Currently only available for \code{\link[stats:lm]{stats::lm()}},
 \code{\link[xgboost:xgb.train]{xgboost::xgboost()}}, and \code{\link[lightgbm:lightgbm]{lightgbm::lightgbm()}} objects.
 Default is \code{FALSE}. Note that setting \code{exact = TRUE} will return
 explanations for each of the \code{\link[stats:terms]{stats::terms()}} in an
-\code{\link[stats:lm]{stats::lm()}} object.}
+\code{\link[stats:lm]{stats::lm()}} object. Default is \code{FALSE}.}
 }
 \value{
-A matrix with one column for each feature specified in
-\code{feature_names} (if \code{feature_names = NULL}, the default, there will
+If \code{shap_only = TRUE} (the default), a matrix is returned with one
+column for each feature specified in \code{feature_names} (if
+\code{feature_names = NULL}, the default, there will
 be one column for each feature in \code{X}) and one row for each observation
 in \code{newdata} (if \code{newdata = NULL}, the default, there will be one
-row for each observation in \code{X}).
+row for each observation in \code{X}). Additionally, the returned matrix will
+have an attribute called \code{"baseline"} containing the baseline value. If
+\code{shap_only = FALSE}, then a list is returned with three components:
+\itemize{
+\item \code{shapley_values} - a matrix of Shapley values (as described above);
+\item \code{feature_values} - the corresponding feature values (for plotting with
+\code{\link[shapviz:shapviz]{shapviz::shapviz()}});
+\item \code{baseline} - the corresponding baseline value (for plotting with
+\code{\link[shapviz:shapviz]{shapviz::shapviz()}}).
+}
 }
 \description{
 Compute fast (approximate) Shapley values for a set of features using the

@@ -8,3 +8,4 @@ lightgbm.model
 src/*.o
 src/*.so
 src/*.dll
+docs
