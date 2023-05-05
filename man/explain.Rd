@@ -33,7 +33,9 @@ explain(object, ...)
   newdata = NULL,
   adjust = FALSE,
   exact = FALSE,
+  baseline = NULL,
   shap_only = TRUE,
+  parallel = FALSE,
   ...
 )
 
@@ -46,7 +48,9 @@ explain(object, ...)
   newdata = NULL,
   adjust = FALSE,
   exact = FALSE,
+  baseline = NULL,
   shap_only = TRUE,
+  parallel = FALSE,
   ...
 )
 
@@ -59,7 +63,9 @@ explain(object, ...)
   newdata = NULL,
   adjust = FALSE,
   exact = FALSE,
+  baseline = NULL,
   shap_only = TRUE,
+  parallel = FALSE,
   ...
 )
 }

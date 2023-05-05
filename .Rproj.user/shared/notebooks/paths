@@ -1,3 +1,4 @@
+/Users/bgreenwell/.R/Makevars="EEC1896A"
 /Users/bgreenwell/Dropbox/devel/fastshap/.Rbuildignore="B0549DA2"
 /Users/bgreenwell/Dropbox/devel/fastshap/DESCRIPTION="300503D2"
 /Users/bgreenwell/Dropbox/devel/fastshap/NAMESPACE="0716B2F8"
@@ -22,6 +23,5 @@
 /Users/bgreenwell/Dropbox/devel/fastshap/slowtests/fastshap-genOMat.cpp="99FEC81E"
 /Users/bgreenwell/Dropbox/devel/fastshap/slowtests/slowtest-benchmark.R="29ADFB84"
 /Users/bgreenwell/Dropbox/devel/fastshap/slowtests/slowtest-parallel.R="7B058F98"
-/Users/bgreenwell/Dropbox/devel/fastshap/slowtests/test-shapviz.R="7F402C66"
 /Users/bgreenwell/Dropbox/devel/fastshap/vignettes/fastshap.Rmd="536A2979"
 /Users/bgreenwell/Dropbox/trees/book.tex="4ECC8BA9"

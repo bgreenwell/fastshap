@@ -6,6 +6,8 @@ if (!requireNamespace("xgboost", quietly = TRUE)) {
   exit_file("Package 'xgboost' missing")
 }
 
+library(fastshap)
+
 # Use one of the available (imputed) versions of the Titanic data
 titanic <- titanic_mice[[1L]]
 
@@ -35,7 +37,8 @@ jack.dawson <- data.matrix(data.frame(
 params.lgb <- list(
   num_leaves = 4L,
   learning_rate = 0.1,
-  objective = "binary"
+  objective = "binary",
+  force_row_wise = TRUE
 )
 
 set.seed(1420)  # for reproducibility

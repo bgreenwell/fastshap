@@ -286,7 +286,8 @@ explain.default <- function(object, feature_names = NULL, X = NULL, nsim = 1,
       newdata.stacked <- newdata[rep(1L, times = nsim), ]  # replicate obs `nsim` times
       phis <- explain.default(object, feature_names = feature_names, X = X, 
                               nsim = 1L, pred_wrapper = pred_wrapper, 
-                              newdata = newdata.stacked, adjust = FALSE, ...)
+                              newdata = newdata.stacked, adjust = FALSE, 
+                              parallel = parallel, ...)
       phi.avg <- t(colMeans(phis))  # transpose to keep as row matrix
       if (isTRUE(adjust)) {
         # Adjust sum of approximate Shapley values using the same technique from 
@@ -408,7 +409,8 @@ explain.default <- function(object, feature_names = NULL, X = NULL, nsim = 1,
 #' @export
 explain.lm <- function(object, feature_names = NULL, X, nsim = 1, 
                        pred_wrapper, newdata = NULL, adjust = FALSE, 
-                       exact = FALSE, shap_only = TRUE, ...) {
+                       exact = FALSE, baseline = NULL, shap_only = TRUE, 
+                       parallel = FALSE, ...) {
   if (isTRUE(exact)) {  # use Linear SHAP
     phis <- if (is.null(newdata)) {
       stats::predict(object, type = "terms", ...)
@@ -429,7 +431,8 @@ explain.lm <- function(object, feature_names = NULL, X, nsim = 1,
   } else {
     explain.default(object, feature_names = feature_names, X = X, nsim = nsim,
                     pred_wrapper = pred_wrapper, newdata = newdata, 
-                    adjust = adjust, ...)
+                    adjust = adjust, baseline = baseline, shap_only = shap_only,
+                    parallel = parallel, ...)
   }
 }
 
@@ -439,7 +442,8 @@ explain.lm <- function(object, feature_names = NULL, X, nsim = 1,
 #' @export
 explain.xgb.Booster <- function(object, feature_names = NULL, X = NULL, nsim = 1, 
                                 pred_wrapper, newdata = NULL, adjust = FALSE, 
-                                exact = FALSE, shap_only = TRUE, ...) {
+                                exact = FALSE, baseline = NULL, 
+                                shap_only = TRUE, parallel = FALSE, ...) {
   if (isTRUE(exact)) {  # use Tree SHAP
     if (is.null(X) && is.null(newdata)) {
       stop("Must supply `X` or `newdata` argument (but not both).", 
@@ -463,7 +467,8 @@ explain.xgb.Booster <- function(object, feature_names = NULL, X = NULL, nsim = 1
   } else {
     explain.default(object, feature_names = feature_names, X = X, nsim = nsim,
                     pred_wrapper = pred_wrapper, newdata = newdata, 
-                    adjust = adjust, ...)
+                    adjust = adjust, baseline = baseline, shap_only = shap_only, 
+                    parallel = parallel, ...)
   }
 }
 
@@ -473,7 +478,8 @@ explain.xgb.Booster <- function(object, feature_names = NULL, X = NULL, nsim = 1
 #' @export
 explain.lgb.Booster <- function(object, feature_names = NULL, X = NULL, nsim = 1, 
                                 pred_wrapper, newdata = NULL, adjust = FALSE, 
-                                exact = FALSE, shap_only = TRUE, ...) {
+                                exact = FALSE, baseline = NULL, 
+                                shap_only = TRUE, parallel = FALSE, ...) {
   if (isTRUE(exact)) {  # use Tree SHAP
     if (is.null(X) && is.null(newdata)) {
       stop("Must supply `X` or `newdata` argument (but not both).", 
@@ -504,6 +510,7 @@ explain.lgb.Booster <- function(object, feature_names = NULL, X = NULL, nsim = 1
   } else {
     explain.default(object, feature_names = feature_names, X = X, nsim = nsim,
                     pred_wrapper = pred_wrapper, newdata = newdata, 
-                    adjust = adjust, shap_only = shap_only, ...)
+                    adjust = adjust, baseline = baseline, shap_only = shap_only, 
+                    parallel = parallel, ...)
   }
 }
