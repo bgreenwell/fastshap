@@ -12,6 +12,7 @@ Computes fast (relative to other implementations) approximate Shapley values for
 Useful links:
 \itemize{
   \item \url{https://github.com/bgreenwell/fastshap}
+  \item \url{https://bgreenwell.github.io/fastshap/}
   \item Report bugs at \url{https://github.com/bgreenwell/fastshap/issues}
 }
 
