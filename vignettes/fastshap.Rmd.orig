@@ -83,8 +83,6 @@ To illustrate, we'll use the `explain()` function to estimate how each of jack f
 [^2]: Note that we need to supply the training features via the `X` argument (i.e., no response column) and that `newdata` should also only contain columns of feature values.
 
 ```{r titanic-explain-jack}
-library(fastshap)
-
 X <- subset(t1, select = -survived)  # features only
 set.seed(2113)  # for reproducibility
 (ex.jack <- explain(rfo, X = X, pred_wrapper = pfun, newdata = jack.dawson))
