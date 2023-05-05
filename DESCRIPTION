@@ -10,7 +10,8 @@ Description: Computes fast (relative to other implementations) approximate
     theory; see Strumbel and Kononenko (2014) <doi:10.1007/s10115-013-0679-x> 
     for details.
 License: GPL (>= 2)
-URL: https://github.com/bgreenwell/fastshap
+URL: https://github.com/bgreenwell/fastshap,
+    https://bgreenwell.github.io/fastshap/
 BugReports: https://github.com/bgreenwell/fastshap/issues
 Imports: 
     foreach,
