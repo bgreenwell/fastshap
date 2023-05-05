@@ -1,7 +1,7 @@
 Package: fastshap
 Type: Package
 Title: Fast Approximate Shapley Values
-Version: 0.0.7.9000
+Version: 0.1.0
 Authors@R: person("Brandon", "Greenwell", email = "greenwell.brandon@gmail.com", role =
          c("aut", "cre"), comment = c(ORCID = "0000-0002-8120-0084"))
 Description: Computes fast (relative to other implementations) approximate 
@@ -19,14 +19,13 @@ Imports:
 Suggests: 
     AmesHousing,
     covr,
-    earth,
     knitr,
     lightgbm,
     ranger,
     rmarkdown,
     shapviz,
+    tibble,
     tinytest,
-    titanic,
     xgboost
 LinkingTo: 
     Rcpp,
@@ -34,6 +33,7 @@ LinkingTo:
 RoxygenNote: 7.2.3
 Encoding: UTF-8
 Depends: 
-    R (>= 2.10)
+    R (>= 3.5.0)
 LazyData: true
 Roxygen: list(markdown = TRUE)
+VignetteBuilder: knitr

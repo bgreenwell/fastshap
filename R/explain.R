@@ -129,20 +129,20 @@ explain_column <- function(object, X, column, pred_wrapper, newdata = NULL) {
 #' `X` (i.e., the training data).
 #' 
 #' @param adjust Logical indicating whether or not to adjust the sum of the 
-#' estimated Shapley values to satisfy the *additivity* (or 
-#' *local accuracy*) property; that is, to equal the difference between the 
-#' model's prediction for that sample and the average prediction over all the 
-#' training data (i.e., `X`).
+#' estimated Shapley values to satisfy the *local accuracy* property; that is, 
+#' to equal the difference between the model's prediction for that sample and 
+#' the average prediction over all the training data (i.e., `X`). Default is 
+#' `FALSE` and setting to `TRUE` requires `nsim` > 1.
 #' 
 #' @param exact Logical indicating whether to compute exact Shapley values. 
 #' Currently only available for [stats::lm()], 
 #' [xgboost::xgboost()], and [lightgbm::lightgbm()] objects. 
 #' Default is `FALSE`. Note that setting `exact = TRUE` will return 
 #' explanations for each of the [stats::terms()] in an 
-#' [stats::lm()] object.
+#' [stats::lm()] object. Default is `FALSE`.
 #' 
 #' @param baseline Numeric baseline to use when adjusting the computed Shapley
-#' values to meet the additivity property. Adjusted Shapley values for a single 
+#' values to achieve *local accuracy*. Adjusted Shapley values for a single 
 #' prediction (`fx`) will sum to the difference `fx - baseline`. Defaults to 
 #' `NULL`, which corresponds to the average predictions computed from `X`, and
 #' zero otherwise (i.e., no additional predictions will be computed and the 
@@ -150,7 +150,8 @@ explain_column <- function(object, X, column, pred_wrapper, newdata = NULL) {
 #' 
 #' @param shap_only Logical indicating whether or not to include additional 
 #' output useful for plotting (i.e., `newdata` and the `baseline` value.). This 
-#' is convenient, for example, when interfacing with [shapviz::shapviz()]
+#' is convenient, for example, when using [shapviz::shapviz()] for plotting.
+#' Default is `TRUE`.
 #' 
 #' @param parallel Logical indicating whether or not to compute the approximate
 #' Shapley values in parallel across features; default is `FALSE`. **NOTE:**
@@ -167,11 +168,19 @@ explain_column <- function(object, X, column, pred_wrapper, newdata = NULL) {
 #' `explain()`, so passing it via the `...` argument would likely result in an
 #' error.
 #' 
-#' @return A matrix with one column for each feature specified in 
-#' `feature_names` (if `feature_names = NULL`, the default, there will
+#' @return If `shap_only = TRUE` (the default), a matrix is returned with one 
+#' column for each feature specified in `feature_names` (if 
+#' `feature_names = NULL`, the default, there will
 #' be one column for each feature in `X`) and one row for each observation
 #' in `newdata` (if `newdata = NULL`, the default, there will be one
-#' row for each observation in `X`). 
+#' row for each observation in `X`). Additionally, the returned matrix will
+#' have an attribute called `"baseline"` containing the baseline value. If 
+#' `shap_only = FALSE`, then a list is returned with three components:
+#' * `shapley_values` - a matrix of Shapley values (as described above);
+#' * `feature_values` - the corresponding feature values (for plotting with 
+#' [shapviz::shapviz()]);
+#' * `baseline` - the corresponding baseline value (for plotting with 
+#' [shapviz::shapviz()]).
 #' 
 #' @seealso You can find more examples (with larger and more realistic data 
 #' sets) on the **fastshap** GitHub repository: 

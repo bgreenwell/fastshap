@@ -10,7 +10,7 @@
     
     <a class="navbar-brand me-2" href="../index.html">fastshap</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.7.9000</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.0</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -19,6 +19,9 @@
 
     <div id="navbar" class="collapse navbar-collapse ms-3">
       <ul class="navbar-nav me-auto"><li class="nav-item">
+  <a class="nav-link" href="../articles/fastshap.html">Get started</a>
+</li>
+<li class="nav-item">
   <a class="nav-link" href="../reference/index.html">Reference</a>
 </li>
 <li class="active nav-item">
@@ -45,16 +48,21 @@
     </div>
 
     <div class="section level2">
-<h2 class="pkg-version" data-toc-text="0.0.8" id="fastshap-008">fastshap 0.0.8<a class="anchor" aria-label="anchor" href="#fastshap-008"></a></h2>
+<h2 class="pkg-version" data-toc-text="0.1.0" id="fastshap-010">fastshap 0.1.0<a class="anchor" aria-label="anchor" href="#fastshap-010"></a></h2>
 <div class="section level3">
-<h3 id="breaking-changes-0-0-8">Breaking changes<a class="anchor" aria-label="anchor" href="#breaking-changes-0-0-8"></a></h3>
-<ul><li><p>Since Shapley values are ALWAYS numeric the <code><a href="../reference/explain.html">explain()</a></code> function now returns a matrix, as opposed to a <a href="https://cran.r-project.org/package=tibble" class="external-link">tibble</a>; data frames (and <a href="https://cran.r-project.org/package=tibble" class="external-link">tibbles</a>’s) are really only necessary when the data are heterogeneous. In essence, the output from <code><a href="../reference/explain.html">explain()</a></code> will act like an R matrix but with class structure <code>c("explain", "matrix", "array")</code>.</p></li>
-<li><p>The output from <code><a href="../reference/explain.html">explain()</a></code> now contains a <code>"baseline"</code> attribute, which, unless supplied by the user, contains the average training response. When <code>adjust = TRUE</code>, then the sum of a row of Shapley values is equal to the difference between the corresponding prediction, <span class="math inline"><em>f̂</em>(<strong>x</strong>)</span>, and the baseline.</p></li>
+<h3 id="breaking-changes-0-1-0">Breaking changes<a class="anchor" aria-label="anchor" href="#breaking-changes-0-1-0"></a></h3>
+<ul><li><p>The <code><a href="../reference/explain.html">explain()</a></code> function now returns a matrix, as opposed to a <a href="https://cran.r-project.org/package=tibble" class="external-link">tibble</a>, which makes more sense since Shapley values values are ALWAYS numeric; data frames (and <a href="https://cran.r-project.org/package=tibble" class="external-link">tibbles</a>’s) are really only necessary when the data are heterogeneous. In essence, the output from <code><a href="../reference/explain.html">explain()</a></code> will act like an R matrix but with class structure <code>c("explain", "matrix", "array")</code>; you could always convert the results to a tibble using <code>tibble::as_tibble(result)</code>.</p></li>
 <li><p>Two new data sets, <code>titanic</code> and <code>titanic_mice</code>, were added to the package; see the corresponding help pages for details.</p></li>
-<li><p>The plotting functions have all been deprecated in favor of the (far superior) <a href="https://cran.r-project.org/package=shapviz" class="external-link">shapviz</a> package by <a href="https://github.com/Mayer79" class="external-link">@Mayer79</a> (<code>grid.arrange()</code> is also no longer imported from <a href="https://cran.r-project.org/package=gridExtra" class="external-link">gridExtra</a>). Consequently, the output from <code><a href="../reference/explain.html">explain()</a></code> no longer needs to have its own <code>"explain"</code> class (only an ordinary <code>c("matrix", "array")</code> object is returned).</p></li>
+<li><p><strong>The plotting functions have all been deprecated</strong> in favor of the (far superior) <a href="https://cran.r-project.org/package=shapviz" class="external-link">shapviz</a> package by <a href="https://github.com/Mayer79" class="external-link">@Mayer79</a> (<code>grid.arrange()</code> is also no longer imported from <a href="https://cran.r-project.org/package=gridExtra" class="external-link">gridExtra</a>). Consequently, the output from <code><a href="../reference/explain.html">explain()</a></code> no longer needs to have its own <code>"explain"</code> class (only an ordinary <code>c("matrix", "array")</code> object is returned).</p></li>
+<li>
+<p>The <code><a href="../reference/explain.html">explain()</a></code> function gained three new arguments:</p>
+<ul><li><p><code>baseline</code>, which defaults to <code>NULL</code>, containing the baseline to use when adjusting Shapley values to meet the efficiency property. If <code>NULL</code> and <code>adjust = TRUE</code>, it will default to the average training prediction (i.e., the average prediction over <code>X</code>.)</p></li>
+<li><p><code>shap_only</code>, which defaults to <code>TRUE</code>, determines whether to return a matrix of Shapley values (<code>TRUE</code>) containing the baseline as aanattribute or a list containing the Shapley values, corresponding feature values, and baseline (<code>FALSE</code>); setting to <code>FALSE</code> is a convenience when using the <a href="https://cran.r-project.org/package=shapviz" class="external-link">shapviz</a> package.</p></li>
+<li><p><code>parallel</code>, which defaults to <code>FALSE</code> for determining whether or not to compute Shapley values in parallel (across features) using any suitable parallel backend supported by <a href="https://cran.r-project.org/package=foreach" class="external-link">foreach</a>.</p></li>
+</ul></li>
 </ul></div>
 <div class="section level3">
-<h3 id="miscellaneous-0-0-8">Miscellaneous<a class="anchor" aria-label="anchor" href="#miscellaneous-0-0-8"></a></h3>
+<h3 id="miscellaneous-0-1-0">Miscellaneous<a class="anchor" aria-label="anchor" href="#miscellaneous-0-1-0"></a></h3>
 <ul><li><p>Minor change to <code><a href="../reference/explain.html">explain.lgb.Booster()</a></code> to support breaking changes in <a href="https://cran.r-project.org/package=lightgbm" class="external-link">lightgbm</a> v4.0.0. (Thanks to <a href="https://github.com/jameslamb" class="external-link">@jameslamb</a> and <a href="https://github.com/Mayer79" class="external-link">@Mayer79</a>.)</p></li>
 <li><p>The dependency on <a href="https://cran.r-project.org/package=matrixStats" class="external-link">matrixStats</a> has been removed in favor of using R’s internal <code><a href="https://rdrr.io/r/base/apply.html" class="external-link">apply()</a></code> and <code><a href="https://rdrr.io/r/stats/cor.html" class="external-link">var()</a></code> functions.</p></li>
 <li><p>The dependency on <a href="https://cran.r-project.org/package=plyr" class="external-link">plyr</a>, which has been retired, has been removed in favor of using <a href="https://cran.r-project.org/package=foreach" class="external-link">foreach</a> directly.</p></li>
@@ -104,7 +112,7 @@
 <h3 id="new-features-0-0-4">New features<a class="anchor" aria-label="anchor" href="#new-features-0-0-4"></a></h3>
 <ul><li><p>The default method of <code><a href="../reference/explain.html">explain()</a></code> gained a new logical argument called <code>adjust</code>. When <code>adjust = TRUE</code> (and <code>nsim &gt; 1</code>), the algorithm will adjust the sum of the estimated Shapley values to satisfy the <em>efficiency property</em>; that is, to equal the difference between the model’s prediction for that sample and the average prediction over all the training data. This option is experimental and we follow the same approach as in <a href="https://github.com/slundberg/shap" class="external-link">shap</a> <a href="https://github.com/bgreenwell/fastshap/issues/6" class="external-link">(</a><a href="https://github.com/bgreenwell/fastshap/issues/6" class="external-link">#6</a>).</p></li>
 <li><p>New (experimental) function for constructing <a href="https://github.com/slundberg/shap" class="external-link">force plots</a> <a href="https://github.com/bgreenwell/fastshap/issues/7" class="external-link">(</a><a href="https://github.com/bgreenwell/fastshap/issues/7" class="external-link">#7</a>) to help visualize prediction explanations. The function is also a generic which means additional methods can be added.</p></li>
-<li><p>Function <code><a href="../reference/explain.html">explain()</a></code> became a generic and gained a new logical argument, <code>exact</code>, for computing exact Shapley contributions for linear models (LinearSHAP, which assumes independent features) and boosted decision trees (TreeSHAP). Currently, only <code>"lm"</code>, <code>"glm"</code>, and <code>"xgb.Booster"</code> objects are supported <a href="https://github.com/bgreenwell/fastshap/issues/2" class="external-link">(</a><a href="https://github.com/bgreenwell/fastshap/issues/2" class="external-link">#2</a>)<a href="https://github.com/bgreenwell/fastshap/issues/3" class="external-link">(</a><a href="https://github.com/bgreenwell/fastshap/issues/3" class="external-link">#3</a>).</p></li>
+<li><p>Function <code><a href="../reference/explain.html">explain()</a></code> became a generic and gained a new logical argument, <code>exact</code>, for computing exact Shapley contributions for linear models (Linear SHAP, which assumes independent features) and boosted decision trees (Tree SHAP). Currently, only <code>"lm"</code>, <code>"glm"</code>, and <code>"xgb.Booster"</code> objects are supported <a href="https://github.com/bgreenwell/fastshap/issues/2" class="external-link">(</a><a href="https://github.com/bgreenwell/fastshap/issues/2" class="external-link">#2</a>)<a href="https://github.com/bgreenwell/fastshap/issues/3" class="external-link">(</a><a href="https://github.com/bgreenwell/fastshap/issues/3" class="external-link">#3</a>).</p></li>
 </ul></div>
 <div class="section level3">
 <h3 id="minor-changes-0-0-4">Minor changes<a class="anchor" aria-label="anchor" href="#minor-changes-0-0-4"></a></h3>

@@ -28,7 +28,8 @@ jack.dawson <- data.matrix(data.frame(
 params.lgb <- list(
   num_leaves = 4L,
   learning_rate = 0.1,
-  objective = "binary"
+  objective = "binary",
+  force_row_wise = TRUE
 )
 
 # Fit a LightGBM model

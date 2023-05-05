@@ -20,7 +20,7 @@ et. al. (2020) for details."><!-- mathjax --><script src="https://cdnjs.cloudfla
     
     <a class="navbar-brand me-2" href="../index.html">fastshap</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.7.9000</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.0</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -28,7 +28,10 @@ et. al. (2020) for details."><!-- mathjax --><script src="https://cdnjs.cloudfla
     </button>
 
     <div id="navbar" class="collapse navbar-collapse ms-3">
-      <ul class="navbar-nav me-auto"><li class="active nav-item">
+      <ul class="navbar-nav me-auto"><li class="nav-item">
+  <a class="nav-link" href="../articles/fastshap.html">Get started</a>
+</li>
+<li class="active nav-item">
   <a class="nav-link" href="../reference/index.html">Reference</a>
 </li>
 <li class="nav-item">
@@ -193,25 +196,26 @@ is, the observation(s) you want to compute explanations for. Default is
 
 <dt>adjust</dt>
 <dd><p>Logical indicating whether or not to adjust the sum of the
-estimated Shapley values to satisfy the <em>additivity</em> (or
-<em>local accuracy</em>) property; that is, to equal the difference between the
-model's prediction for that sample and the average prediction over all the
-training data (i.e., <code>X</code>).</p></dd>
+estimated Shapley values to satisfy the <em>local accuracy</em> property; that is,
+to equal the difference between the model's prediction for that sample and
+the average prediction over all the training data (i.e., <code>X</code>). Default is
+<code>FALSE</code> and setting to <code>TRUE</code> requires <code>nsim</code> &gt; 1.</p></dd>
 
 
 <dt>baseline</dt>
-<dd><p>Numeric baseline to use in determining the additive property
-of the adjust Shapley estimates. Adjust Shapley values for a single
-prediction (<code>fx</code>) sum to the difference <code>fx - baseline</code>.
-Defaults to <code>NULL</code> which corresponds to the average predictions computed
-from <code>X</code> (e.g., if <code>X</code> is the training feature set, then <code>baseline</code> will
-correspond to the average training prediction).</p></dd>
+<dd><p>Numeric baseline to use when adjusting the computed Shapley
+values to achieve <em>local accuracy</em>. Adjusted Shapley values for a single
+prediction (<code>fx</code>) will sum to the difference <code>fx - baseline</code>. Defaults to
+<code>NULL</code>, which corresponds to the average predictions computed from <code>X</code>, and
+zero otherwise (i.e., no additional predictions will be computed and the
+baseline attribute of the output will be set to zero).</p></dd>
 
 
 <dt>shap_only</dt>
 <dd><p>Logical indicating whether or not to include additional
 output useful for plotting (i.e., <code>newdata</code> and the <code>baseline</code> value.). This
-is convenient, for example, when interfacing with <code><a href="https://rdrr.io/pkg/shapviz/man/shapviz.html" class="external-link">shapviz::shapviz()</a></code></p></dd>
+is convenient, for example, when using <code><a href="https://rdrr.io/pkg/shapviz/man/shapviz.html" class="external-link">shapviz::shapviz()</a></code> for plotting.
+Default is <code>TRUE</code>.</p></dd>
 
 
 <dt>parallel</dt>
@@ -229,19 +233,26 @@ Currently only available for <code><a href="https://rdrr.io/r/stats/lm.html" cla
 <code><a href="https://rdrr.io/pkg/xgboost/man/xgb.train.html" class="external-link">xgboost::xgboost()</a></code>, and <code><a href="https://rdrr.io/pkg/lightgbm/man/lightgbm.html" class="external-link">lightgbm::lightgbm()</a></code> objects.
 Default is <code>FALSE</code>. Note that setting <code>exact = TRUE</code> will return
 explanations for each of the <code><a href="https://rdrr.io/r/stats/terms.html" class="external-link">stats::terms()</a></code> in an
-<code><a href="https://rdrr.io/r/stats/lm.html" class="external-link">stats::lm()</a></code> object.</p></dd>
+<code><a href="https://rdrr.io/r/stats/lm.html" class="external-link">stats::lm()</a></code> object. Default is <code>FALSE</code>.</p></dd>
 
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
     
 
-<p>A matrix with one column for each feature specified in
-<code>feature_names</code> (if <code>feature_names = NULL</code>, the default, there will
+<p>If <code>shap_only = TRUE</code> (the default), a matrix is returned with one
+column for each feature specified in <code>feature_names</code> (if
+<code>feature_names = NULL</code>, the default, there will
 be one column for each feature in <code>X</code>) and one row for each observation
 in <code>newdata</code> (if <code>newdata = NULL</code>, the default, there will be one
-row for each observation in <code>X</code>).</p>
-    </div>
+row for each observation in <code>X</code>). Additionally, the returned matrix will
+have an attribute called <code>"baseline"</code> containing the baseline value. If
+<code>shap_only = FALSE</code>, then a list is returned with three components:</p><ul><li><p><code>shapley_values</code> - a matrix of Shapley values (as described above);</p></li>
+<li><p><code>feature_values</code> - the corresponding feature values (for plotting with
+<code><a href="https://rdrr.io/pkg/shapviz/man/shapviz.html" class="external-link">shapviz::shapviz()</a></code>);</p></li>
+<li><p><code>baseline</code> - the corresponding baseline value (for plotting with
+<code><a href="https://rdrr.io/pkg/shapviz/man/shapviz.html" class="external-link">shapviz::shapviz()</a></code>).</p></li>
+</ul></div>
     <div class="section level2">
     <h2 id="note">Note<a class="anchor" aria-label="anchor" href="#note"></a></h2>
     <p>Setting <code>exact = TRUE</code> with a linear model (i.e., an
@@ -350,10 +361,6 @@ sets) on the <strong>fastshap</strong> GitHub repository:
 <span class="r-out co"><span class="r-pr">#&gt;</span> Ferrari Dino        -2.426996456 -0.22243397  1.7641588  1.0486608 -0.45866429</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Maserati Bora       -3.036208692 -0.19065769  1.5121361  0.9175782 -1.03698013</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Volvo 142E           0.149429416  0.06355256  1.0080908  0.0655413  0.09970963</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> attr(,"baseline")</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 0</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> attr(,"class")</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "explain" "matrix"  "array"  </span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Compute exact Shapley (i.e., LinearSHAP) values</span></span></span>
 <span class="r-in"><span><span class="va">shap</span> <span class="op">&lt;-</span> <span class="fu">explain</span><span class="op">(</span><span class="va">fit</span>, exact <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
@@ -457,12 +464,6 @@ sets) on the <strong>fastshap</strong> GitHub repository:
 <span class="r-out co"><span class="r-pr">#&gt;</span> Ferrari Dino        -0.63564887</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Maserati Bora       -1.03448738</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Volvo 142E           0.16202814</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> attr(,"constant")</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 20.09062</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> attr(,"baseline")</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 20.09062</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> attr(,"class")</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "explain" "matrix"  "array"  </span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>

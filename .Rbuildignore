@@ -12,5 +12,7 @@
 ^README_cache$
 ^rjarticle$
 ^slowtests$
+^tools$
 ^TODO\.md$
-^vignettes$
+^vignettes/fastshap\.Rmd\.orig$
+^vignettes/figure$

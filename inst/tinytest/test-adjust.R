@@ -120,4 +120,3 @@ for (obj in c("binary:logistic", "binary:logitraw")) {
                tolerance = 1e-06)
   
 }
-
