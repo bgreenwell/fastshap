@@ -1,18 +1,10 @@
-# Exits
-if (!requireNamespace("iml", quietly = TRUE)) {
-  exit_file("Package 'iml' missing")
-}
-if (!requireNamespace("lightgbm", quietly = TRUE)) {
-  exit_file("Package 'lightgbm' missing")
-}
-
-library(fastshap)
-library(iml)
-library(lightgbm)
-library(ranger)
+exit_if_not(
+  requireNamespace("iml", quietly = TRUE),
+  requireNamespace("lightgbm", quietly = TRUE)
+)
 
 # Use one of the available (imputed) versions of the Titanic data
-titanic <- titanic_mice[[1L]]
+titanic <- fastshap::titanic_mice[[1L]]
 
 # Package 'lightgbm' requires numeric values
 titanic$survived <- ifelse(titanic$survived == "yes", 1, 0)
@@ -21,6 +13,7 @@ titanic$sex <- ifelse(titanic$sex == "male", 1, 0)
 # Matrix of only predictor values
 X <- data.matrix(subset(titanic, select = -survived))
 
+# lightgbm params
 params <- list(
   num_leaves = 10L,
   learning_rate = 0.1,
@@ -29,14 +22,8 @@ params <- list(
 )
 
 set.seed(1420)  # for reproducibility
-bst <- lightgbm(X, label = titanic$survived, params = params, nrounds = 45,
-                verbose = 0)
-
-
-# Fit a default random forest
-set.seed(1250)  # for reproducibility
-rfo <- ranger(survived ~ ., data = titanic, probability = TRUE, 
-              respect.unordered.factors = "partition")
+bst <- lightgbm::lightgbm(X, label = titanic$survived, params = params, 
+                        nrounds = 45, verbose = 0)
 
 # Prediction wrapper for computing predicted probability of surviving
 pfun <- function(object, newdata) {  # prediction wrapper
@@ -63,14 +50,14 @@ jack.dawson <- data.matrix(jack.dawson)
 
 # Compute feature contributions using MC SHAP using the fastshap package
 set.seed(1306)  # for reproducibility
-ex.fastshap <- explain(bst, X = X, nsim = 1000, pred_wrapper = pfun,
-                       newdata = jack.dawson, adjust = FALSE)
+ex.fastshap <- fastshap::explain(bst, X = X, nsim = 1000, pred_wrapper = pfun,
+                                 newdata = jack.dawson, adjust = FALSE)
 
 # Compute feature contributions using MC SHAP using the iml package
-pred <- Predictor$new(bst, data = as.data.frame(X), predict.fun = pfun)
+pred <- iml::Predictor$new(bst, data = as.data.frame(X), predict.fun = pfun)
 set.seed(1316)  # for reproducibility
-ex.iml <- Shapley$new(pred, x.interest = data.frame(jack.dawson), 
-                      sample.size = 1000)
+ex.iml <- iml::Shapley$new(pred, x.interest = data.frame(jack.dawson), 
+                           sample.size = 1000)
 
 # Compare results
 res <- cbind(

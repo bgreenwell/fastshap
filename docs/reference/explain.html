@@ -96,7 +96,9 @@ et. al. (2020) for details.</p>
 <span>  newdata <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  adjust <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  exact <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  baseline <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  shap_only <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  parallel <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  <span class="va">...</span></span>
 <span><span class="op">)</span></span>
 <span></span>
@@ -110,7 +112,9 @@ et. al. (2020) for details.</p>
 <span>  newdata <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  adjust <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  exact <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  baseline <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  shap_only <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  parallel <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  <span class="va">...</span></span>
 <span><span class="op">)</span></span>
 <span></span>
@@ -124,7 +128,9 @@ et. al. (2020) for details.</p>
 <span>  newdata <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  adjust <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  exact <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  baseline <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  shap_only <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  parallel <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  <span class="va">...</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
@@ -361,6 +367,10 @@ sets) on the <strong>fastshap</strong> GitHub repository:
 <span class="r-out co"><span class="r-pr">#&gt;</span> Ferrari Dino        -2.426996456 -0.22243397  1.7641588  1.0486608 -0.45866429</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Maserati Bora       -3.036208692 -0.19065769  1.5121361  0.9175782 -1.03698013</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Volvo 142E           0.149429416  0.06355256  1.0080908  0.0655413  0.09970963</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> attr(,"baseline")</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> attr(,"class")</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "explain" "matrix"  "array"  </span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Compute exact Shapley (i.e., LinearSHAP) values</span></span></span>
 <span class="r-in"><span><span class="va">shap</span> <span class="op">&lt;-</span> <span class="fu">explain</span><span class="op">(</span><span class="va">fit</span>, exact <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
@@ -464,6 +474,12 @@ sets) on the <strong>fastshap</strong> GitHub repository:
 <span class="r-out co"><span class="r-pr">#&gt;</span> Ferrari Dino        -0.63564887</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Maserati Bora       -1.03448738</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Volvo 142E           0.16202814</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> attr(,"constant")</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 20.09062</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> attr(,"baseline")</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 20.09062</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> attr(,"class")</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "explain" "matrix"  "array"  </span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>

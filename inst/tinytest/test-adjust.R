@@ -1,15 +1,10 @@
-# Exits
-if (!requireNamespace("lightgbm", quietly = TRUE)) {
-  exit_file("Package 'lightgbm' missing")
-}
-if (!requireNamespace("xgboost", quietly = TRUE)) {
-  exit_file("Package 'xgboost' missing")
-}
-
-library(fastshap)
+exit_if_not(
+  requireNamespace("lightgbm", quietly = TRUE),
+  requireNamespace("xgboost", quietly = TRUE)
+)
 
 # Use one of the available (imputed) versions of the Titanic data
-titanic <- titanic_mice[[1L]]
+titanic <- fastshap::titanic_mice[[1L]]
 
 # Packages 'lightgbm' and 'xgboost' require numeric values
 titanic$survived <- ifelse(titanic$survived == "yes", 1, 0)
@@ -34,6 +29,7 @@ jack.dawson <- data.matrix(data.frame(
 # Package: lightgbm
 ################################################################################
 
+# lightgbm params
 params.lgb <- list(
   num_leaves = 4L,
   learning_rate = 0.1,
@@ -63,8 +59,9 @@ diff.lgb <- jack.logit.lgb - baseline.lgb
 
 # Compute feature contributions using MC SHAP using the fastshap package
 set.seed(1306)  # for reproducibility
-ex.fastshap <- explain(bst.lgb, X = X, nsim = 1000, pred_wrapper = pfun.lgb,
-                       newdata = jack.dawson, adjust = TRUE)
+ex.fastshap <- fastshap::explain(bst.lgb, X = X, nsim = 1000, 
+                                 pred_wrapper = pfun.lgb, newdata = jack.dawson, 
+                                 adjust = TRUE)
 
 # Expectations
 expect_equal(sum(ex.fastshap), jack.logit.lgb - baseline.lgb, tolerance = 1e-06)
@@ -72,8 +69,8 @@ expect_equal(sum(ex.fastshap), jack.logit.lgb - baseline.lgb, tolerance = 1e-06)
 # Explain a few rows of the training data
 X.new <- X[1L:5L, ]
 set.seed(2033)  # for reproducibility
-ex.new <- explain(bst.lgb, X = X, nsim = 2, pred_wrapper = pfun.lgb,
-                  newdata = X.new, adjust = TRUE)  # nsim = 2 here ONLY for speed
+ex.new <- fastshap::explain(bst.lgb, X = X, nsim = 2, pred_wrapper = pfun.lgb,
+                            newdata = X.new, adjust = TRUE)  # `nsim = 2` here ONLY for speed
 
 # Expectations
 expect_equal(rowSums(ex.new), pfun.lgb(bst.lgb, newdata = X.new) - baseline.lgb,
@@ -86,7 +83,7 @@ expect_equal(rowSums(ex.new), pfun.lgb(bst.lgb, newdata = X.new) - baseline.lgb,
 
 for (obj in c("binary:logistic", "binary:logitraw")) {
   
-  # Set task parameters
+  # xgboost params
   params.xgb <- list(
     max_depth = 2L,
     eta = 0.1,
@@ -115,8 +112,9 @@ for (obj in c("binary:logistic", "binary:logitraw")) {
   
   # Compute feature contributions using MC SHAP using the fastshap package
   set.seed(2026)  # for reproducibility
-  ex.fastshap <- explain(bst.xgb, X = X, nsim = 1000, pred_wrapper = pfun.xgb,
-                         newdata = jack.dawson, adjust = TRUE)
+  ex.fastshap <- fastshap::explain(bst.xgb, X = X, nsim = 1000, 
+                                   pred_wrapper = pfun.xgb, 
+                                   newdata = jack.dawson, adjust = TRUE)
   
   # Expectations
   expect_equal(sum(ex.fastshap), jack.logit.xgb - baseline.xgb, 

@@ -17,17 +17,18 @@ Imports:
     foreach,
     Rcpp (>= 1.0.1), 
     utils
+Enhances:
+    lightgbm,
+    xgboost
 Suggests: 
     AmesHousing,
     covr,
     knitr,
-    lightgbm,
     ranger,
     rmarkdown,
-    shapviz,
+    shapviz (>= 0.8.0),
     tibble,
-    tinytest,
-    xgboost
+    tinytest (>= 1.4.1)
 LinkingTo: 
     Rcpp,
     RcppArmadillo
