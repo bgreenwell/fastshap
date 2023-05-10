@@ -35,7 +35,7 @@ LinkingTo:
 RoxygenNote: 7.2.3
 Encoding: UTF-8
 Depends: 
-    R (>= 3.5.0)
+    R (>= 3.6.0)
 LazyData: true
 Roxygen: list(markdown = TRUE)
 VignetteBuilder: knitr

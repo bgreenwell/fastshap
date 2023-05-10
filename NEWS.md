@@ -26,6 +26,8 @@
 
 * The dependency on [plyr](https://cran.r-project.org/package=plyr), which has been retired, has been removed in favor of using [foreach](https://cran.r-project.org/package=foreach) directly. 
 
+* Removed CXX_STD=CXX11 flag, so increased R dependency to R >= 3.6.
+
 # fastshap 0.0.7
 
 ## Miscellaneous
