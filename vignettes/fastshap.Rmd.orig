@@ -14,7 +14,8 @@ knitr::opts_chunk$set(
   message = FALSE,
   fig.width = 6, 
   fig.asp = 0.618,
-  fig.path = "vignettes/figure/",
+  #fig.path = "vignettes/figure/",
+  fig.path = "man/figures/",
   out.width = "70%"
 )
 
