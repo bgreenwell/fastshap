@@ -129,6 +129,10 @@ set.seed(2113)  # for reproducibility
 ```
 ##      pclass          age sex      sibsp parch
 ## [1,]      0 -0.006721834   0 0.03017177     0
+## attr(,"baseline")
+## [1] 0
+## attr(,"class")
+## [1] "explain" "matrix"  "array"
 ```
 
 The [fastshap](https://cran.r-project.org/package=fastshap) package uses an efficient version of the Monte-Carlo (MC) algorithm described in @strumbelj-2014-explaining. Consequently, for stability and accuracy, the feature contributions should be computed many times and the results averaged together. To accomplish this, simply set the `nsim` argument to a reasonably high value (i.e., as much as you can computationally afford). Below we compute 1000 Shapley-based feature contributions for Jack and average the results:
@@ -143,6 +147,10 @@ set.seed(2129)  # for reproducibility
 ```
 ##           pclass          age        sex       sibsp       parch
 ## [1,] -0.07878601 -0.009507426 -0.1417691 0.005069262 -0.01201627
+## attr(,"baseline")
+## [1] 0
+## attr(,"class")
+## [1] "explain" "matrix"  "array"
 ```
 
 Note that the MC approach used by [fastshap](https://cran.r-project.org/package=fastshap) (and other packages) will not produce Shapley-based feature contributions that satisfy the [efficiency property](https://christophm.github.io/interpretable-ml-book/shapley.html#the-shapley-value-in-detail); that is, they won't add up to the difference between the corresponding prediction and baseline (i.e., average training prediction). However, borrowing a trick from the popular Python [shap](https://github.com/slundberg/shap) library, we can use a regression-based adjustment to correct the sum. To do this, simply set `adjust = TRUE` in the call to `explain()`^[Note that `nsim` has to be larger than one whenever setting `adjust = TRUE`.]:
@@ -157,6 +165,10 @@ set.seed(2133)  # for reproducibility
 ```
 ##           pclass         age        sex       sibsp       parch
 ## [1,] -0.07299993 -0.02063907 -0.1491682 0.007971709 -0.01361257
+## attr(,"baseline")
+## [1] 0.3815068
+## attr(,"class")
+## [1] "explain" "matrix"  "array"
 ```
 
 ```r
@@ -178,7 +190,7 @@ shv <- shapviz(ex.jack.adj, X = jack.dawson, baseline = baseline)
 sv_waterfall(shv)
 ```
 
-<img src="figure/titanic-explain-jack-waterfall-1.png" alt="plot of chunk titanic-explain-jack-waterfall" width="70%" />
+<img src="../man/figures/titanic-explain-jack-waterfall-1.png" alt="plot of chunk titanic-explain-jack-waterfall" width="70%" />
 
 Clearly, the fact the Jack was a male, third-class passenger contributed the most to pushing his predicted probability of survival down below the baseline. *Force plots* are another popular way to visualize Shapley values for explaining a single prediction:
 
@@ -187,7 +199,7 @@ Clearly, the fact the Jack was a male, third-class passenger contributed the mos
 sv_force(shv)
 ```
 
-<img src="figure/titanic-explain-jack-force-1.png" alt="plot of chunk titanic-explain-jack-force" width="70%" />
+<img src="../man/figures/titanic-explain-jack-force-1.png" alt="plot of chunk titanic-explain-jack-force" width="70%" />
 
 Although force plots are cool, waterfall charts seem to be a much more effective way of visualizing feature contributions for a single prediction; especially when there's a large number of features.
 
@@ -231,7 +243,7 @@ shv.global <- shapviz(ex.t1)
 sv_importance(shv)  
 ```
 
-<img src="figure/titanic-explain-global-importance-1.png" alt="plot of chunk titanic-explain-global-importance" width="70%" />
+<img src="../man/figures/titanic-explain-global-importance-1.png" alt="plot of chunk titanic-explain-global-importance" width="70%" />
 
 Another common global visualization is the Shapley dependence plot, akin to a [*partial dependence plot*](https://cran.r-project.org/package=pdp). Here, we'll look at the dependence of the feature contribution of `age` on its input value:
 
@@ -240,7 +252,7 @@ Another common global visualization is the Shapley dependence plot, akin to a [*
 sv_dependence(shv.global, v = "age")
 ```
 
-<img src="figure/titanic-explain-global-dependence-1.png" alt="plot of chunk titanic-explain-global-dependence" width="70%" />
+<img src="../man/figures/titanic-explain-global-dependence-1.png" alt="plot of chunk titanic-explain-global-dependence" width="70%" />
 
 
 ## Parallel processing
@@ -295,8 +307,12 @@ system.time({  # estimate run time
 ```
 
 ```
+## Predicting.. Progress: 36%. Estimated remaining time: 2 minutes, 9 seconds.
+```
+
+```
 ##     user   system  elapsed 
-## 2402.172  216.711  898.679
+## 2390.225  187.328  950.160
 ```
 
 Honestly, not that bad for 50 MC repetitions on a data set with 80 features on 2930 rows!
@@ -317,8 +333,8 @@ system.time({  # estimate run time
 ```
 
 ```
-##    user  system elapsed 
-##   0.948   0.632 265.087
+##     user   system  elapsed 
+##      0.948   0.632 265.087
 ```
 
 Not a bad speedup!
@@ -334,7 +350,7 @@ shv <- shapviz(ex.ames.par, X = X, baseline = baseline)
 sv_importance(shv)
 ```
 
-<img src="figure/ames-explain-global-parallel-importance-1.png" alt="plot of chunk ames-explain-global-parallel-importance" width="70%" />
+<img src="../man/figures/ames-explain-global-parallel-importance-1.png" alt="plot of chunk ames-explain-global-parallel-importance" width="70%" />
 
 Similar for Shapley-based dependence plots:
 
@@ -343,4 +359,4 @@ Similar for Shapley-based dependence plots:
 sv_dependence(shv, v = "Gr_Liv_Area", alpha = 0.3)
 ```
 
-<img src="figure/ames-explain-global-parallel-dependence-1.png" alt="plot of chunk ames-explain-global-parallel-dependence" width="70%" />
+<img src="../man/figures/ames-explain-global-parallel-dependence-1.png" alt="plot of chunk ames-explain-global-parallel-dependence" width="70%" />

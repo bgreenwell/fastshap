@@ -216,17 +216,18 @@ explain_column <- function(object, X, column, pred_wrapper, newdata = NULL) {
 #' data(mtcars)
 #' 
 #' # Fit a projection pursuit regression model
-#' fit <- lm(mpg ~ ., data = mtcars)
+#' fit <- ppr(mpg ~ ., data = mtcars, nterms = 5)
+#' 
+#' # Prediction wrapper
+#' pfun <- function(object, newdata) {  # needs to return a numeric vector
+#'   predict(object, newdata = newdata)  
+#' }
 #' 
 #' # Compute approximate Shapley values using 10 Monte Carlo simulations
 #' set.seed(101)  # for reproducibility
 #' shap <- explain(fit, X = subset(mtcars, select = -mpg), nsim = 10, 
-#'                 pred_wrapper = predict)
-#' shap
-#' 
-#' # Compute exact Shapley (i.e., LinearSHAP) values
-#' shap <- explain(fit, exact = TRUE)
-#' shap
+#'                 pred_wrapper = pfun)
+#' head(shap)
 explain <- function(object, ...) {
   UseMethod("explain")
 } 

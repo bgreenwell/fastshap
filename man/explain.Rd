@@ -187,17 +187,18 @@ experimental and we follow the same approach as in
 data(mtcars)
 
 # Fit a projection pursuit regression model
-fit <- lm(mpg ~ ., data = mtcars)
+fit <- ppr(mpg ~ ., data = mtcars, nterms = 5)
+
+# Prediction wrapper
+pfun <- function(object, newdata) {  # needs to return a numeric vector
+  predict(object, newdata = newdata)  
+}
 
 # Compute approximate Shapley values using 10 Monte Carlo simulations
 set.seed(101)  # for reproducibility
 shap <- explain(fit, X = subset(mtcars, select = -mpg), nsim = 10, 
-                pred_wrapper = predict)
-shap
-
-# Compute exact Shapley (i.e., LinearSHAP) values
-shap <- explain(fit, exact = TRUE)
-shap
+                pred_wrapper = pfun)
+head(shap)
 }
 \references{
 Strumbelj, E., and Igor K. (2014). Explaining prediction models and
