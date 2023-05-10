@@ -1,10 +1,7 @@
-# Exits
-if (!requireNamespace("lightgbm", quietly = TRUE)) {
-  exit_file("Package 'lightgbm' missing")
-}
+exit_if_not(requireNamespace("lightgbm", quietly = TRUE))
 
 # Use one of the available (imputed) versions of the Titanic data
-titanic <- titanic_mice[[1L]]
+titanic <- fastshap::titanic_mice[[1L]]
 
 # Packages 'lightgbm' and 'xgboost' require numeric values
 titanic$survived <- ifelse(titanic$survived == "yes", 1, 0)
@@ -24,7 +21,7 @@ jack.dawson <- data.matrix(data.frame(
   parch = 0L  
 ))
 
-# LightGBM paramater list
+# lightgbm paramaters
 params.lgb <- list(
   num_leaves = 4L,
   learning_rate = 0.1,
@@ -61,8 +58,9 @@ diff.lgb <- jack.logit.lgb - baseline.lgb
 
 # Compute feature contributions using MC SHAP using the fastshap package
 set.seed(1306)  # for reproducibility
-ex.fastshap <- explain(bst.lgb, X = X, nsim = 1000, pred_wrapper = pfun.lgb,
-                       newdata = jack.dawson, adjust = TRUE, shap_only = FALSE)
+ex.fastshap <- fastshap::explain(bst.lgb, X = X, nsim = 1000, 
+                                 pred_wrapper = pfun.lgb, ewdata = jack.dawson, 
+                                 adjust = TRUE, shap_only = FALSE)
 
 # Expect Shapley values to have additivity property
 expect_equal(sum(ex.fastshap$shapley_values), jack.logit.lgb - baseline.lgb, 
@@ -73,7 +71,7 @@ expect_equal(ex.fastshap$baseline, ex.lgb[1L, 6L])
 
 # Compute feature contributions with a different baseline
 set.seed(1308)  # for reproducibility
-ex.fastshap.baseline <- explain(
+ex.fastshap.baseline <- fastshap::explain(
   object = bst.lgb, 
   X = X, 
   nsim = 1000, 

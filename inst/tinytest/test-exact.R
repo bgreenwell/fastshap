@@ -1,10 +1,7 @@
-# Exits
-if (!requireNamespace("xgboost", quietly = TRUE)) {
-  exit_file("Package xgboost missing")
-}
+exit_if_not(requireNamespace("xgboost", quietly = TRUE))
 
 # Generate training data from the Friedman 1 benchmark problem
-trn <- gen_friedman(500, seed = 101)
+trn <- fastshap::gen_friedman(500, seed = 101)
 X <- subset(trn, select = -y)
 x <- X[1L, , drop = FALSE]
 
@@ -17,10 +14,10 @@ pfun <- function(object, newdata) {
 }
 
 # Generate exact and approximate Shapley values for entire training set
-ex_exact <- explain(fit_lm, exact = TRUE, newdata = x)
+ex_exact <- fastshap::explain(fit_lm, exact = TRUE, newdata = x)
 set.seed(102)
-ex_apprx <- explain(fit_lm, X = X, pred_wrapper = pfun, nsim = 1000,
-                    newdata = x, adjust = TRUE)
+ex_apprx <- fastshap::explain(fit_lm, X = X, pred_wrapper = pfun, nsim = 1000,
+                              newdata = x, adjust = TRUE)
 
 # Check accuracy
 expect_true(cor(as.numeric(ex_exact), as.numeric((ex_apprx))) > 0.999)
@@ -56,10 +53,10 @@ fit_xgb <- xgboost::xgboost(
 
 # Generate exact and approximate Shapley values for entire training set
 x <- data.matrix(X)[1L, , drop = FALSE]
-ex_exact <- explain(fit_xgb, X = x, exact = TRUE)
+ex_exact <- fastshap::explain(fit_xgb, X = x, exact = TRUE)
 set.seed(132)
-ex_apprx <- explain(fit_xgb, X = data.matrix(X), newdata = x, adjust = TRUE,
-                    pred_wrapper = pfun, nsim = 1000)
+ex_apprx <- fastshap::explain(fit_xgb, X = data.matrix(X), newdata = x, 
+                              adjust = TRUE, pred_wrapper = pfun, nsim = 1000)
 
 # Check accuracy
 expect_true(cor(as.numeric(ex_exact), as.numeric((ex_apprx))) > 0.999)
