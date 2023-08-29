@@ -489,7 +489,7 @@ explain.lgb.Booster <- function(object, feature_names = NULL, X = NULL, nsim = 1
     X <- if (is.null(X)) newdata else X
     
     # Adapt LightGBM predict() interface
-    if (utils::packageVersion("lightgbm") > package_version("3.3.2")) {
+    if (utils::packageVersion("lightgbm") > package_version("3.3.5")) {
       phis <- stats::predict(object, X, type = "contrib", ...)
     } else {
       phis <- stats::predict(object, X, predcontrib = TRUE, ...)
