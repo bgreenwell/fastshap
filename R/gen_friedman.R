@@ -7,6 +7,8 @@
 #' @param Integer specifying the number of bins to split `x` into.
 #'
 #' @keywords internal
+#'
+#' @noRd
 bin <- function(x, n_bins) {
   quantiles <- stats::quantile(x, probs = seq(from = 0, to = 1,
                                               length = n_bins + 1))

@@ -97,7 +97,7 @@ set.seed(2129)  # for reproducibility
                     nsim = 1000))
 ```
 
-Note that the MC approach used by [fastshap](https://cran.r-project.org/package=fastshap) (and other packages) will not produce Shapley-based feature contributions that satisfy the [efficiency property](https://christophm.github.io/interpretable-ml-book/shapley.html#the-shapley-value-in-detail); that is, they won't add up to the difference between the corresponding prediction and baseline (i.e., average training prediction). However, borrowing a trick from the popular Python [shap](https://github.com/slundberg/shap) library, we can use a regression-based adjustment to correct the sum. To do this, simply set `adjust = TRUE` in the call to `explain()`^[Note that `nsim` has to be larger than one whenever setting `adjust = TRUE`.]:
+Note that the MC approach used by [fastshap](https://cran.r-project.org/package=fastshap) (and other packages) will not produce Shapley-based feature contributions that satisfy the [efficiency property](https://christophm.github.io/interpretable-ml-book/shapley.html#the-shapley-value-in-detail); that is, they won't add up to the difference between the corresponding prediction and baseline (i.e., average training prediction). However, borrowing a trick from the popular Python [shap](https://github.com/shap/shap) library, we can use a regression-based adjustment to correct the sum. To do this, simply set `adjust = TRUE` in the call to `explain()`^[Note that `nsim` has to be larger than one whenever setting `adjust = TRUE`.]:
 
 ```{r titanic-explain-jack-adjust}
 set.seed(2133)  # for reproducibility

@@ -6,7 +6,7 @@
 #' @importFrom foreach foreach %do% %dopar%
 #' @importFrom stats var
 explain_column <- function(object, X, column, pred_wrapper, newdata = NULL) {
-  
+
   # Check types
   if (!is.null(newdata) && !identical(class(X), class(newdata))) {
     stop("Arguments `X` and `newdata` do not inherit from the same class: ",
@@ -191,7 +191,7 @@ explain_column <- function(object, X, column, pred_wrapper, newdata = NULL) {
 #' [stats::lm()] or [stats::glm()] object) assumes that the
 #' input features are independent. Also, setting `adjust = TRUE` is 
 #' experimental and we follow the same approach as in
-#' [shap](https://github.com/slundberg/shap).
+#' [shap](https://github.com/shap/shap).
 #' 
 #' @references 
 #' Strumbelj, E., and Igor K. (2014). Explaining prediction models and 
