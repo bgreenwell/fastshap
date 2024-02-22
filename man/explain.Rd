@@ -176,7 +176,7 @@ Setting \code{exact = TRUE} with a linear model (i.e., an
 \code{\link[stats:lm]{stats::lm()}} or \code{\link[stats:glm]{stats::glm()}} object) assumes that the
 input features are independent. Also, setting \code{adjust = TRUE} is
 experimental and we follow the same approach as in
-\href{https://github.com/slundberg/shap}{shap}.
+\href{https://github.com/shap/shap}{shap}.
 }
 \examples{
 #

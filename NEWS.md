@@ -1,3 +1,15 @@
+# fastshap 0.1.1
+
+## Changed
+
+* This NEWS file now follows the [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) format.
+
+## Fixed 
+
+* Removed an unnecessary `.Rd` file to satisfy CRAN policies.
+* Fixed a couple of outdated URLs.
+* Added [earth](https://CRAN.R-project.org/package=earth) to the list of suggested packages since it's referenced a couple of times in the package documentation.
+
 # fastshap 0.1.0
 
 ## Breaking changes
@@ -70,9 +82,9 @@ features.
 ## New features
 
 * The default method of `explain()` gained a new logical argument called `adjust`. When `adjust = TRUE` (and `nsim > 1`), the algorithm will adjust the sum of the estimated Shapley values to satisfy the *efficiency property*; that is, to equal the difference between the model's prediction for that sample and the average prediction over all the training data. This option is experimental and we follow the same approach as in
-[shap](https://github.com/slundberg/shap) [(#6)](https://github.com/bgreenwell/fastshap/issues/6).
+[shap](https://github.com/shap/shap) [(#6)](https://github.com/bgreenwell/fastshap/issues/6).
 
-* New (experimental) function for constructing [force plots](https://github.com/slundberg/shap) [(#7)](https://github.com/bgreenwell/fastshap/issues/7) to help visualize prediction explanations. The function is also a generic which means additional methods can be added.
+* New (experimental) function for constructing [force plots](https://github.com/shap/shap) [(#7)](https://github.com/bgreenwell/fastshap/issues/7) to help visualize prediction explanations. The function is also a generic which means additional methods can be added.
 
 * Function `explain()` became a generic and gained a new logical argument, `exact`, for computing exact Shapley contributions for linear models (Linear SHAP, which assumes independent features) and boosted decision trees (Tree SHAP). Currently, only `"lm"`, `"glm"`, and `"xgb.Booster"` objects are supported [(#2)](https://github.com/bgreenwell/fastshap/issues/2)[(#3)](https://github.com/bgreenwell/fastshap/issues/3).
 
