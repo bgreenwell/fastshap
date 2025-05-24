@@ -157,8 +157,14 @@ explain_column <- function(object, X, column, pred_wrapper, newdata = NULL) {
 #' Shapley values in parallel across features; default is `FALSE`. **NOTE:**
 #' setting `parallel = TRUE` requires setting up an appropriate (i.e., 
 #' system-specific) *parallel backend* as described in the 
-#' [foreach](https://cran.r-project.org/package=foreach); for details, see
+#' [foreach](https://cran.r-project.org/package/foreach); for details, see
 #' `vignette("foreach", package = "foreach")` in R.
+#' 
+#' @param keep_raw_scores Logical indicating whether to return all raw Shapley
+#' scores from the simulations when `nsim > 1` and `adjust = FALSE`. Default 
+#' is `FALSE`. If `TRUE` under these conditions, the function returns a list of 
+#' matrices containing the raw scores instead of their averages. This argument 
+#' is ignored if `adjust = TRUE` or `nsim = 1`.
 #' 
 #' @param ... Additional optional arguments to be passed on to 
 #' [foreach::foreach()] whenever `parallel = TRUE`. For example, you may need
@@ -168,19 +174,42 @@ explain_column <- function(object, X, column, pred_wrapper, newdata = NULL) {
 #' `explain()`, so passing it via the `...` argument would likely result in an
 #' error.
 #' 
-#' @return If `shap_only = TRUE` (the default), a matrix is returned with one 
-#' column for each feature specified in `feature_names` (if 
-#' `feature_names = NULL`, the default, there will
-#' be one column for each feature in `X`) and one row for each observation
-#' in `newdata` (if `newdata = NULL`, the default, there will be one
-#' row for each observation in `X`). Additionally, the returned matrix will
-#' have an attribute called `"baseline"` containing the baseline value. If 
-#' `shap_only = FALSE`, then a list is returned with three components:
-#' * `shapley_values` - a matrix of Shapley values (as described above);
-#' * `feature_values` - the corresponding feature values (for plotting with 
-#' [shapviz::shapviz()]);
-#' * `baseline` - the corresponding baseline value (for plotting with 
-#' [shapviz::shapviz()]).
+#' @return The structure of the returned object depends on the arguments 
+#' `shap_only`, `keep_raw_scores`, `nsim`, and `adjust`.
+#' 
+#' If `keep_raw_scores = TRUE`, `nsim > 1`, and `adjust = FALSE`:
+#' A list is returned. Each element of the list corresponds to a feature 
+#' specified in `feature_names` (or all features in `X` if `feature_names = NULL`) 
+#' and is named after that feature. 
+#' Each element is a matrix where rows correspond to the observations in 
+#' `newdata` and columns correspond to the `nsim` Monte Carlo simulations. 
+#' If `newdata` contains only a single row, each element of the list will be a 
+#' column matrix with `nsim` rows and 1 column.
+#' The list will also have an attribute `"baseline"` containing the baseline value,
+#' and an attribute `"shap_only"` set to `TRUE` (as this output format is
+#' considered a raw form of Shapley values).
+#' 
+#' Otherwise (if `keep_raw_scores = FALSE` or `nsim = 1` or `adjust = TRUE`):
+#' \itemize{
+#'   \item If `shap_only = TRUE` (the default): A matrix is returned.
+#'     \itemize{
+#'       \item Rows correspond to each observation in `newdata` (or `X` if 
+#'             `newdata` is `NULL`).
+#'       \item Columns correspond to each feature specified in `feature_names` 
+#'             (or all features in `X` if `feature_names` is `NULL`).
+#'       \item The matrix has an attribute `"baseline"` containing the baseline 
+#'             value.
+#'     }
+#'   \item If `shap_only = FALSE`: A list is returned with three components:
+#'     \itemize{
+#'       \item `shapley_values` - A matrix of Shapley values as described above.
+#'       \item `feature_values` - The corresponding feature values from 
+#'             `newdata` (for plotting with [shapviz::shapviz()]).
+#'       \item `baseline` - The baseline value.
+#'     }
+#' }
+#' The returned object will also have the class `explain` (in addition to its
+#' base R class).
 #' 
 #' @seealso You can find more examples (with larger and more realistic data 
 #' sets) on the **fastshap** GitHub repository: 
@@ -228,7 +257,7 @@ explain_column <- function(object, X, column, pred_wrapper, newdata = NULL) {
 #' shap <- explain(fit, X = subset(mtcars, select = -mpg), nsim = 10, 
 #'                 pred_wrapper = pfun)
 #' head(shap)
-explain <- function(object, ...) {
+explain <- function(object, ..., keep_raw_scores = FALSE) {
   UseMethod("explain")
 } 
 
@@ -238,8 +267,8 @@ explain <- function(object, ...) {
 #' @export
 explain.default <- function(object, feature_names = NULL, X = NULL, nsim = 1, 
                             pred_wrapper = NULL, newdata = NULL, adjust = FALSE,
-                            baseline = NULL, shap_only = TRUE, parallel = FALSE, 
-                            ...) {
+                            baseline = NULL, shap_only = TRUE, parallel = FALSE,
+                            keep_raw_scores = FALSE, ...) {
   
   # Compute baseline/average training prediction (fnull) and predictions 
   # associated with each explanation (fx); if `adjust = FALSE`, then the 
@@ -368,27 +397,51 @@ explain.default <- function(object, feature_names = NULL, X = NULL, nsim = 1,
     
   } else {  # don't adjust
     
-    # Compute approximate Shapley values
-    phis <- foreach(i = feature_names, .combine = 'cbind', ...) %.do% {
-      reps <- replicate(nsim, {  # replace later with vapply()
-        explain_column(object, X = X, column = i, pred_wrapper = pred_wrapper,
-                       newdata = newdata)
-      })
-      if (is.matrix(reps)) {
-        rowMeans(reps)
-      } else {
-        mean.default(reps)
+    if (isTRUE(keep_raw_scores) && nsim > 1) {
+      phis <- foreach(i = feature_names, ...) %.do% {
+        reps <- replicate(nsim, {
+          explain_column(object, X = X, column = i, pred_wrapper = pred_wrapper,
+                         newdata = newdata)
+        })
+        if (is.vector(reps)) { # newdata has one row
+          reps <- matrix(reps, ncol = 1)
+        }
+        reps
       }
+      names(phis) <- feature_names
+    } else {
+      # Compute approximate Shapley values
+      phis <- foreach(i = feature_names, .combine = 'cbind', ...) %.do% {
+        reps <- replicate(nsim, {  # replace later with vapply()
+          explain_column(object, X = X, column = i, pred_wrapper = pred_wrapper,
+                         newdata = newdata)
+        })
+        if (is.matrix(reps)) {
+          rowMeans(reps)
+        } else {
+          mean.default(reps)
+        }
+      }
+      # Reformat if necessary and fix column names
+      if (length(feature_names) == 1L) {
+        phis <- as.matrix(phis)
+      }
+      colnames(phis) <- feature_names
     }
     
   }
   
-  # Reformat if necessary and fix column names
-  if (length(feature_names) == 1L) {
-    phis <- as.matrix(phis) 
-  } 
-  colnames(phis) <- feature_names
-  
+  # Reformat if necessary and fix column names for the matrix case
+  if (is.matrix(phis) && length(feature_names) == 1L && ncol(phis) == 1 && colnames(phis)[1L] != feature_names[1L]) {
+    # This condition specifically handles the case where foreach returns a matrix
+    # with a single column, and the column name might be something generic like "result.1"
+    # instead of the actual feature name when feature_names has length 1.
+    colnames(phis) <- feature_names
+  } else if (is.matrix(phis)) {
+    colnames(phis) <- feature_names
+  }
+
+
   if (isFALSE(shap_only)) {
     return(structure(list(
       "shapley_values" = phis,
@@ -411,7 +464,7 @@ explain.default <- function(object, feature_names = NULL, X = NULL, nsim = 1,
 explain.lm <- function(object, feature_names = NULL, X, nsim = 1, 
                        pred_wrapper, newdata = NULL, adjust = FALSE, 
                        exact = FALSE, baseline = NULL, shap_only = TRUE, 
-                       parallel = FALSE, ...) {
+                       parallel = FALSE, keep_raw_scores = FALSE, ...) {
   if (isTRUE(exact)) {  # use Linear SHAP
     phis <- if (is.null(newdata)) {
       stats::predict(object, type = "terms", ...)
@@ -433,7 +486,7 @@ explain.lm <- function(object, feature_names = NULL, X, nsim = 1,
     explain.default(object, feature_names = feature_names, X = X, nsim = nsim,
                     pred_wrapper = pred_wrapper, newdata = newdata, 
                     adjust = adjust, baseline = baseline, shap_only = shap_only,
-                    parallel = parallel, ...)
+                    parallel = parallel, keep_raw_scores = keep_raw_scores, ...)
   }
 }
 
@@ -444,7 +497,7 @@ explain.lm <- function(object, feature_names = NULL, X, nsim = 1,
 explain.xgb.Booster <- function(object, feature_names = NULL, X = NULL, nsim = 1, 
                                 pred_wrapper, newdata = NULL, adjust = FALSE, 
                                 exact = FALSE, baseline = NULL, 
-                                shap_only = TRUE, parallel = FALSE, ...) {
+                                shap_only = TRUE, parallel = FALSE, keep_raw_scores = FALSE, ...) {
   if (isTRUE(exact)) {  # use Tree SHAP
     if (is.null(X) && is.null(newdata)) {
       stop("Must supply `X` or `newdata` argument (but not both).", 
@@ -469,7 +522,7 @@ explain.xgb.Booster <- function(object, feature_names = NULL, X = NULL, nsim = 1
     explain.default(object, feature_names = feature_names, X = X, nsim = nsim,
                     pred_wrapper = pred_wrapper, newdata = newdata, 
                     adjust = adjust, baseline = baseline, shap_only = shap_only, 
-                    parallel = parallel, ...)
+                    parallel = parallel, keep_raw_scores = keep_raw_scores, ...)
   }
 }
 
@@ -480,7 +533,7 @@ explain.xgb.Booster <- function(object, feature_names = NULL, X = NULL, nsim = 1
 explain.lgb.Booster <- function(object, feature_names = NULL, X = NULL, nsim = 1, 
                                 pred_wrapper, newdata = NULL, adjust = FALSE, 
                                 exact = FALSE, baseline = NULL, 
-                                shap_only = TRUE, parallel = FALSE, ...) {
+                                shap_only = TRUE, parallel = FALSE, keep_raw_scores = FALSE, ...) {
   if (isTRUE(exact)) {  # use Tree SHAP
     if (is.null(X) && is.null(newdata)) {
       stop("Must supply `X` or `newdata` argument (but not both).", 
@@ -512,6 +565,6 @@ explain.lgb.Booster <- function(object, feature_names = NULL, X = NULL, nsim = 1
     explain.default(object, feature_names = feature_names, X = X, nsim = nsim,
                     pred_wrapper = pred_wrapper, newdata = newdata, 
                     adjust = adjust, baseline = baseline, shap_only = shap_only, 
-                    parallel = parallel, ...)
+                    parallel = parallel, keep_raw_scores = keep_raw_scores, ...)
   }
 }
