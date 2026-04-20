@@ -149,6 +149,9 @@ Monte Carlo replications; for example, \code{apply(result, 1:2, sd)} computes
 standard errors for each (observation, feature) pair. Only supported when
 \code{adjust = FALSE}. Default is \code{FALSE}.}
 
+\item{seed}{Integer specifying a random seed for reproducibility; passed to
+\code{\link[base:Random]{base::set.seed()}}. Default is \code{NULL} (no seed).}
+
 \item{exact}{Logical indicating whether to compute exact Shapley values.
 Currently only available for \code{\link[stats:lm]{stats::lm()}},
 \code{\link[xgboost:xgboost]{xgboost::xgboost()}}, and \code{\link[lightgbm:lightgbm]{lightgbm::lightgbm()}} objects.

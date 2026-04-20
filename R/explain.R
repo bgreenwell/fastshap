@@ -156,6 +156,9 @@ explain_column <- function(object, X, column, pred_wrapper, newdata = NULL) {
 #' [foreach](https://cran.r-project.org/package=foreach); for details, see
 #' `vignette("foreach", package = "foreach")` in R.
 #' 
+#' @param seed Integer specifying a random seed for reproducibility; passed to
+#' [base::set.seed()]. Default is `NULL` (no seed).
+#'
 #' @param raw Logical indicating whether or not to return the raw per-simulation
 #' Shapley values from each Monte Carlo replication. If `TRUE`, a 3-D array
 #' of dimensions `n x p x nsim` is returned, where `n` is the number of
