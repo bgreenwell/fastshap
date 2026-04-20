@@ -15,3 +15,5 @@
 ^tools$
 ^TODO\.md$
 ^vignettes/fastshap\.Rmd\.orig$
+^AGENTS\.md$
+^CLAUDE\.md$

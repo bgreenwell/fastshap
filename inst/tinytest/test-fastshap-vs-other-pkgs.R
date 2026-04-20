@@ -27,7 +27,7 @@ bst <- lightgbm::lightgbm(X, label = titanic$survived, params = params,
 
 # Prediction wrapper for computing predicted probability of surviving
 pfun <- function(object, newdata) {  # prediction wrapper
-  predict(object, data = data.matrix(newdata), rawscore = TRUE)
+  predict(object, newdata = data.matrix(newdata), type = "raw")
 }
 
 # Passenger who's survival prediction we want to estimate and explain
@@ -46,7 +46,7 @@ jack.dawson <- data.matrix(jack.dawson)
 (jack.prob <- pfun(bst, newdata = jack.dawson))
 
 # Compute per-feature contributions using Tree SHAP
-(ex.lightgbm <- predict(bst, data = jack.dawson, predcontrib = TRUE))
+(ex.lightgbm <- predict(bst, newdata = jack.dawson, type = "contrib"))
 
 # Compute feature contributions using MC SHAP using the fastshap package
 set.seed(1306)  # for reproducibility

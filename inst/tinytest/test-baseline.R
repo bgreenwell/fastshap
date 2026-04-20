@@ -32,17 +32,16 @@ params.lgb <- list(
 # Fit a LightGBM model
 set.seed(1420)  # for reproducibility
 bst.lgb <- lightgbm::lightgbm(
-  data = X, 
-  label = titanic$survived, 
-  params = params.lgb, 
-  nrounds = 50, 
-  verbose = 0, 
-  save_name = "lightgbm.model"
+  data = X,
+  label = titanic$survived,
+  params = params.lgb,
+  nrounds = 50,
+  verbose = 0
 )
 
 # Prediction wrapper for computing predicted probability of surviving
 pfun.lgb <- function(object, newdata) {  # prediction wrapper
-  predict(object, data = newdata, rawscore = TRUE)
+  predict(object, newdata = newdata, type = "raw")
 }
 
 # Estimates Jack's survival probability
@@ -54,12 +53,12 @@ baseline.lgb <- mean(pfun.lgb(bst.lgb, newdata = X))
 diff.lgb <- jack.logit.lgb - baseline.lgb
 
 # Compute per-feature contributions using Tree SHAP
-(ex.lgb <- predict(bst.lgb, data = jack.dawson, predcontrib = TRUE))
+(ex.lgb <- predict(bst.lgb, newdata = jack.dawson, type = "contrib"))
 
 # Compute feature contributions using MC SHAP using the fastshap package
 set.seed(1306)  # for reproducibility
-ex.fastshap <- fastshap::explain(bst.lgb, X = X, nsim = 1000, 
-                                 pred_wrapper = pfun.lgb, ewdata = jack.dawson, 
+ex.fastshap <- fastshap::explain(bst.lgb, X = X, nsim = 1000,
+                                 pred_wrapper = pfun.lgb, newdata = jack.dawson,
                                  adjust = TRUE, shap_only = FALSE)
 
 # Expect Shapley values to have additivity property

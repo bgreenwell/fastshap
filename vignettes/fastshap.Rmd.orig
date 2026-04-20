@@ -126,6 +126,29 @@ sv_force(shv)
 Although force plots are cool, waterfall charts seem to be a much more effective way of visualizing feature contributions for a single prediction; especially when there's a large number of features.
 
 
+## Raw Shapley values
+
+By default, `explain()` returns the averaged Shapley values from all Monte Carlo simulations. However, sometimes it can be useful to access the raw Shapley values from each individual simulation, especially for uncertainty quantification or further statistical analysis. The `raw` argument allows you to obtain these unprocessed results:
+
+```{r titanic-explain-jack-raw}
+set.seed(2140)  # for reproducibility
+raw.jack <- explain(rfo, X = X, pred_wrapper = pfun, newdata = jack.dawson,
+                    nsim = 100, raw = TRUE)
+
+# Structure of raw results
+str(raw.jack, max.level = 2)
+
+# Each list element contains a matrix with one row per observation 
+# and one column per simulation
+dim(raw.jack$pclass)  # 1 observation, 100 simulations
+
+# We can compute statistics on the raw values
+sapply(raw.jack, function(x) c(mean = mean(x), sd = sd(x)))
+```
+
+The `raw` argument works with both single and multiple observations, and the structure of the returned list will match the number of features in your model.
+
+
 ## Global explanations
 
 Aside from explaining individual prediction (i.e., *local explanation*), it can be useful to aggregate the results of several (i.e., all of the training predictions) into an overall global summary about the model (i.e., global explanations). However, computing Shapley values for a large number of observations can be quite computationally expensive, especially when using the MC approach. However, [fastshap](https://cran.r-project.org/package=fastshap) is quite efficient compared to alternative implementations^[For large-ish data sets, you should always run `it `explain()` on a smaller subsample with `nsim = 1` to gauge how much compute you can afford]. The code chunk below computes Shapley explanations for each passenger in the training data using 1000 MC repetitions, and coerces the resulting matrix to a [tibble](https://cran.r-project.org/package=tibble) (for nicer printing).

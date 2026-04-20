@@ -1,3 +1,28 @@
+# fastshap 0.1.3
+
+## Changed
+
+* `explain()` with `raw = TRUE` now returns a 3-D array of dimensions
+  `n x p x nsim` (observations × features × simulations) instead of a named
+  list. This makes downstream computation straightforward: e.g.,
+  `apply(result, 1:2, sd)` yields per-(observation, feature) standard errors,
+  and `result[, , k]` gives the `k`-th simulation's SHAP matrix in the same
+  `n x p` shape as the normal output. Using `raw = TRUE` together with
+  `adjust = TRUE` now emits a warning and returns the adjusted means (same
+  behaviour as `raw = FALSE`).
+
+# fastshap 0.1.2
+
+## Fixed
+
+* Fixed compatibility with XGBoost 2.x: `explain.xgb.Booster()` now correctly handles the case where `predict(..., predcontrib = TRUE)` returns a named vector instead of a matrix for single-row inputs (#GH).
+
+* Updated test suite to use the current LightGBM 4.x prediction API (`type = "raw"` and `type = "contrib"` instead of deprecated `rawscore` and `predcontrib` arguments; `newdata` instead of `data`).
+
+* Updated test suite to use the current XGBoost 2.x training API (`x`/`y` instead of `data`/`label`; `learning_rate` instead of `eta`).
+
+* Fixed a pre-existing typo in a test file where `ewdata` was used instead of `newdata`, causing the `newdata` argument to be silently ignored.
+
 # fastshap 0.1.1
 
 ## Changed

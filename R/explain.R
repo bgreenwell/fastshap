@@ -1,7 +1,7 @@
 #' @keywords internal
-#' 
+#'
 #' @useDynLib fastshap, .registration = TRUE
-#' 
+#'
 #' @importFrom Rcpp sourceCpp
 #' @importFrom foreach foreach %do% %dopar%
 #' @importFrom stats var
@@ -18,35 +18,35 @@ explain_column <- function(object, X, column, pred_wrapper, newdata = NULL) {
   if (is.character(column)) {
     column <- which(column == colnames(X))
   }
-  
+
   # Extract dimensions of X (before possible subsetting)
   n <- nrow(X)  # number of training instances
   p <- ncol(X)  # number of features
-  
+
   # Generate original and sampled feature instances
   if (is.null(newdata)) {  # FIXME: Should sampling be done with replacement?
     W <- X[sample(n, replace = TRUE), ]  
     O <- genOMat(n, p)
   } else {
-    W <- X[sample(n, size = nrow(newdata), replace = TRUE), , drop = FALSE]  # randomly sample rows from full X
-    O <- genOMat(n, p)[sample(n, size = nrow(newdata), replace = TRUE), , drop = FALSE]
+    # Randomly sample rows from full X
+    W <- X[sample(n, size = nrow(newdata), replace = TRUE), , drop = FALSE]
+    O <- genOMat(n, p)[sample(n, size = nrow(newdata), replace = TRUE),
+                       , drop = FALSE]
     X <- newdata  # observations of interest
   }
-  
-  #print(list("W" = W, "O" = O))
-  
-  # Finish building logical matrix that resembles the random permutation order 
+
+  # Finish building logical matrix that resembles the random permutation order
   # to use for each row of X and W (a TRUE indicates that the corresponding
-  # feature appeared before the feature of interest in the associated 
+  # feature appeared before the feature of interest in the associated
   # permutation)
   O <- if (column == 1) {  # case 1
     cbind(TRUE, O)
   } else if (column == p) {  # case 2
     cbind(O, TRUE)
   } else {  # case 3
-    cbind(  
+    cbind(
       O[, 1:(column - 1), drop = FALSE], 
-      TRUE, 
+      TRUE,
       O[, column:(p - 1), drop = FALSE]
     )
   }
@@ -55,13 +55,10 @@ explain_column <- function(object, X, column, pred_wrapper, newdata = NULL) {
   # each rows in B[[1L]] and B[[2L]] is a combination of feature values from X
   # and W
   if (is.matrix(X)) {
-    
     # Use RcppArmadillo for slight performance gain
     B <- genFrankensteinMatrices(X, W, O, feature = column)
     colnames(B[[1L]]) <- colnames(B[[2L]]) <- colnames(X)
-
   } else {
-    
     # Use base R's logical subsetting
     B <- list(X, X)
     B[[1L]][O] <- X[O]
@@ -69,29 +66,28 @@ explain_column <- function(object, X, column, pred_wrapper, newdata = NULL) {
     O[, column] <- FALSE
     B[[2L]][O] <- X[O]
     B[[2L]][!O] <- W[!O]
-    
   }
 
   # Make sure each component of `B` has the same column classes as `X`
   B[[1L]] <- copy_classes(B[[1L]], y = X)
   B[[2L]] <- copy_classes(B[[2L]], y = X)
-  
+
   # Return differences in predictions
-  pred_wrapper(object, newdata = B[[1L]]) - 
-    pred_wrapper(object, newdata = B[[2L]])  
-  
+  pred_wrapper(object, newdata = B[[1L]]) -
+    pred_wrapper(object, newdata = B[[2L]])
+
 }
 
 
 #' Fast approximate Shapley values
-#' 
+#'
 #' Compute fast (approximate) Shapley values for a set of features using the 
 #' Monte Carlo algorithm described in Strumbelj and Igor (2014). An efficient 
 #' algorithm for tree-based models, commonly referred to as Tree SHAP, is also 
 #' supported for [lightgbm](https://cran.r-project.org/package=lightgbm) and
 #' [xgboost](https://cran.r-project.org/package=xgboost) models; see Lundberg 
 #' et. al. (2020) for details.
-#' 
+#'
 #' @param object A fitted model object (e.g., a [ranger::ranger()],
 #' [xgboost::xgboost()], or [earth::earth()] object, to name
 #' a few).
@@ -159,6 +155,17 @@ explain_column <- function(object, X, column, pred_wrapper, newdata = NULL) {
 #' system-specific) *parallel backend* as described in the 
 #' [foreach](https://cran.r-project.org/package=foreach); for details, see
 #' `vignette("foreach", package = "foreach")` in R.
+#' 
+#' @param seed Integer specifying a random seed for reproducibility; passed to
+#' [base::set.seed()]. Default is `NULL` (no seed).
+#'
+#' @param raw Logical indicating whether or not to return the raw per-simulation
+#' Shapley values from each Monte Carlo replication. If `TRUE`, a 3-D array
+#' of dimensions `n x p x nsim` is returned, where `n` is the number of
+#' observations, `p` is the number of features, and `nsim` is the number of
+#' Monte Carlo replications; for example, `apply(result, 1:2, sd)` computes
+#' standard errors for each (observation, feature) pair. Only supported when
+#' `adjust = FALSE`. Default is `FALSE`.
 #' 
 #' @param ... Additional optional arguments to be passed on to 
 #' [foreach::foreach()] whenever `parallel = TRUE`. For example, you may need
@@ -239,7 +246,13 @@ explain <- function(object, ...) {
 explain.default <- function(object, feature_names = NULL, X = NULL, nsim = 1, 
                             pred_wrapper = NULL, newdata = NULL, adjust = FALSE,
                             baseline = NULL, shap_only = TRUE, parallel = FALSE, 
-                            ...) {
+                            raw = FALSE, seed = NULL, ...) {
+  
+  
+  # Set seed for reproducibility
+  if (!is.null(seed)) {
+    set.seed(seed)
+  }
   
   # Compute baseline/average training prediction (fnull) and predictions 
   # associated with each explanation (fx); if `adjust = FALSE`, then the 
@@ -288,7 +301,13 @@ explain.default <- function(object, feature_names = NULL, X = NULL, nsim = 1,
       phis <- explain.default(object, feature_names = feature_names, X = X, 
                               nsim = 1L, pred_wrapper = pred_wrapper, 
                               newdata = newdata.stacked, adjust = FALSE, 
-                              parallel = parallel, ...)
+                              parallel = parallel, raw = raw, seed = seed, ...)
+      if (isTRUE(raw)) {
+        # phis is (nsim × p × 1) from recursive call; reshape to (1 × p × nsim)
+        arr <- aperm(phis, c(3L, 2L, 1L))
+        dimnames(arr) <- list(rownames(newdata), feature_names, NULL)
+        return(arr)
+      }
       phi.avg <- t(colMeans(phis))  # transpose to keep as row matrix
       if (isTRUE(adjust)) {
         # Adjust sum of approximate Shapley values using the same technique from 
@@ -318,7 +337,12 @@ explain.default <- function(object, feature_names = NULL, X = NULL, nsim = 1,
   }
   
   if (isTRUE(adjust)) {  # compute variances and adjust the sum
-    
+
+    if (isTRUE(raw)) {
+      warning("`raw = TRUE` is not supported when `adjust = TRUE`; ignoring `raw`.",
+              call. = FALSE)
+    }
+
     # Need nsim > 1 to compute variances for adjustment
     if (nsim < 2) {
       stop("Need `nsim > 1` whenever `adjust = TRUE`.", call. = FALSE)
@@ -329,7 +353,10 @@ explain.default <- function(object, feature_names = NULL, X = NULL, nsim = 1,
     # nrow(newdata) x 2 x length(feature_names); the second dimension holds the
     # averages (i.e., unadjusted Shapley estimates) and variances.
     acomb <- function(...) abind(..., along = 3)
-    phis.stats <- foreach(i = feature_names, .combine = "acomb", ...) %.do% {
+    phis.stats <- foreach(
+      i = feature_names, .combine = "acomb", 
+      .options.RNG = seed, ...
+    ) %.do% {
       reps <- replicate(nsim, {  # replace later with vapply()
         explain_column(object, X = X, column = i, pred_wrapper = pred_wrapper,
                        newdata = newdata)
@@ -369,16 +396,31 @@ explain.default <- function(object, feature_names = NULL, X = NULL, nsim = 1,
   } else {  # don't adjust
     
     # Compute approximate Shapley values
-    phis <- foreach(i = feature_names, .combine = 'cbind', ...) %.do% {
-      reps <- replicate(nsim, {  # replace later with vapply()
+    reps <- foreach(i = feature_names, .options.RNG = seed, ...) %.do% {
+      replicate(nsim, {  # replace later with vapply()
         explain_column(object, X = X, column = i, pred_wrapper = pred_wrapper,
                        newdata = newdata)
       })
-      if (is.matrix(reps)) {
-        rowMeans(reps)
-      } else {
-        mean.default(reps)
-      }
+    }
+    if (isTRUE(raw)) {
+      # simplify2array converts list of p (n × nsim) matrices → (n × nsim × p) array;
+      # aperm reorders to (n × p × nsim) so result[,,k] is the k-th simulation's
+      # SHAP matrix, matching the shape of the standard (raw=FALSE) output.
+      nd <- if (!is.null(newdata)) newdata else X
+      arr <- aperm(simplify2array(reps), c(1L, 3L, 2L))
+      dimnames(arr) <- list(rownames(nd), feature_names, NULL)
+      return(arr)
+    }
+    phis <- if (is.list(reps)) {
+      sapply(reps, FUN = function(x) {
+        if (is.matrix(x)) {
+          rowMeans(x)
+        } else {
+          mean.default(x)
+        }
+      })
+    } else {
+      rowMeans(reps)
     }
     
   }
@@ -451,18 +493,26 @@ explain.xgb.Booster <- function(object, feature_names = NULL, X = NULL, nsim = 1
            call. = FALSE)
     }
     X <- if (is.null(X)) newdata else X
-    phis <- stats::predict(object, newdata = X, predcontrib = TRUE, 
+    # Strip any subclasses (e.g., "xgboost" in xgboost >= 2.0) so that
+    # predict.xgb.Booster is dispatched, which supports predcontrib = TRUE.
+    phis <- stats::predict(structure(object, class = "xgb.Booster"),
+                           newdata = X, predcontrib = TRUE,
                            approxcontrib = FALSE, ...)
+    if (!is.matrix(phis)) {
+      phis <- matrix(phis, nrow = nrow(X), dimnames = list(rownames(X), names(phis)))
+    }
+    # The bias column was named "BIAS" in older xgboost and "(Intercept)" in newer.
+    bias_col <- colnames(phis)[ncol(phis)]
     if (isFALSE(shap_only)) {
       return(structure(list(
         "shapley_values" = phis,
         "feature_values" = newdata[, feature_names, drop = FALSE],
-        "baseline" = phis[, "BIAS"]
+        "baseline" = phis[, bias_col]
       ), class = "explain"))
     } else {
-      attr(phis, which = "baseline") <- phis[, "BIAS"]
+      attr(phis, which = "baseline") <- phis[, bias_col]
       class(phis) <- c("explain", class(phis))
-      phis <- phis[, colnames(phis) != "BIAS", drop = FALSE]
+      phis <- phis[, colnames(phis) != bias_col, drop = FALSE]
       return(phis)
     }
   } else {
