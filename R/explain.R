@@ -156,10 +156,13 @@ explain_column <- function(object, X, column, pred_wrapper, newdata = NULL) {
 #' [foreach](https://cran.r-project.org/package=foreach); for details, see
 #' `vignette("foreach", package = "foreach")` in R.
 #' 
-#' @param raw Logical indicating whether or not to return the raw Shapley values 
-#' from each Monte Carlo simulation. If `TRUE`, the result will be a list, 
-#' where each component contains the Shapley values from a single simulation.
-#' Default is `FALSE`.
+#' @param raw Logical indicating whether or not to return the raw per-simulation
+#' Shapley values from each Monte Carlo replication. If `TRUE`, a 3-D array
+#' of dimensions `n x p x nsim` is returned, where `n` is the number of
+#' observations, `p` is the number of features, and `nsim` is the number of
+#' Monte Carlo replications; for example, `apply(result, 1:2, sd)` computes
+#' standard errors for each (observation, feature) pair. Only supported when
+#' `adjust = FALSE`. Default is `FALSE`.
 #' 
 #' @param ... Additional optional arguments to be passed on to 
 #' [foreach::foreach()] whenever `parallel = TRUE`. For example, you may need
@@ -297,7 +300,10 @@ explain.default <- function(object, feature_names = NULL, X = NULL, nsim = 1,
                               newdata = newdata.stacked, adjust = FALSE, 
                               parallel = parallel, raw = raw, seed = seed, ...)
       if (isTRUE(raw)) {
-        return(phis)
+        # phis is (nsim × p × 1) from recursive call; reshape to (1 × p × nsim)
+        arr <- aperm(phis, c(3L, 2L, 1L))
+        dimnames(arr) <- list(rownames(newdata), feature_names, NULL)
+        return(arr)
       }
       phi.avg <- t(colMeans(phis))  # transpose to keep as row matrix
       if (isTRUE(adjust)) {
@@ -328,7 +334,12 @@ explain.default <- function(object, feature_names = NULL, X = NULL, nsim = 1,
   }
   
   if (isTRUE(adjust)) {  # compute variances and adjust the sum
-    
+
+    if (isTRUE(raw)) {
+      warning("`raw = TRUE` is not supported when `adjust = TRUE`; ignoring `raw`.",
+              call. = FALSE)
+    }
+
     # Need nsim > 1 to compute variances for adjustment
     if (nsim < 2) {
       stop("Need `nsim > 1` whenever `adjust = TRUE`.", call. = FALSE)
@@ -389,8 +400,13 @@ explain.default <- function(object, feature_names = NULL, X = NULL, nsim = 1,
       })
     }
     if (isTRUE(raw)) {
-      names(reps) <- feature_names
-      return(reps)
+      # simplify2array converts list of p (n × nsim) matrices → (n × nsim × p) array;
+      # aperm reorders to (n × p × nsim) so result[,,k] is the k-th simulation's
+      # SHAP matrix, matching the shape of the standard (raw=FALSE) output.
+      nd <- if (!is.null(newdata)) newdata else X
+      arr <- aperm(simplify2array(reps), c(1L, 3L, 2L))
+      dimnames(arr) <- list(rownames(nd), feature_names, NULL)
+      return(arr)
     }
     phis <- if (is.list(reps)) {
       sapply(reps, FUN = function(x) {

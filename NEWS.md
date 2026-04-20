@@ -1,3 +1,16 @@
+# fastshap 0.1.3
+
+## Changed
+
+* `explain()` with `raw = TRUE` now returns a 3-D array of dimensions
+  `n x p x nsim` (observations × features × simulations) instead of a named
+  list. This makes downstream computation straightforward: e.g.,
+  `apply(result, 1:2, sd)` yields per-(observation, feature) standard errors,
+  and `result[, , k]` gives the `k`-th simulation's SHAP matrix in the same
+  `n x p` shape as the normal output. Using `raw = TRUE` together with
+  `adjust = TRUE` now emits a warning and returns the adjusted means (same
+  behaviour as `raw = FALSE`).
+
 # fastshap 0.1.2
 
 ## Fixed

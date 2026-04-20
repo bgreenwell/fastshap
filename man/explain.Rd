@@ -73,7 +73,7 @@ explain(object, ...)
 }
 \arguments{
 \item{object}{A fitted model object (e.g., a \code{\link[ranger:ranger]{ranger::ranger()}},
-\code{\link[xgboost:xgb.train]{xgboost::xgboost()}}, or \code{\link[earth:earth]{earth::earth()}} object, to name
+\code{\link[xgboost:xgboost]{xgboost::xgboost()}}, or \code{\link[earth:earth]{earth::earth()}} object, to name
 a few).}
 
 \item{...}{Additional optional arguments to be passed on to
@@ -141,14 +141,17 @@ system-specific) \emph{parallel backend} as described in the
 \href{https://cran.r-project.org/package=foreach}{foreach}; for details, see
 \code{vignette("foreach", package = "foreach")} in R.}
 
-\item{raw}{Logical indicating whether or not to return the raw Shapley values
-from each Monte Carlo simulation. If \code{TRUE}, the result will be a list,
-where each component contains the Shapley values from a single simulation.
-Default is \code{FALSE}.}
+\item{raw}{Logical indicating whether or not to return the raw per-simulation
+Shapley values from each Monte Carlo replication. If \code{TRUE}, a 3-D array
+of dimensions \verb{n x p x nsim} is returned, where \code{n} is the number of
+observations, \code{p} is the number of features, and \code{nsim} is the number of
+Monte Carlo replications; for example, \code{apply(result, 1:2, sd)} computes
+standard errors for each (observation, feature) pair. Only supported when
+\code{adjust = FALSE}. Default is \code{FALSE}.}
 
 \item{exact}{Logical indicating whether to compute exact Shapley values.
 Currently only available for \code{\link[stats:lm]{stats::lm()}},
-\code{\link[xgboost:xgb.train]{xgboost::xgboost()}}, and \code{\link[lightgbm:lightgbm]{lightgbm::lightgbm()}} objects.
+\code{\link[xgboost:xgboost]{xgboost::xgboost()}}, and \code{\link[lightgbm:lightgbm]{lightgbm::lightgbm()}} objects.
 Default is \code{FALSE}. Note that setting \code{exact = TRUE} will return
 explanations for each of the \code{\link[stats:terms]{stats::terms()}} in an
 \code{\link[stats:lm]{stats::lm()}} object. Default is \code{FALSE}.}
