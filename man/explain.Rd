@@ -21,6 +21,8 @@ explain(object, ...)
   baseline = NULL,
   shap_only = TRUE,
   parallel = FALSE,
+  raw = FALSE,
+  seed = NULL,
   ...
 )
 
@@ -138,6 +140,11 @@ setting \code{parallel = TRUE} requires setting up an appropriate (i.e.,
 system-specific) \emph{parallel backend} as described in the
 \href{https://cran.r-project.org/package=foreach}{foreach}; for details, see
 \code{vignette("foreach", package = "foreach")} in R.}
+
+\item{raw}{Logical indicating whether or not to return the raw Shapley values
+from each Monte Carlo simulation. If \code{TRUE}, the result will be a list,
+where each component contains the Shapley values from a single simulation.
+Default is \code{FALSE}.}
 
 \item{exact}{Logical indicating whether to compute exact Shapley values.
 Currently only available for \code{\link[stats:lm]{stats::lm()}},

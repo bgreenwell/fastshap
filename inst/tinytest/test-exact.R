@@ -43,12 +43,12 @@ expect_identical(
 # Fit model(s)
 set.seed(111)
 fit_xgb <- xgboost::xgboost(
-  data = data.matrix(subset(trn, select = -y)),
-  label = trn$y,
+  x = data.matrix(subset(trn, select = -y)),
+  y = trn$y,
   max_depth = 3,
-  eta = 0.1,
+  learning_rate = 0.1,
   nrounds = 301,
-  verbose = 0
+  verbosity = 0L
 )
 
 # Generate exact and approximate Shapley values for entire training set

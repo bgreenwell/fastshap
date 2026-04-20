@@ -38,12 +38,12 @@ params.lgb <- list(
 )
 
 set.seed(1420)  # for reproducibility
-bst.lgb <- lightgbm::lightgbm(X, label = titanic$survived, params = params.lgb, 
+bst.lgb <- lightgbm::lightgbm(data = X, label = titanic$survived, params = params.lgb,
                               nrounds = 50, verbose = 0)
 
 # Prediction wrapper for computing predicted probability of surviving
 pfun.lgb <- function(object, newdata) {  # prediction wrapper
-  predict(object, data = newdata, rawscore = TRUE)
+  predict(object, newdata = newdata, type = "raw")
 }
 
 # Estimates Jack's survival probability
@@ -55,7 +55,7 @@ baseline.lgb <- mean(pfun.lgb(bst.lgb, newdata = X))
 diff.lgb <- jack.logit.lgb - baseline.lgb
 
 # Compute per-feature contributions using Tree SHAP
-(ex.lgb <- predict(bst.lgb, data = jack.dawson, predcontrib = TRUE))
+(ex.lgb <- predict(bst.lgb, newdata = jack.dawson, type = "contrib"))
 
 # Compute feature contributions using MC SHAP using the fastshap package
 set.seed(1306)  # for reproducibility
@@ -73,7 +73,7 @@ ex.new <- fastshap::explain(bst.lgb, X = X, nsim = 2, pred_wrapper = pfun.lgb,
                             newdata = X.new, adjust = TRUE)  # `nsim = 2` here ONLY for speed
 
 # Expectations
-expect_equal(rowSums(ex.new), pfun.lgb(bst.lgb, newdata = X.new) - baseline.lgb,
+expect_equal(rowSums(ex.new), as.vector(pfun.lgb(bst.lgb, newdata = X.new) - baseline.lgb),
              tolerance = 1e-06)
 
 
@@ -83,32 +83,29 @@ expect_equal(rowSums(ex.new), pfun.lgb(bst.lgb, newdata = X.new) - baseline.lgb,
 
 for (obj in c("binary:logistic", "binary:logitraw")) {
   
-  # xgboost params
-  params.xgb <- list(
-    max_depth = 2L,
-    eta = 0.1,
-    objective = obj,
-    eval_metric = "logloss"
-  )
-  
-  # Fit model
+  # Fit model (use xgb.train for binary objectives since xgboost() requires factor y)
   set.seed(2020)  # for reproducibility
-  bst.xgb <- xgboost::xgboost(X, label = titanic$survived, params = params.xgb, 
-                              nrounds = 50, verbose = 0)
-  
-  # Prediction wrapper for ''xgboost'; output depend on user-specified objective
+  dtrain.xgb <- xgboost::xgb.DMatrix(data = X, label = titanic$survived)
+  bst.xgb <- xgboost::xgb.train(
+    params = list(
+      max_depth = 2L, learning_rate = 0.1,
+      objective = obj, eval_metric = "logloss"
+    ),
+    data = dtrain.xgb,
+    nrounds = 50,
+    verbose = 0
+  )
+
+  # Prediction wrapper for 'xgboost'; output depends on user-specified objective
   pfun.xgb <- function(object, newdata) {  # prediction wrapper
     predict(object, newdata = newdata)
   }
-  
+
   # Estimates Jack's survival probability
   jack.logit.xgb <- pfun.xgb(bst.xgb, newdata = jack.dawson)
-  
+
   # Compute baseline prediction
   baseline.xgb <- mean(pfun.xgb(bst.xgb, newdata = X))
-  
-  # Compute per-feature contributions using Tree SHAP
-  (ex.xgb <- predict(bst.xgb, newdata = jack.dawson, predcontrib = TRUE))
   
   # Compute feature contributions using MC SHAP using the fastshap package
   set.seed(2026)  # for reproducibility

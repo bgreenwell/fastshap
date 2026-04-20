@@ -1,3 +1,15 @@
+# fastshap 0.1.2
+
+## Fixed
+
+* Fixed compatibility with XGBoost 2.x: `explain.xgb.Booster()` now correctly handles the case where `predict(..., predcontrib = TRUE)` returns a named vector instead of a matrix for single-row inputs (#GH).
+
+* Updated test suite to use the current LightGBM 4.x prediction API (`type = "raw"` and `type = "contrib"` instead of deprecated `rawscore` and `predcontrib` arguments; `newdata` instead of `data`).
+
+* Updated test suite to use the current XGBoost 2.x training API (`x`/`y` instead of `data`/`label`; `learning_rate` instead of `eta`).
+
+* Fixed a pre-existing typo in a test file where `ewdata` was used instead of `newdata`, causing the `newdata` argument to be silently ignored.
+
 # fastshap 0.1.1
 
 ## Changed
