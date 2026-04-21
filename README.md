@@ -7,7 +7,6 @@
 
 [![CRAN
 status](https://www.r-pkg.org/badges/version/fastshap)](https://CRAN.R-project.org/package=fastshap)
-[![R-CMD-check](https://github.com/bgreenwell/fastshap/workflows/R-CMD-check/badge.svg)](https://github.com/bgreenwell/fastshap/actions)
 [![Codecov test
 coverage](https://codecov.io/gh/bgreenwell/fastshap/branch/master/graph/badge.svg)](https://codecov.io/gh/bgreenwell/fastshap?branch=master)
 [![Lifecycle:

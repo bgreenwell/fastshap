@@ -9,3 +9,9 @@ src/*.o
 src/*.so
 src/*.dll
 docs
+rjarticle/*.pdf
+rjarticle/*.html
+rjarticle/*.log
+rjarticle/*.rds
+rjarticle/*_cache/
+rjarticle/*_files/

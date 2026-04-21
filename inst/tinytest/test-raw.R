@@ -27,10 +27,10 @@ expect_true(is.array(shap_raw))
 expect_equal(dim(shap_raw), c(3L, ncol(X), nsim))
 expect_equal(dimnames(shap_raw)[[2L]], names(X))
 
-# apply(result, 1:2, mean) should give the same structure as the raw=FALSE output
+# apply(raw, 1:2, mean) must equal the raw=FALSE output (same seed → same draws)
 shap_mean <- fastshap::explain(fit, X = X, pred_wrapper = pfun, nsim = nsim,
                                newdata = X[1:3, ], raw = FALSE, seed = 101)
-expect_equal(dim(apply(shap_raw, 1:2, mean)), dim(shap_mean))
+expect_equal(as.numeric(apply(shap_raw, 1:2, mean)), as.numeric(shap_mean))
 
 # Compute raw Shapley values (single-row) — should also be (1 x p x nsim)
 shap_raw_1 <- fastshap::explain(fit, X = X, pred_wrapper = pfun, nsim = nsim,

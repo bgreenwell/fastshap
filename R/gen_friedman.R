@@ -53,8 +53,10 @@ bin <- function(x, n_bins) {
 #' gen_friedman()
 gen_friedman <- function(n_samples = 100, n_features = 10, n_bins = NULL,
                          sigma = 0.1, seed = NULL) {
-  # FIXME: Eventually need to deprecate the `nbins` argument (it's bad practice
-  # anyway)
+  if (!is.null(n_bins)) {
+    warning("`n_bins` is deprecated and will be removed in a future release.",
+            call. = FALSE)
+  }
   if (!is.null(seed)) {
     set.seed(seed)
   }
@@ -66,7 +68,7 @@ gen_friedman <- function(n_samples = 100, n_features = 10, n_bins = NULL,
   if (!is.null(n_bins)) {
     n_bins <- as.integer(n_bins)
     if (n_bins < 2) {
-      stop("Argument `n_bins` shouls be a postive integer > 1.", call. = FALSE)
+      stop("Argument `n_bins` should be a positive integer > 1.", call. = FALSE)
     }
     friedman$y <- bin(friedman$y, n_bins = n_bins)
   }
