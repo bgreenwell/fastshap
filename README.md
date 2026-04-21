@@ -9,8 +9,6 @@
 status](https://www.r-pkg.org/badges/version/fastshap)](https://CRAN.R-project.org/package=fastshap)
 [![Codecov test
 coverage](https://codecov.io/gh/bgreenwell/fastshap/branch/master/graph/badge.svg)](https://codecov.io/gh/bgreenwell/fastshap?branch=master)
-[![Lifecycle:
-experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://www.tidyverse.org/lifecycle/#experimental)
 [![R-CMD-check](https://github.com/bgreenwell/fastshap/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/bgreenwell/fastshap/actions/workflows/R-CMD-check.yaml)
 <!-- badges: end -->
 
