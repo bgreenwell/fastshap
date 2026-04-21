@@ -278,7 +278,7 @@ explain.default <- function(object, feature_names = NULL, X = NULL, nsim = 1,
       baseline
     }
   } else {
-    0  # FIXME: Is it really necessary to return zero?
+    NA_real_
   }
   
   # Deal with other NULL arguments
@@ -294,7 +294,9 @@ explain.default <- function(object, feature_names = NULL, X = NULL, nsim = 1,
   # Set up the 'foreach' "do" operator
   `%.do%` <- if (isTRUE(parallel)) `%dopar%` else `%do%`
 
-  # Experimental patch for more efficiently computing single-row explanations
+  # More efficiently compute single-row explanations by stacking the observation
+  # `nsim` times and calling `explain.default()` once with `nsim = 1L`. This
+  # allows the C++ backend to handle the vectorization.
   if (!is.null(newdata)) {
     if (nrow(newdata) == 1L && nsim > 1L) {
       newdata.stacked <- newdata[rep(1L, times = nsim), ]  # replicate obs `nsim` times
