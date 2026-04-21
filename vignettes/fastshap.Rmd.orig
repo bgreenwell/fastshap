@@ -128,25 +128,46 @@ Although force plots are cool, waterfall charts seem to be a much more effective
 
 ## Raw Shapley values
 
-By default, `explain()` returns the averaged Shapley values from all Monte Carlo simulations. However, sometimes it can be useful to access the raw Shapley values from each individual simulation, especially for uncertainty quantification or further statistical analysis. The `raw` argument allows you to obtain these unprocessed results:
+By default, `explain()` returns the averaged Shapley values across all Monte Carlo simulations. Setting `raw = TRUE` gives you the full per-simulation results as a 3-D array of dimensions **n × p × nsim** (observations × features × simulations). This is useful for uncertainty quantification: once you have the raw draws, standard errors and confidence intervals are just an `apply()` away.
 
 ```{r titanic-explain-jack-raw}
 set.seed(2140)  # for reproducibility
 raw.jack <- explain(rfo, X = X, pred_wrapper = pfun, newdata = jack.dawson,
-                    nsim = 100, raw = TRUE)
+                    nsim = 1000, raw = TRUE)
 
-# Structure of raw results
-str(raw.jack, max.level = 2)
-
-# Each list element contains a matrix with one row per observation 
-# and one column per simulation
-dim(raw.jack$pclass)  # 1 observation, 100 simulations
-
-# We can compute statistics on the raw values
-sapply(raw.jack, function(x) c(mean = mean(x), sd = sd(x)))
+dim(raw.jack)  # 1 observation x 5 features x 1000 simulations
 ```
 
-The `raw` argument works with both single and multiple observations, and the structure of the returned list will match the number of features in your model.
+Compute the mean and standard error across the 1000 simulations for each feature:
+
+```{r titanic-explain-jack-raw-se}
+shap.mean <- apply(raw.jack, 1:2, mean)  # same as plain explain() output
+shap.se   <- apply(raw.jack, 1:2, sd)
+
+rbind(mean = shap.mean, se = shap.se)
+```
+
+A dot-and-whisker plot (mean ± 2 SE) gives an intuitive sense of how stable the SHAP estimates are for each feature:
+
+```{r titanic-explain-jack-raw-plot}
+library(ggplot2)
+
+df <- data.frame(
+  feature = colnames(shap.mean),
+  mean    = as.numeric(shap.mean),
+  se      = as.numeric(shap.se)
+)
+
+ggplot(df, aes(x = mean, y = reorder(feature, mean))) +
+  geom_vline(xintercept = 0, linetype = "dashed", colour = "grey50") +
+  geom_errorbarh(aes(xmin = mean - 2 * se, xmax = mean + 2 * se),
+                 height = 0.2) +
+  geom_point(size = 3) +
+  labs(x = "SHAP value (mean \u00b1 2 SE)", y = NULL,
+       title = "Jack's feature contributions with uncertainty")
+```
+
+The `sex` and `pclass` contributions are precisely estimated (narrow intervals) because they dominate Jack's prediction; `age`, `sibsp`, and `parch` show more simulation-to-simulation variability, reflecting their smaller and noisier contributions.
 
 
 ## Global explanations

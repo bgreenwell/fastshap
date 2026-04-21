@@ -403,11 +403,14 @@ explain.default <- function(object, feature_names = NULL, X = NULL, nsim = 1,
       })
     }
     if (isTRUE(raw)) {
-      # simplify2array converts list of p (n × nsim) matrices → (n × nsim × p) array;
-      # aperm reorders to (n × p × nsim) so result[,,k] is the k-th simulation's
-      # SHAP matrix, matching the shape of the standard (raw=FALSE) output.
+      # Use array(unlist(...)) rather than simplify2array() because
+      # replicate(1L, vector) returns a plain vector (not a matrix), which
+      # would cause simplify2array to produce a 2-D matrix instead of the
+      # expected 3-D array and break the subsequent aperm() call.
       nd <- if (!is.null(newdata)) newdata else X
-      arr <- aperm(simplify2array(reps), c(1L, 3L, 2L))
+      n <- nrow(nd)
+      p <- length(feature_names)
+      arr <- aperm(array(unlist(reps), dim = c(n, nsim, p)), c(1L, 3L, 2L))
       dimnames(arr) <- list(rownames(nd), feature_names, NULL)
       return(arr)
     }
