@@ -208,7 +208,7 @@ sv_waterfall(shv)
 ```
 
 ![plot of chunk
-titanic-explain-jack-waterfall](reference/figures/titanic-explain-jack-waterfall-1.png)
+titanic-explain-jack-waterfall](figures/titanic-explain-jack-waterfall-1.png)
 
 plot of chunk titanic-explain-jack-waterfall
 
@@ -222,7 +222,7 @@ sv_force(shv)
 ```
 
 ![plot of chunk
-titanic-explain-jack-force](reference/figures/titanic-explain-jack-force-1.png)
+titanic-explain-jack-force](figures/titanic-explain-jack-force-1.png)
 
 plot of chunk titanic-explain-jack-force
 
@@ -233,48 +233,67 @@ prediction; especially when there’s a large number of features.
 ## Raw Shapley values
 
 By default, [`explain()`](../reference/explain.md) returns the averaged
-Shapley values from all Monte Carlo simulations. However, sometimes it
-can be useful to access the raw Shapley values from each individual
-simulation, especially for uncertainty quantification or further
-statistical analysis. The `raw` argument allows you to obtain these
-unprocessed results:
+Shapley values across all Monte Carlo simulations. Setting `raw = TRUE`
+gives you the full per-simulation results as a 3-D array of dimensions
+**n × p × nsim** (observations × features × simulations). This is useful
+for uncertainty quantification: once you have the raw draws, standard
+errors and confidence intervals are just an
+[`apply()`](https://rdrr.io/r/base/apply.html) away.
 
 ``` r
 set.seed(2140)  # for reproducibility
 raw.jack <- explain(rfo, X = X, pred_wrapper = pfun, newdata = jack.dawson,
-                    nsim = 100, raw = TRUE)
+                    nsim = 1000, raw = TRUE)
 
-# Structure of raw results
-str(raw.jack, max.level = 2)
+dim(raw.jack)  # 1 observation x 5 features x 1000 simulations
 ```
 
-    ## List of 5
-    ##  $ pclass: num [1:100, 1] -0.2918 0 -0.1524 -0.0492 -0.4452 ...
-    ##  $ age   : num [1:100, 1] -0.3063 0.0453 0.0244 0.047 -0.083 ...
-    ##  $ sex   : num [1:100, 1] -0.3263 -0.4217 0 -0.3385 -0.0701 ...
-    ##  $ sibsp : num [1:100, 1] -0.0161 0 0.0766 0 0.3344 ...
-    ##  $ parch : num [1:100, 1] 0 0 0 0 0 0 0 0 0 0 ...
+    ## [1]    1    5 1000
+
+Compute the mean and standard error across the 1000 simulations for each
+feature:
 
 ``` r
-# Each list element contains a matrix with one row per observation 
-# and one column per simulation
-dim(raw.jack$pclass)  # 1 observation, 100 simulations
+shap.mean <- apply(raw.jack, 1:2, mean)  # same as plain explain() output
+shap.se   <- apply(raw.jack, 1:2, sd)
+
+rbind(mean = shap.mean, se = shap.se)
 ```
 
-    ## [1] 100   1
+    ##        pclass         age        sex       sibsp       parch
+    ## 1 -0.07611516 -0.02415439 -0.1323875 0.005918466 -0.01690250
+    ## 1  0.13277286  0.12182523  0.2056869 0.069499500  0.06415175
+
+A dot-and-whisker plot (mean ± 2 SE) gives an intuitive sense of how
+stable the SHAP estimates are for each feature:
 
 ``` r
-# We can compute statistics on the raw values
-sapply(raw.jack, function(x) c(mean = mean(x), sd = sd(x)))
+library(ggplot2)
+
+df <- data.frame(
+  feature = colnames(shap.mean),
+  mean    = as.numeric(shap.mean),
+  se      = as.numeric(shap.se)
+)
+
+ggplot(df, aes(x = mean, y = reorder(feature, mean))) +
+  geom_vline(xintercept = 0, linetype = "dashed", colour = "grey50") +
+  geom_errorbarh(aes(xmin = mean - 2 * se, xmax = mean + 2 * se),
+                 height = 0.2) +
+  geom_point(size = 3) +
+  labs(x = "SHAP value (mean \u00b1 2 SE)", y = NULL,
+       title = "Jack's feature contributions with uncertainty")
 ```
 
-    ##           pclass         age        sex       sibsp       parch
-    ## mean -0.07813898 -0.02971629 -0.1576069 0.006664637 -0.01509985
-    ## sd    0.13505635  0.13190724  0.2354966 0.063783882  0.06296690
+![plot of chunk
+titanic-explain-jack-raw-plot](figures/titanic-explain-jack-raw-plot-1.png)
 
-The `raw` argument works with both single and multiple observations, and
-the structure of the returned list will match the number of features in
-your model.
+plot of chunk titanic-explain-jack-raw-plot
+
+The `sex` and `pclass` contributions are precisely estimated (narrow
+intervals) because they dominate Jack’s prediction; `age`, `sibsp`, and
+`parch` show more simulation-to-simulation variability, reflecting their
+smaller and noisier contributions.
 
 ## Global explanations
 
@@ -327,11 +346,11 @@ mean of the absolute value of the features contribution for each column:
 
 ``` r
 shv.global <- shapviz(ex.t1)
-sv_importance(shv)  
+sv_importance(shv.global)
 ```
 
 ![plot of chunk
-titanic-explain-global-importance](reference/figures/titanic-explain-global-importance-1.png)
+titanic-explain-global-importance](figures/titanic-explain-global-importance-1.png)
 
 plot of chunk titanic-explain-global-importance
 
@@ -345,7 +364,7 @@ sv_dependence(shv.global, v = "age")
 ```
 
 ![plot of chunk
-titanic-explain-global-dependence](reference/figures/titanic-explain-global-dependence-1.png)
+titanic-explain-global-dependence](figures/titanic-explain-global-dependence-1.png)
 
 plot of chunk titanic-explain-global-dependence
 
@@ -410,7 +429,8 @@ system.time({  # estimate run time
 })
 ```
 
-    ## Error in {: object 'msg' not found
+    ##     user   system  elapsed 
+    ## 1738.720   70.178 1175.397
 
 Honestly, not that bad for 50 MC repetitions on a data set with 80
 features on 2930 rows!
@@ -419,6 +439,58 @@ For comparison, we’ll run the same computation, but this time in
 parallel using the
 [doParallel](https://cran.r-project.org/package=doParallel) package to
 execute across 12 cores:
+
+``` r
+library(doParallel)
+
+# With parallelism
+registerDoParallel(cores = 12)  # use forking with 12 cores
+set.seed(5038)
+system.time({  # estimate run time
+  ex.ames.par <- explain(rfo, X = X, pred_wrapper = pfun, nsim = 50, 
+                         adjust = TRUE, parallel = TRUE)
+})
+```
+
+    ##     user   system  elapsed 
+    ## 3725.689  158.068  440.336
+
+Not a bad speedup!
+
+Since we didn’t set `shap_only=FALSE` in the call to
+[`explain()`](../reference/explain.md), we’ll need to pass the
+corresponding feature values and baseline when interfacing with
+[shapviz](https://cran.r-project.org/package=shapviz). By default, as
+long as `adjust = TRUE`, the baseline will be automatically computed as
+the average training prediction (or whatever suitable background feature
+set is provided via `X`) and stored in the `"baseline"` of the returned
+matrix when `shap_only=TRUE`, or the `"baseline"` component of the
+returned object when `shap_only=FALSE`.
+
+For instance, to construct a Shapley-based variable importance plot from
+the `ex.ames.par` object, we can simply do the following:
+
+``` r
+baseline <- attr(ex.ames.par, "baseline")
+shv <- shapviz(ex.ames.par, X = X, baseline = baseline)
+sv_importance(shv)
+```
+
+![plot of chunk
+ames-explain-global-parallel-importance](figures/ames-explain-global-parallel-importance-1.png)
+
+plot of chunk ames-explain-global-parallel-importance
+
+Similar for Shapley-based dependence plots:
+
+``` r
+sv_dependence(shv, v = "Gr_Liv_Area", alpha = 0.3)
+```
+
+![plot of chunk
+ames-explain-global-parallel-dependence](figures/ames-explain-global-parallel-dependence-1.png)
+
+plot of chunk ames-explain-global-parallel-dependence
 
 ------------------------------------------------------------------------
 

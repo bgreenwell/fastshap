@@ -29,3 +29,8 @@ remotes::install_github("bgreenwell/fastshap")
 - [`titanic`](titanic.md) : Survival of Titanic passengers
 - [`titanic_mice`](titanic_mice.md) : Survival of Titanic passengers
 
+# Articles
+
+### All vignettes
+
+- [fastshap](fastshap.md):

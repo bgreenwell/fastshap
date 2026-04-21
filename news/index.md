@@ -276,8 +276,10 @@ CRAN release: 2019-11-22
     (i.e., whenever `type = "dependence"`).
 
   - `...` which can be used to pass on additional parameters to
-    `geom_col()` (when `type = "importance"`) or `geom_point()` (when
-    `type = "dependence"`).
+    [`geom_col()`](https://ggplot2.tidyverse.org/reference/geom_bar.html)
+    (when `type = "importance"`) or
+    [`geom_point()`](https://ggplot2.tidyverse.org/reference/geom_point.html)
+    (when `type = "dependence"`).
 
 ### Breaking changes
 

@@ -25,7 +25,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">fastshap</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.3</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.4</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -228,7 +228,7 @@ probability of surviving:</p>
 <span><span class="va">shv</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://modeloriented.github.io/shapviz/reference/shapviz.html" class="external-link">shapviz</a></span><span class="op">(</span><span class="va">ex.jack.adj</span>, X <span class="op">=</span> <span class="va">jack.dawson</span>, baseline <span class="op">=</span> <span class="va">baseline</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://modeloriented.github.io/shapviz/reference/sv_waterfall.html" class="external-link">sv_waterfall</a></span><span class="op">(</span><span class="va">shv</span><span class="op">)</span></span></code></pre></div>
 <div class="figure">
-<img src="reference/figures/titanic-explain-jack-waterfall-1.png" alt="plot of chunk titanic-explain-jack-waterfall" width="70%"><p class="caption">
+<img src="figures/titanic-explain-jack-waterfall-1.png" alt="plot of chunk titanic-explain-jack-waterfall" width="70%"><p class="caption">
 plot of chunk titanic-explain-jack-waterfall
 </p>
 </div>
@@ -239,7 +239,7 @@ visualize Shapley values for explaining a single prediction:</p>
 <div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://modeloriented.github.io/shapviz/reference/sv_force.html" class="external-link">sv_force</a></span><span class="op">(</span><span class="va">shv</span><span class="op">)</span></span></code></pre></div>
 <div class="figure">
-<img src="reference/figures/titanic-explain-jack-force-1.png" alt="plot of chunk titanic-explain-jack-force" width="70%"><p class="caption">
+<img src="figures/titanic-explain-jack-force-1.png" alt="plot of chunk titanic-explain-jack-force" width="70%"><p class="caption">
 plot of chunk titanic-explain-jack-force
 </p>
 </div>
@@ -251,38 +251,57 @@ prediction; especially when there’s a large number of features.</p>
 <h2 id="raw-shapley-values">Raw Shapley values<a class="anchor" aria-label="anchor" href="#raw-shapley-values"></a>
 </h2>
 <p>By default, <code><a href="../reference/explain.html">explain()</a></code> returns the averaged Shapley
-values from all Monte Carlo simulations. However, sometimes it can be
-useful to access the raw Shapley values from each individual simulation,
-especially for uncertainty quantification or further statistical
-analysis. The <code>raw</code> argument allows you to obtain these
-unprocessed results:</p>
+values across all Monte Carlo simulations. Setting
+<code>raw = TRUE</code> gives you the full per-simulation results as a
+3-D array of dimensions <strong>n × p × nsim</strong> (observations ×
+features × simulations). This is useful for uncertainty quantification:
+once you have the raw draws, standard errors and confidence intervals
+are just an <code><a href="https://rdrr.io/r/base/apply.html" class="external-link">apply()</a></code> away.</p>
 <div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">2140</span><span class="op">)</span>  <span class="co"># for reproducibility</span></span>
 <span><span class="va">raw.jack</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/explain.html">explain</a></span><span class="op">(</span><span class="va">rfo</span>, X <span class="op">=</span> <span class="va">X</span>, pred_wrapper <span class="op">=</span> <span class="va">pfun</span>, newdata <span class="op">=</span> <span class="va">jack.dawson</span>,</span>
-<span>                    nsim <span class="op">=</span> <span class="fl">100</span>, raw <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
+<span>                    nsim <span class="op">=</span> <span class="fl">1000</span>, raw <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Structure of raw results</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/utils/str.html" class="external-link">str</a></span><span class="op">(</span><span class="va">raw.jack</span>, max.level <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## List of 5</span></span>
-<span><span class="co">##  $ pclass: num [1:100, 1] -0.2918 0 -0.1524 -0.0492 -0.4452 ...</span></span>
-<span><span class="co">##  $ age   : num [1:100, 1] -0.3063 0.0453 0.0244 0.047 -0.083 ...</span></span>
-<span><span class="co">##  $ sex   : num [1:100, 1] -0.3263 -0.4217 0 -0.3385 -0.0701 ...</span></span>
-<span><span class="co">##  $ sibsp : num [1:100, 1] -0.0161 0 0.0766 0 0.3344 ...</span></span>
-<span><span class="co">##  $ parch : num [1:100, 1] 0 0 0 0 0 0 0 0 0 0 ...</span></span></code></pre>
+<span><span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="va">raw.jack</span><span class="op">)</span>  <span class="co"># 1 observation x 5 features x 1000 simulations</span></span></code></pre></div>
+<pre><code><span><span class="co">## [1]    1    5 1000</span></span></code></pre>
+<p>Compute the mean and standard error across the 1000 simulations for
+each feature:</p>
 <div class="sourceCode" id="cb25"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Each list element contains a matrix with one row per observation </span></span>
-<span><span class="co"># and one column per simulation</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="va">raw.jack</span><span class="op">$</span><span class="va">pclass</span><span class="op">)</span>  <span class="co"># 1 observation, 100 simulations</span></span></code></pre></div>
-<pre><code><span><span class="co">## [1] 100   1</span></span></code></pre>
+<code class="sourceCode R"><span><span class="va">shap.mean</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/apply.html" class="external-link">apply</a></span><span class="op">(</span><span class="va">raw.jack</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">2</span>, <span class="va">mean</span><span class="op">)</span>  <span class="co"># same as plain explain() output</span></span>
+<span><span class="va">shap.se</span>   <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/apply.html" class="external-link">apply</a></span><span class="op">(</span><span class="va">raw.jack</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">2</span>, <span class="va">sd</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">rbind</a></span><span class="op">(</span>mean <span class="op">=</span> <span class="va">shap.mean</span>, se <span class="op">=</span> <span class="va">shap.se</span><span class="op">)</span></span></code></pre></div>
+<pre><code><span><span class="co">##        pclass         age        sex       sibsp       parch</span></span>
+<span><span class="co">## 1 -0.07611516 -0.02415439 -0.1323875 0.005918466 -0.01690250</span></span>
+<span><span class="co">## 1  0.13277286  0.12182523  0.2056869 0.069499500  0.06415175</span></span></code></pre>
+<p>A dot-and-whisker plot (mean ± 2 SE) gives an intuitive sense of how
+stable the SHAP estimates are for each feature:</p>
 <div class="sourceCode" id="cb27"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># We can compute statistics on the raw values</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">sapply</a></span><span class="op">(</span><span class="va">raw.jack</span>, <span class="kw">function</span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>mean <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span>, sd <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/sd.html" class="external-link">sd</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">##           pclass         age        sex       sibsp       parch</span></span>
-<span><span class="co">## mean -0.07813898 -0.02971629 -0.1576069 0.006664637 -0.01509985</span></span>
-<span><span class="co">## sd    0.13505635  0.13190724  0.2354966 0.063783882  0.06296690</span></span></code></pre>
-<p>The <code>raw</code> argument works with both single and multiple
-observations, and the structure of the returned list will match the
-number of features in your model.</p>
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://ggplot2.tidyverse.org" class="external-link">ggplot2</a></span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">df</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
+<span>  feature <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">colnames</a></span><span class="op">(</span><span class="va">shap.mean</span><span class="op">)</span>,</span>
+<span>  mean    <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/numeric.html" class="external-link">as.numeric</a></span><span class="op">(</span><span class="va">shap.mean</span><span class="op">)</span>,</span>
+<span>  se      <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/numeric.html" class="external-link">as.numeric</a></span><span class="op">(</span><span class="va">shap.se</span><span class="op">)</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">df</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">mean</span>, y <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/reorder.factor.html" class="external-link">reorder</a></span><span class="op">(</span><span class="va">feature</span>, <span class="va">mean</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_abline.html" class="external-link">geom_vline</a></span><span class="op">(</span>xintercept <span class="op">=</span> <span class="fl">0</span>, linetype <span class="op">=</span> <span class="st">"dashed"</span>, colour <span class="op">=</span> <span class="st">"grey50"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_linerange.html" class="external-link">geom_errorbarh</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>xmin <span class="op">=</span> <span class="va">mean</span> <span class="op">-</span> <span class="fl">2</span> <span class="op">*</span> <span class="va">se</span>, xmax <span class="op">=</span> <span class="va">mean</span> <span class="op">+</span> <span class="fl">2</span> <span class="op">*</span> <span class="va">se</span><span class="op">)</span>,</span>
+<span>                 height <span class="op">=</span> <span class="fl">0.2</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_point.html" class="external-link">geom_point</a></span><span class="op">(</span>size <span class="op">=</span> <span class="fl">3</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span>x <span class="op">=</span> <span class="st">"SHAP value (mean \u00b1 2 SE)"</span>, y <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>       title <span class="op">=</span> <span class="st">"Jack's feature contributions with uncertainty"</span><span class="op">)</span></span></code></pre></div>
+<div class="figure">
+<img src="figures/titanic-explain-jack-raw-plot-1.png" alt="plot of chunk titanic-explain-jack-raw-plot" width="70%"><p class="caption">
+plot of chunk titanic-explain-jack-raw-plot
+</p>
+</div>
+<p>The <code>sex</code> and <code>pclass</code> contributions are
+precisely estimated (narrow intervals) because they dominate Jack’s
+prediction; <code>age</code>, <code>sibsp</code>, and <code>parch</code>
+show more simulation-to-simulation variability, reflecting their smaller
+and noisier contributions.</p>
 </div>
 <div class="section level2">
 <h2 id="global-explanations">Global explanations<a class="anchor" aria-label="anchor" href="#global-explanations"></a>
@@ -299,7 +318,7 @@ efficient compared to alternative implementations<a class="footnote-ref" tabinde
 computes Shapley explanations for each passenger in the training data
 using 1000 MC repetitions, and coerces the resulting matrix to a <a href="https://cran.r-project.org/package=tibble" class="external-link">tibble</a> (for nicer
 printing).</p>
-<div class="sourceCode" id="cb29"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb28"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">2224</span><span class="op">)</span>  <span class="co"># for reproducibility</span></span>
 <span><span class="va">ex.t1</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/explain.html">explain</a></span><span class="op">(</span><span class="va">rfo</span>, X <span class="op">=</span> <span class="va">X</span>, pred_wrapper <span class="op">=</span> <span class="va">pfun</span>, nsim <span class="op">=</span> <span class="fl">100</span>, adjust <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>                 shap_only <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
@@ -328,11 +347,11 @@ plotting functions).</p>
 Shapley-based feature importance scores, which are nothing more than the
 mean of the absolute value of the features contribution for each
 column:</p>
-<div class="sourceCode" id="cb31"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb30"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">shv.global</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://modeloriented.github.io/shapviz/reference/shapviz.html" class="external-link">shapviz</a></span><span class="op">(</span><span class="va">ex.t1</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://modeloriented.github.io/shapviz/reference/sv_importance.html" class="external-link">sv_importance</a></span><span class="op">(</span><span class="va">shv</span><span class="op">)</span>  </span></code></pre></div>
+<span><span class="fu"><a href="https://modeloriented.github.io/shapviz/reference/sv_importance.html" class="external-link">sv_importance</a></span><span class="op">(</span><span class="va">shv.global</span><span class="op">)</span></span></code></pre></div>
 <div class="figure">
-<img src="reference/figures/titanic-explain-global-importance-1.png" alt="plot of chunk titanic-explain-global-importance" width="70%"><p class="caption">
+<img src="figures/titanic-explain-global-importance-1.png" alt="plot of chunk titanic-explain-global-importance" width="70%"><p class="caption">
 plot of chunk titanic-explain-global-importance
 </p>
 </div>
@@ -340,10 +359,10 @@ plot of chunk titanic-explain-global-importance
 akin to a <a href="https://cran.r-project.org/package=pdp" class="external-link"><em>partial
 dependence plot</em></a>. Here, we’ll look at the dependence of the
 feature contribution of <code>age</code> on its input value:</p>
-<div class="sourceCode" id="cb32"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb31"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://modeloriented.github.io/shapviz/reference/sv_dependence.html" class="external-link">sv_dependence</a></span><span class="op">(</span><span class="va">shv.global</span>, v <span class="op">=</span> <span class="st">"age"</span><span class="op">)</span></span></code></pre></div>
 <div class="figure">
-<img src="reference/figures/titanic-explain-global-dependence-1.png" alt="plot of chunk titanic-explain-global-dependence" width="70%"><p class="caption">
+<img src="figures/titanic-explain-global-dependence-1.png" alt="plot of chunk titanic-explain-global-dependence" width="70%"><p class="caption">
 plot of chunk titanic-explain-global-dependence
 </p>
 </div>
@@ -362,7 +381,7 @@ view with <code><a href="https://cran.rstudio.com/web/packages/foreach/vignettes
 <p>To illustrate, we’ll compute Shapley values from a random forest fit
 to the Ames housing data available in the <a href="https://cran.r-project.org/package=AmesHousing" class="external-link">AmesHousing</a>
 package:</p>
-<div class="sourceCode" id="cb33"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb32"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">ames</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></span><span class="op">(</span><span class="fu">AmesHousing</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/AmesHousing/man/make_ames.html" class="external-link">make_ames</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="va">X</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/subset.html" class="external-link">subset</a></span><span class="op">(</span><span class="va">ames</span>, select <span class="op">=</span> <span class="op">-</span><span class="va">Sale_Price</span><span class="op">)</span>  <span class="co"># features only</span></span>
 <span></span>
@@ -388,7 +407,7 @@ package:</p>
 <code><a href="../reference/explain.html">explain()</a></code> function without passing anything to
 <code>newdata</code> (i.e., Shapley values for the predictions of every
 row in <code>X</code> will be computed):</p>
-<div class="sourceCode" id="cb35"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb34"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Prediction wrapper</span></span>
 <span><span class="va">pfun</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">object</span>, <span class="va">newdata</span><span class="op">)</span> <span class="op">{</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict</a></span><span class="op">(</span><span class="va">object</span>, data <span class="op">=</span> <span class="va">newdata</span><span class="op">)</span><span class="op">$</span><span class="va">predictions</span></span>
@@ -400,12 +419,55 @@ row in <code>X</code> will be computed):</p>
 <span>  <span class="va">ex.ames.nonpar</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/explain.html">explain</a></span><span class="op">(</span><span class="va">rfo</span>, X <span class="op">=</span> <span class="va">X</span>, pred_wrapper <span class="op">=</span> <span class="va">pfun</span>, nsim <span class="op">=</span> <span class="fl">50</span>,</span>
 <span>                            adjust <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
 <span><span class="op">}</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## Error in {: object 'msg' not found</span></span></code></pre>
+<pre><code><span><span class="co">##     user   system  elapsed </span></span>
+<span><span class="co">## 1738.720   70.178 1175.397</span></span></code></pre>
 <p>Honestly, not that bad for 50 MC repetitions on a data set with 80
 features on 2930 rows!</p>
 <p>For comparison, we’ll run the same computation, but this time in
 parallel using the <a href="https://cran.r-project.org/package=doParallel" class="external-link">doParallel</a>
 package to execute across 12 cores:</p>
+<div class="sourceCode" id="cb36"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/RevolutionAnalytics/doparallel" class="external-link">doParallel</a></span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># With parallelism</span></span>
+<span><span class="fu">registerDoParallel</span><span class="op">(</span>cores <span class="op">=</span> <span class="fl">12</span><span class="op">)</span>  <span class="co"># use forking with 12 cores</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">5038</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/system.time.html" class="external-link">system.time</a></span><span class="op">(</span><span class="op">{</span>  <span class="co"># estimate run time</span></span>
+<span>  <span class="va">ex.ames.par</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/explain.html">explain</a></span><span class="op">(</span><span class="va">rfo</span>, X <span class="op">=</span> <span class="va">X</span>, pred_wrapper <span class="op">=</span> <span class="va">pfun</span>, nsim <span class="op">=</span> <span class="fl">50</span>, </span>
+<span>                         adjust <span class="op">=</span> <span class="cn">TRUE</span>, parallel <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
+<span><span class="op">}</span><span class="op">)</span></span></code></pre></div>
+<pre><code><span><span class="co">##     user   system  elapsed </span></span>
+<span><span class="co">## 3725.689  158.068  440.336</span></span></code></pre>
+<p>Not a bad speedup!</p>
+<p>Since we didn’t set <code>shap_only=FALSE</code> in the call to
+<code><a href="../reference/explain.html">explain()</a></code>, we’ll need to pass the corresponding feature
+values and baseline when interfacing with <a href="https://cran.r-project.org/package=shapviz" class="external-link">shapviz</a>. By
+default, as long as <code>adjust = TRUE</code>, the baseline will be
+automatically computed as the average training prediction (or whatever
+suitable background feature set is provided via <code>X</code>) and
+stored in the <code>"baseline"</code> of the returned matrix when
+<code>shap_only=TRUE</code>, or the <code>"baseline"</code> component of
+the returned object when <code>shap_only=FALSE</code>.</p>
+<p>For instance, to construct a Shapley-based variable importance plot
+from the <code>ex.ames.par</code> object, we can simply do the
+following:</p>
+<div class="sourceCode" id="cb38"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">baseline</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/attr.html" class="external-link">attr</a></span><span class="op">(</span><span class="va">ex.ames.par</span>, <span class="st">"baseline"</span><span class="op">)</span></span>
+<span><span class="va">shv</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://modeloriented.github.io/shapviz/reference/shapviz.html" class="external-link">shapviz</a></span><span class="op">(</span><span class="va">ex.ames.par</span>, X <span class="op">=</span> <span class="va">X</span>, baseline <span class="op">=</span> <span class="va">baseline</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://modeloriented.github.io/shapviz/reference/sv_importance.html" class="external-link">sv_importance</a></span><span class="op">(</span><span class="va">shv</span><span class="op">)</span></span></code></pre></div>
+<div class="figure">
+<img src="figures/ames-explain-global-parallel-importance-1.png" alt="plot of chunk ames-explain-global-parallel-importance" width="70%"><p class="caption">
+plot of chunk ames-explain-global-parallel-importance
+</p>
+</div>
+<p>Similar for Shapley-based dependence plots:</p>
+<div class="sourceCode" id="cb39"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://modeloriented.github.io/shapviz/reference/sv_dependence.html" class="external-link">sv_dependence</a></span><span class="op">(</span><span class="va">shv</span>, v <span class="op">=</span> <span class="st">"Gr_Liv_Area"</span>, alpha <span class="op">=</span> <span class="fl">0.3</span><span class="op">)</span></span></code></pre></div>
+<div class="figure">
+<img src="figures/ames-explain-global-parallel-dependence-1.png" alt="plot of chunk ames-explain-global-parallel-dependence" width="70%"><p class="caption">
+plot of chunk ames-explain-global-parallel-dependence
+</p>
+</div>
 </div>
 
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
