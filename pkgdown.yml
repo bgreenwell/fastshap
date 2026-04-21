@@ -1,6 +1,5 @@
 pandoc: 3.1.11
 pkgdown: 2.2.0
 pkgdown_sha: ~
-articles:
-  fastshap: fastshap.html
-last_built: 2026-04-20T12:09Z
+articles: {}
+last_built: 2026-04-21T02:27Z

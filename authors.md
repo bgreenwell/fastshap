@@ -11,12 +11,12 @@ Source:
 [`DESCRIPTION`](https://github.com/bgreenwell/fastshap/blob/master/DESCRIPTION)
 
 Greenwell B (2026). *fastshap: Fast Approximate Shapley Values*. R
-package version 0.1.3, <https://github.com/bgreenwell/fastshap>.
+package version 0.1.4, <https://github.com/bgreenwell/fastshap>.
 
     @Manual{,
       title = {fastshap: Fast Approximate Shapley Values},
       author = {Brandon Greenwell},
       year = {2026},
-      note = {R package version 0.1.3},
+      note = {R package version 0.1.4},
       url = {https://github.com/bgreenwell/fastshap},
     }

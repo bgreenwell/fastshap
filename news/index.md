@@ -1,5 +1,33 @@
 # Changelog
 
+## fastshap 0.1.4
+
+### Changed
+
+- [`explain()`](../reference/explain.md) now returns `NA_real_` as the
+  baseline (stored as the `"baseline"` attribute) when `adjust = FALSE`
+  and no baseline is provided. This correctly signals that the baseline
+  was not computed, rather than implying a default baseline of zero.
+
+- Formalized the single-row performance optimization in
+  [`explain()`](../reference/explain.md) and removed the “experimental”
+  label.
+
+- Deprecated the `n_bins` argument in
+  [`gen_friedman()`](../reference/gen_friedman.md); it will be removed
+  in a future release.
+
+### Fixed
+
+- Fixed a typo in the error message in
+  [`gen_friedman()`](../reference/gen_friedman.md).
+
+### Cleanup
+
+- Removed the `slowtests/` directory and cleaned up binary artifacts and
+  large cache directories in `rjarticle/`. Updated `.gitignore` to
+  prevent these from being re-tracked.
+
 ## fastshap 0.1.3
 
 ### Changed

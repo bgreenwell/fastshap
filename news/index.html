@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">fastshap</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.3</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.4</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -15,8 +15,7 @@
     </button>
 
     <div id="navbar" class="collapse navbar-collapse ms-3">
-      <ul class="navbar-nav me-auto"><li class="nav-item"><a class="nav-link" href="../articles/fastshap.html">Get started</a></li>
-<li class="nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
+      <ul class="navbar-nav me-auto"><li class="nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
 <li class="active nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
       </ul><ul class="navbar-nav"><li class="nav-item"><form class="form-inline" role="search">
  <input class="form-control" type="search" name="search-input" id="search-input" autocomplete="off" aria-label="Search site" placeholder="Search for" data-search-index="../search.json"></form></li>
@@ -33,6 +32,23 @@
       <small>Source: <a href="https://github.com/bgreenwell/fastshap/blob/master/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
     </div>
 
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="0.1.4" id="fastshap-014">fastshap 0.1.4<a class="anchor" aria-label="anchor" href="#fastshap-014"></a></h2>
+<div class="section level3">
+<h3 id="changed-0-1-4">Changed<a class="anchor" aria-label="anchor" href="#changed-0-1-4"></a></h3>
+<ul><li><p><code><a href="../reference/explain.html">explain()</a></code> now returns <code>NA_real_</code> as the baseline (stored as the <code>"baseline"</code> attribute) when <code>adjust = FALSE</code> and no baseline is provided. This correctly signals that the baseline was not computed, rather than implying a default baseline of zero.</p></li>
+<li><p>Formalized the single-row performance optimization in <code><a href="../reference/explain.html">explain()</a></code> and removed the “experimental” label.</p></li>
+<li><p>Deprecated the <code>n_bins</code> argument in <code><a href="../reference/gen_friedman.html">gen_friedman()</a></code>; it will be removed in a future release.</p></li>
+</ul></div>
+<div class="section level3">
+<h3 id="fixed-0-1-4">Fixed<a class="anchor" aria-label="anchor" href="#fixed-0-1-4"></a></h3>
+<ul><li>Fixed a typo in the error message in <code><a href="../reference/gen_friedman.html">gen_friedman()</a></code>.</li>
+</ul></div>
+<div class="section level3">
+<h3 id="cleanup-0-1-4">Cleanup<a class="anchor" aria-label="anchor" href="#cleanup-0-1-4"></a></h3>
+<ul><li>Removed the <code>slowtests/</code> directory and cleaned up binary artifacts and large cache directories in <code>rjarticle/</code>. Updated <code>.gitignore</code> to prevent these from being re-tracked.</li>
+</ul></div>
+</div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.1.3" id="fastshap-013">fastshap 0.1.3<a class="anchor" aria-label="anchor" href="#fastshap-013"></a></h2>
 <div class="section level3">
