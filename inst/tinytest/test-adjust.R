@@ -114,7 +114,31 @@ for (obj in c("binary:logistic", "binary:logitraw")) {
                                    newdata = jack.dawson, adjust = TRUE)
   
   # Expectations
-  expect_equal(sum(ex.fastshap), jack.logit.xgb - baseline.xgb, 
+  expect_equal(sum(ex.fastshap), jack.logit.xgb - baseline.xgb,
                tolerance = 1e-06)
-  
+
 }
+
+
+################################################################################
+# Regression test: single feature_names with adjust = TRUE (GH issue #79)
+################################################################################
+
+fit.ppr <- ppr(mpg ~ ., data = mtcars, nterms = 5)
+pfun.ppr <- function(object, newdata) predict(object, newdata = newdata)
+X.ppr <- subset(mtcars, select = -mpg)
+
+set.seed(101)
+ex.single <- fastshap::explain(fit.ppr, X = X.ppr, feature_names = "wt",
+                               pred_wrapper = pfun.ppr, nsim = 10,
+                               adjust = TRUE)
+expect_true(is.matrix(ex.single))
+expect_equal(ncol(ex.single), 1L)
+expect_equal(colnames(ex.single), "wt")
+
+set.seed(102)
+ex.single.list <- fastshap::explain(fit.ppr, X = X.ppr, feature_names = "wt",
+                                    pred_wrapper = pfun.ppr, nsim = 10,
+                                    adjust = TRUE, shap_only = FALSE)
+expect_true(is.list(ex.single.list))
+expect_equal(ncol(ex.single.list$shapley_values), 1L)

@@ -371,29 +371,21 @@ explain.default <- function(object, feature_names = NULL, X = NULL, nsim = 1,
       }
     }
     
-    # Adjust sum of approximate Shapley values using the same technique 
-    # described above
-    if (length(dim(phis.stats)) == 3L) {  # multiple explanations
-      for (i in seq_len(dim(phis.stats)[1L])) {  # loop through each observation
-        err <- fx - sum(phis.stats[i, 1L, ]) - fnull
-        v <- (phis.stats[i, 2L, ] / max(phis.stats[i, 2L, ])) * 1e6
-        adj <- err[i] * (v - (v * sum(v)) / (1 + sum(v)))
-        phis.stats[i, 1L, ] <- phis.stats[i, 1L, ] + adj  # adjust Shapley estimate
-      }
-      phis <- phis.stats[, 1L, ]
-      # if (isTRUE(variance)) {
-      #   attr(phis, which = "variance") <- phis.stats[, 2L, ]
-      # }
-    } else {  # single explanation
-      err <- fx - sum(phis[, 1L]) - fnull
-      v <- (phis.stats[, 2L] / max(phis.stats[, 2L])) * 1e6
-      adj <- err * (v - (v * sum(v)) / (1 + sum(v)))
-      phis.stats[, 1L] <- phis.stats[, 1L] + adj
-      phis <- phis.stats[, 1L]  # adjust Shapley estimate
-      # if (isTRUE(variance)) {
-      #   attr(phis, which = "variance") <- phis.stats[, 2L]
-      # }
+    # When feature_names has a single element, foreach returns a 2-D matrix
+    # because .combine is never invoked. Promote to 3-D for uniform handling.
+    if (length(dim(phis.stats)) == 2L) {
+      phis.stats <- array(phis.stats, dim = c(nrow(phis.stats), 2L, 1L))
     }
+
+    # Adjust sum of approximate Shapley values using the same technique
+    # described above
+    for (i in seq_len(dim(phis.stats)[1L])) {  # loop through each observation
+      err <- fx - sum(phis.stats[i, 1L, ]) - fnull
+      v <- (phis.stats[i, 2L, ] / max(phis.stats[i, 2L, ])) * 1e6
+      adj <- err[i] * (v - (v * sum(v)) / (1 + sum(v)))
+      phis.stats[i, 1L, ] <- phis.stats[i, 1L, ] + adj
+    }
+    phis <- phis.stats[, 1L, ]
     
   } else {  # don't adjust
     
