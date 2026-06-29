@@ -21,6 +21,11 @@ learning model.
 
 ## Installation
 
+**fastshap** is no longer available on CRAN due to CRAN's stringent
+and ever-changing policies. It is now hosted on
+[r-universe](https://bgreenwell.r-universe.dev/fastshap), which
+provides a reliable alternative for distributing R packages.
+
 ``` r
 # Install from r-universe (recommended):
 install.packages("fastshap", repos = c("https://bgreenwell.r-universe.dev", "https://cloud.r-project.org"))
