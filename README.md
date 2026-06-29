@@ -31,8 +31,8 @@ provides a reliable alternative for distributing R packages.
 install.packages("fastshap", repos = c("https://bgreenwell.r-universe.dev", "https://cloud.r-project.org"))
 
 # Install the latest development version from GitHub:
-if (!requireNamespace("remotes")) {
-  install.packages("remotes")
+if (!requireNamespace("pak")) {
+  install.packages("pak")
 }
-remotes::install_github("bgreenwell/fastshap")
+pak::pak("bgreenwell/fastshap")
 ```
