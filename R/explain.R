@@ -507,6 +507,13 @@ explain.xgb.Booster <- function(object, feature_names = NULL, X = NULL, nsim = 1
     phis <- stats::predict(structure(object, class = "xgb.Booster"),
                            newdata = X, predcontrib = TRUE,
                            approxcontrib = FALSE, ...)
+    # Multiclass xgboost returns a 3-D array [n, p+1, num_class]; detect and error.
+    if (length(dim(phis)) > 2L || is.list(phis)) {
+      stop("Exact Shapley values (`exact = TRUE`) are not yet supported for ",
+           "multiclass `xgboost` models. Use the Monte Carlo approximation ",
+           "(default) with a prediction wrapper that returns the class score(s) ",
+           "of interest instead.", call. = FALSE)
+    }
     if (!is.matrix(phis)) {
       phis <- matrix(phis, nrow = nrow(X), dimnames = list(rownames(X), names(phis)))
     }
@@ -554,6 +561,13 @@ explain.lgb.Booster <- function(object, feature_names = NULL, X = NULL, nsim = 1
       phis <- stats::predict(object, X, predcontrib = TRUE, ...)
     }
     
+    # Multiclass lightgbm returns (p+1)*num_class columns; detect and error.
+    if (ncol(phis) != ncol(X) + 1L) {
+      stop("Exact Shapley values (`exact = TRUE`) are not yet supported for ",
+           "multiclass `lightgbm` models. Use the Monte Carlo approximation ",
+           "(default) with a prediction wrapper that returns the class score(s) ",
+           "of interest instead.", call. = FALSE)
+    }
     colnames(phis) <- c(colnames(X), "BIAS")
     if (isFALSE(shap_only)) {
       return(structure(list(

@@ -142,3 +142,26 @@ ex.single.list <- fastshap::explain(fit.ppr, X = X.ppr, feature_names = "wt",
                                     adjust = TRUE, shap_only = FALSE)
 expect_true(is.list(ex.single.list))
 expect_equal(ncol(ex.single.list$shapley_values), 1L)
+
+
+################################################################################
+# Regression test: multiclass xgboost with exact = TRUE (GH issue #51)
+################################################################################
+
+if (requireNamespace("xgboost", quietly = TRUE)) {
+  set.seed(42)
+  n_mc <- 120L; p_mc <- 4L
+  X_mc <- matrix(rnorm(n_mc * p_mc), n_mc, p_mc,
+                 dimnames = list(NULL, paste0("x", seq_len(p_mc))))
+  y_mc <- sample(0L:2L, n_mc, replace = TRUE)
+  dtrain_mc <- xgboost::xgb.DMatrix(data = X_mc, label = y_mc)
+  bst_mc <- xgboost::xgb.train(
+    params = list(objective = "multi:softprob", num_class = 3L,
+                  max_depth = 2L, eta = 0.1, eval_metric = "mlogloss"),
+    data = dtrain_mc, nrounds = 10L, verbose = 0L
+  )
+  expect_error(
+    fastshap::explain(bst_mc, X = X_mc, exact = TRUE),
+    pattern = "not yet supported for multiclass"
+  )
+}
