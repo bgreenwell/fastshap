@@ -41,11 +41,14 @@ expect_equal(dim(shap_raw_1), c(1L, ncol(X), nsim))
 # It should also work with parallel execution
 if (requireNamespace("foreach", quietly = TRUE) &&
     requireNamespace("doParallel", quietly = TRUE)) {
-  doParallel::registerDoParallel(cores = 2)
+  # Use makeCluster so PSOCK workers on Windows also get the ranger package
+  cl <- parallel::makeCluster(2L)
+  doParallel::registerDoParallel(cl)
   shap_raw_parallel <- fastshap::explain(fit, X = X, pred_wrapper = pfun,
                                          nsim = nsim, newdata = X[1:3, ],
-                                         raw = TRUE, parallel = TRUE, seed = 101)
-  # Unregister parallel backend
+                                         raw = TRUE, parallel = TRUE, seed = 101,
+                                         .packages = "ranger")
+  parallel::stopCluster(cl)
   foreach::registerDoSEQ()
 
   # Check output
