@@ -243,17 +243,24 @@ explain <- function(object, ...) {
 #' @rdname explain
 #' 
 #' @export
-explain.default <- function(object, feature_names = NULL, X = NULL, nsim = 1, 
+explain.default <- function(object, feature_names = NULL, X = NULL, nsim = 1,
                             pred_wrapper = NULL, newdata = NULL, adjust = FALSE,
-                            baseline = NULL, shap_only = TRUE, parallel = FALSE, 
-                            raw = FALSE, seed = NULL, ...) {
+                            baseline = NULL, shap_only = TRUE, parallel = FALSE,
+                            raw = FALSE, seed = NULL, exact = FALSE, ...) {
   
   
   # Set seed for reproducibility
   if (!is.null(seed)) {
     set.seed(seed)
   }
-  
+
+  # exact = TRUE is only supported for lm, xgboost, and lightgbm objects
+  if (isTRUE(exact)) {
+    warning("Setting `exact = TRUE` is only supported for `lm`, `xgboost`, and ",
+            "`lightgbm` objects; falling back to Monte Carlo approximation.",
+            call. = FALSE)
+  }
+
   # Compute baseline/average training prediction (fnull) and predictions 
   # associated with each explanation (fx); if `adjust = FALSE`, then the 
   # baseline is not needed and defaults to zero.
