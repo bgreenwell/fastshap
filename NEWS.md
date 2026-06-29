@@ -117,7 +117,7 @@
 
   - `baseline`, which defaults to `NULL`, containing the baseline to use when adjusting Shapley values to meet the efficiency property. If `NULL` and `adjust = TRUE`, it will default to the average training prediction (i.e., the average prediction over `X`.)
 
-  - `shap_only`, which defaults to `TRUE`, determines whether to return a matrix of Shapley values (`TRUE`) containing the baseline as aanattribute or a list containing the Shapley values, corresponding feature values, and baseline (`FALSE`); setting to `FALSE` is a convenience when using the [shapviz](https://cran.r-project.org/package=shapviz) package.
+  - `shap_only`, which defaults to `TRUE`, determines whether to return a matrix of Shapley values (`TRUE`) containing the baseline as an attribute or a list containing the Shapley values, corresponding feature values, and baseline (`FALSE`); setting to `FALSE` is a convenience when using the [shapviz](https://cran.r-project.org/package=shapviz) package.
 
   - `parallel`, which defaults to `FALSE` for determining whether or not to compute Shapley values in parallel (across features) using any suitable parallel backend supported by [foreach](https://cran.r-project.org/package=foreach).
 

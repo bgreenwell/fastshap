@@ -262,20 +262,31 @@ explain.default <- function(object, feature_names = NULL, X = NULL, nsim = 1,
             call. = FALSE)
   }
 
-  # Compute baseline/average training prediction (fnull) and predictions 
-  # associated with each explanation (fx); if `adjust = FALSE`, then the 
-  # baseline is not needed and defaults to zero.
+  # Validate required arguments before any use
+  if (nsim < 1L) {
+    stop("`nsim` must be a positive integer.", call. = FALSE)
+  }
   if (is.null(X)) {
     stop("Training features required for approximate Shapley values. Please ",
          "supply them via the `X` argument; see `?fastshap::explain` for ",
          "details.", call. = FALSE)
   }
+  if (is.null(pred_wrapper)) {
+    stop("Prediction function required for approximate Shapley values. Please ",
+         "supply one via the `pred_wrapper` argument; see ",
+         "`?fastshap::explain` for details.", call. = FALSE)
+  }
+
   if (inherits(X, what = "tbl_df")) {
     X <- as.data.frame(X)
   }
-  if (is.null(newdata)) { 
+  if (is.null(newdata)) {
     newdata <- X  # explain all rows of background data set
-  } 
+  }
+
+  # Compute baseline/average training prediction (fnull) and predictions
+  # associated with each explanation (fx); if `adjust = FALSE`, then the
+  # baseline is not needed and defaults to NA.
   if (isTRUE(adjust)) {
     fx <- pred_wrapper(object, newdata = newdata)
   }
@@ -288,15 +299,9 @@ explain.default <- function(object, feature_names = NULL, X = NULL, nsim = 1,
   } else {
     NA_real_
   }
-  
-  # Deal with other NULL arguments
+
   if (is.null(feature_names)) {
     feature_names = colnames(X)
-  }
-  if (is.null(pred_wrapper)) {
-    stop("Prediction function required for approximate Shapley values. Please ",
-         "supply one via the `pred_wrapper` argument; see ",
-         "`?fastshap::explain` for details.", call. = FALSE)
   }
   
   # Set up the 'foreach' "do" operator
@@ -307,10 +312,15 @@ explain.default <- function(object, feature_names = NULL, X = NULL, nsim = 1,
   # allows the C++ backend to handle the vectorization.
   if (!is.null(newdata)) {
     if (nrow(newdata) == 1L && nsim > 1L) {
+      if (isTRUE(raw) && isTRUE(adjust)) {
+        warning("`raw = TRUE` is not supported when `adjust = TRUE`; ignoring `raw`.",
+                call. = FALSE)
+        raw <- FALSE
+      }
       newdata.stacked <- newdata[rep(1L, times = nsim), ]  # replicate obs `nsim` times
-      phis <- explain.default(object, feature_names = feature_names, X = X, 
-                              nsim = 1L, pred_wrapper = pred_wrapper, 
-                              newdata = newdata.stacked, adjust = FALSE, 
+      phis <- explain.default(object, feature_names = feature_names, X = X,
+                              nsim = 1L, pred_wrapper = pred_wrapper,
+                              newdata = newdata.stacked, adjust = FALSE,
                               parallel = parallel, raw = raw, seed = seed, ...)
       if (isTRUE(raw)) {
         # phis is (nsim × p × 1) from recursive call; reshape to (1 × p × nsim)
@@ -388,9 +398,15 @@ explain.default <- function(object, feature_names = NULL, X = NULL, nsim = 1,
     # Adjust sum of approximate Shapley values using the same technique
     # described above
     for (i in seq_len(dim(phis.stats)[1L])) {  # loop through each observation
-      err <- fx - sum(phis.stats[i, 1L, ]) - fnull
-      v <- (phis.stats[i, 2L, ] / max(phis.stats[i, 2L, ])) * 1e6
-      adj <- err[i] * (v - (v * sum(v)) / (1 + sum(v)))
+      err_i <- fx[i] - sum(phis.stats[i, 1L, ]) - fnull
+      max_var <- max(phis.stats[i, 2L, ])
+      if (max_var == 0) {
+        # All per-feature variances are zero (degenerate draws); skip adjustment
+        # to avoid 0/0 = NaN poisoning the result.
+        next
+      }
+      v <- (phis.stats[i, 2L, ] / max_var) * 1e6
+      adj <- err_i * (v - (v * sum(v)) / (1 + sum(v)))
       phis.stats[i, 1L, ] <- phis.stats[i, 1L, ] + adj
     }
     phis <- phis.stats[, 1L, ]
@@ -471,10 +487,13 @@ explain.lm <- function(object, feature_names = NULL, X, nsim = 1,
       stats::predict(object, newdata = newdata, type = "terms", ...)
     }
     baseline <- attr(phis, which = "constant")  # mean response for all training data
+    data_to_explain <- if (is.null(newdata)) X else newdata
+    fn <- if (is.null(feature_names)) colnames(phis) else feature_names
     if (isFALSE(shap_only)) {
       return(structure(list(
         "shapley_values" = phis,
-        "feature_values" = newdata[, feature_names, drop = FALSE]
+        "feature_values" = data_to_explain[, fn[fn %in% colnames(data_to_explain)], drop = FALSE],
+        "baseline" = baseline
       ), class = "explain"))
     } else {
       attr(phis, which = "baseline") <- baseline
@@ -520,10 +539,11 @@ explain.xgb.Booster <- function(object, feature_names = NULL, X = NULL, nsim = 1
     }
     # The bias column was named "BIAS" in older xgboost and "(Intercept)" in newer.
     bias_col <- colnames(phis)[ncol(phis)]
+    feature_cols <- colnames(phis)[colnames(phis) != bias_col]
     if (isFALSE(shap_only)) {
       return(structure(list(
-        "shapley_values" = phis,
-        "feature_values" = newdata[, feature_names, drop = FALSE],
+        "shapley_values" = phis[, feature_cols, drop = FALSE],
+        "feature_values" = X[, feature_cols, drop = FALSE],
         "baseline" = phis[, bias_col]
       ), class = "explain"))
     } else {
@@ -571,9 +591,10 @@ explain.lgb.Booster <- function(object, feature_names = NULL, X = NULL, nsim = 1
     }
     colnames(phis) <- c(colnames(X), "BIAS")
     if (isFALSE(shap_only)) {
+      feature_cols_lgb <- colnames(X)
       return(structure(list(
-        "shapley_values" = phis,
-        "feature_values" = newdata[, feature_names, drop = FALSE],
+        "shapley_values" = phis[, feature_cols_lgb, drop = FALSE],
+        "feature_values" = X[, feature_cols_lgb, drop = FALSE],
         "baseline" = phis[, "BIAS"]
       ), class = "explain"))
     } else {

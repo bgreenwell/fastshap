@@ -92,3 +92,29 @@ shap_nsim10 <- fastshap::explain(fit.ppr, X = X.ppr, pred_wrapper = pfun.ppr,
                                  nsim = 10L, newdata = X.ppr[1:5, ])
 # row Shapley values should differ across observations (not collapsed to one mean)
 expect_true(length(unique(shap_nsim1[, 1L])) > 1L)
+
+
+################################################################################
+# Regression test: raw=TRUE + adjust=TRUE + single-row should warn (GH audit)
+################################################################################
+
+fit.ppr2 <- ppr(mpg ~ ., data = mtcars, nterms = 5)
+pfun.ppr2 <- function(object, newdata) predict(object, newdata = newdata)
+X.ppr2 <- subset(mtcars, select = -mpg)
+
+# Should warn that raw=TRUE is ignored, and return an adjusted matrix (not array)
+set.seed(7)
+expect_warning(
+  fastshap::explain(fit.ppr2, X = X.ppr2, pred_wrapper = pfun.ppr2,
+                    nsim = 5L, newdata = X.ppr2[1L, , drop = FALSE],
+                    raw = TRUE, adjust = TRUE),
+  pattern = "raw.*not supported.*adjust"
+)
+set.seed(7)
+result_warn <- suppressWarnings(
+  fastshap::explain(fit.ppr2, X = X.ppr2, pred_wrapper = pfun.ppr2,
+                    nsim = 5L, newdata = X.ppr2[1L, , drop = FALSE],
+                    raw = TRUE, adjust = TRUE)
+)
+expect_true(is.matrix(result_warn))
+expect_equal(nrow(result_warn), 1L)

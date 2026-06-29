@@ -21,10 +21,12 @@ Imports:
 Enhances:
     lightgbm,
     xgboost
-Suggests: 
+Suggests:
     AmesHousing,
     covr,
+    doParallel,
     earth,
+    ggplot2,
     knitr,
     ranger,
     rmarkdown,
