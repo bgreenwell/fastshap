@@ -460,23 +460,30 @@ features on 2930 rows!
 
 For comparison, we’ll run the same computation, but this time in
 parallel using the
-[doParallel](https://cran.r-project.org/package=doParallel) package to
-execute across 12 cores:
+[doParallel](https://cran.r-project.org/package=doParallel) package. We
+use `makeCluster()` + `registerDoParallel()` here because it works on
+all platforms (including Windows). Note the `.packages = "ranger"`
+argument: on socket-based clusters (the default on Windows), worker
+processes don’t inherit packages loaded in the main session, so any
+packages needed by the prediction wrapper must be declared explicitly
+via `...`, which [`explain()`](../reference/explain.md) forwards to
+`foreach()`.
 
 ``` r
 
 library(doParallel)
 
-# With parallelism
-registerDoParallel(cores = 12)  # use forking with 12 cores
+cl <- makeCluster(4L)  # adjust to the number of cores available on your machine
+registerDoParallel(cl)
 set.seed(5038)
 system.time({  # estimate run time
-  ex.ames.par <- explain(rfo, X = X, pred_wrapper = pfun, nsim = 50, 
-                         adjust = TRUE, parallel = TRUE)
+  ex.ames.par <- explain(rfo, X = X, pred_wrapper = pfun, nsim = 50,
+                         adjust = TRUE, parallel = TRUE, .packages = "ranger")
 })
+stopCluster(cl)
 ```
 
-    ##     user   system  elapsed 
+    ##     user   system  elapsed
     ## 3725.689  158.068  440.336
 
 Not a bad speedup!
