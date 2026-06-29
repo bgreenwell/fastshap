@@ -130,12 +130,13 @@ explain_column <- function(object, X, column, pred_wrapper, newdata = NULL) {
 #' the average prediction over all the training data (i.e., `X`). Default is 
 #' `FALSE` and setting to `TRUE` requires `nsim` > 1.
 #' 
-#' @param exact Logical indicating whether to compute exact Shapley values. 
-#' Currently only available for [stats::lm()], 
-#' [xgboost::xgboost()], and [lightgbm::lightgbm()] objects. 
-#' Default is `FALSE`. Note that setting `exact = TRUE` will return 
-#' explanations for each of the [stats::terms()] in an 
-#' [stats::lm()] object. Default is `FALSE`.
+#' @param exact Logical indicating whether to compute exact Shapley values.
+#' Currently only supported for [stats::lm()], [xgboost::xgboost()], and
+#' [lightgbm::lightgbm()] objects (binary/regression only — multiclass is not
+#' yet supported). Passing `exact = TRUE` for any other model type issues a
+#' warning and falls back to the Monte Carlo approximation. Note that
+#' `exact = TRUE` for [stats::lm()] returns explanations for each of the
+#' [stats::terms()] in the model. Default is `FALSE`.
 #' 
 #' @param baseline Numeric baseline to use when adjusting the computed Shapley
 #' values to achieve *local accuracy*. Adjusted Shapley values for a single 
