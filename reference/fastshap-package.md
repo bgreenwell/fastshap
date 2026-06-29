@@ -15,6 +15,8 @@ Useful links:
 
 - <https://bgreenwell.github.io/fastshap/>
 
+- <https://bgreenwell.r-universe.dev/fastshap>
+
 - Report bugs at <https://github.com/bgreenwell/fastshap/issues>
 
 ## Author

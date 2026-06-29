@@ -27,6 +27,7 @@ explain(
   parallel = FALSE,
   raw = FALSE,
   seed = NULL,
+  exact = FALSE,
   ...
 )
 
@@ -206,15 +207,17 @@ explain(
 - exact:
 
   Logical indicating whether to compute exact Shapley values. Currently
-  only available for [`stats::lm()`](https://rdrr.io/r/stats/lm.html),
+  only supported for [`stats::lm()`](https://rdrr.io/r/stats/lm.html),
   [`xgboost::xgboost()`](https://rdrr.io/pkg/xgboost/man/xgboost.html),
   and
   [`lightgbm::lightgbm()`](https://rdrr.io/pkg/lightgbm/man/lightgbm.html)
-  objects. Default is `FALSE`. Note that setting `exact = TRUE` will
-  return explanations for each of the
-  [`stats::terms()`](https://rdrr.io/r/stats/terms.html) in an
-  [`stats::lm()`](https://rdrr.io/r/stats/lm.html) object. Default is
-  `FALSE`.
+  objects (binary/regression only — multiclass is not yet supported).
+  Passing `exact = TRUE` for any other model type issues a warning and
+  falls back to the Monte Carlo approximation. Note that `exact = TRUE`
+  for [`stats::lm()`](https://rdrr.io/r/stats/lm.html) returns
+  explanations for each of the
+  [`stats::terms()`](https://rdrr.io/r/stats/terms.html) in the model.
+  Default is `FALSE`.
 
 ## Value
 

@@ -17,7 +17,7 @@ et. al. (2020) for details."></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">fastshap</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.4</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.5</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -71,6 +71,7 @@ et. al. (2020) for details.</p>
 <span>  parallel <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  raw <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  seed <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  exact <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  <span class="va">...</span></span>
 <span><span class="op">)</span></span>
 <span></span>
@@ -240,11 +241,12 @@ standard errors for each (observation, feature) pair. Only supported when
 
 <dt id="arg-exact">exact<a class="anchor" aria-label="anchor" href="#arg-exact"></a></dt>
 <dd><p>Logical indicating whether to compute exact Shapley values.
-Currently only available for <code><a href="https://rdrr.io/r/stats/lm.html" class="external-link">stats::lm()</a></code>,
-<code><a href="https://rdrr.io/pkg/xgboost/man/xgboost.html" class="external-link">xgboost::xgboost()</a></code>, and <code><a href="https://rdrr.io/pkg/lightgbm/man/lightgbm.html" class="external-link">lightgbm::lightgbm()</a></code> objects.
-Default is <code>FALSE</code>. Note that setting <code>exact = TRUE</code> will return
-explanations for each of the <code><a href="https://rdrr.io/r/stats/terms.html" class="external-link">stats::terms()</a></code> in an
-<code><a href="https://rdrr.io/r/stats/lm.html" class="external-link">stats::lm()</a></code> object. Default is <code>FALSE</code>.</p></dd>
+Currently only supported for <code><a href="https://rdrr.io/r/stats/lm.html" class="external-link">stats::lm()</a></code>, <code><a href="https://rdrr.io/pkg/xgboost/man/xgboost.html" class="external-link">xgboost::xgboost()</a></code>, and
+<code><a href="https://rdrr.io/pkg/lightgbm/man/lightgbm.html" class="external-link">lightgbm::lightgbm()</a></code> objects (binary/regression only — multiclass is not
+yet supported). Passing <code>exact = TRUE</code> for any other model type issues a
+warning and falls back to the Monte Carlo approximation. Note that
+<code>exact = TRUE</code> for <code><a href="https://rdrr.io/r/stats/lm.html" class="external-link">stats::lm()</a></code> returns explanations for each of the
+<code><a href="https://rdrr.io/r/stats/terms.html" class="external-link">stats::terms()</a></code> in the model. Default is <code>FALSE</code>.</p></dd>
 
 </dl></div>
     <div class="section level2">

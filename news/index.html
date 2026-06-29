@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">fastshap</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.4</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.5</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -33,6 +33,25 @@
       <small>Source: <a href="https://github.com/bgreenwell/fastshap/blob/main/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
     </div>
 
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="0.1.5" id="fastshap-015">fastshap 0.1.5<a class="anchor" aria-label="anchor" href="#fastshap-015"></a></h2>
+<div class="section level3">
+<h3 id="fixed-0-1-5">Fixed<a class="anchor" aria-label="anchor" href="#fixed-0-1-5"></a></h3>
+<ul><li><p><code><a href="../reference/explain.html">explain()</a></code> with <code>nsim = 1</code> now returns a correctly shaped matrix for all combinations of <code>nrow(newdata)</code> and number of features. Previously, <code>replicate(1L, ...)</code> returned a plain vector rather than a matrix, causing <code><a href="https://rdrr.io/r/base/colSums.html" class="external-link">rowMeans()</a></code> to dispatch as <code><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean.default()</a></code> (wrong results for multiple rows) and a <code>colnames&lt;-</code> error for single-row inputs (<a href="https://github.com/bgreenwell/fastshap/issues/77" class="external-link">#77</a>).</p></li>
+<li><p><code><a href="../reference/explain.html">explain()</a></code> with <code>adjust = TRUE</code> and a single feature name (e.g., <code>feature_names = "wt"</code>) no longer throws <code>Error: object 'phis' not found</code>. When <code>foreach</code> iterates over a single element it skips <code>.combine</code>, returning a 2-D matrix; the code now promotes it to a 3-D array before the adjustment loop (<a href="https://github.com/bgreenwell/fastshap/issues/79" class="external-link">#79</a>).</p></li>
+<li><p><code>exact = TRUE</code> for multiclass <code>xgboost</code> or <code>lightgbm</code> models now stops immediately with an informative error instead of silently producing corrupted output (<a href="https://github.com/bgreenwell/fastshap/issues/51" class="external-link">#51</a>).</p></li>
+<li><p>Passing <code>exact</code> to <code><a href="../reference/explain.html">explain()</a></code> for a model type that does not support it (e.g., <code>ranger</code>, <code>cv.glmnet</code>) no longer silently leaks the argument into <code>foreach()</code>. <code>exact</code> is now an explicit parameter of <code><a href="../reference/explain.html">explain.default()</a></code>; <code>exact = TRUE</code> issues a warning and falls back to the Monte Carlo approximation (<a href="https://github.com/bgreenwell/fastshap/issues/74" class="external-link">#74</a>).</p></li>
+</ul></div>
+<div class="section level3">
+<h3 id="documentation-0-1-5">Documentation<a class="anchor" aria-label="anchor" href="#documentation-0-1-5"></a></h3>
+<ul><li><p>Updated the vignette parallel example to use <code>makeCluster()</code> + <code>registerDoParallel()</code> (cross-platform, including Windows) and to pass <code>.packages = "ranger"</code> via <code>...</code> so worker processes can find <code>predict.ranger</code>. The previous <code>registerDoParallel(cores = N)</code> pattern failed on Windows with “no applicable method for ‘predict’” (<a href="https://github.com/bgreenwell/fastshap/issues/56" class="external-link">#56</a>).</p></li>
+<li><p>Clarified the <code>exact</code> parameter documentation to note that multiclass <code>xgboost</code>/<code>lightgbm</code> models are not yet supported and that passing <code>exact = TRUE</code> for other model types issues a warning and falls back to Monte Carlo.</p></li>
+</ul></div>
+<div class="section level3">
+<h3 id="infrastructure-0-1-5">Infrastructure<a class="anchor" aria-label="anchor" href="#infrastructure-0-1-5"></a></h3>
+<ul><li>Package is now distributed via <a href="https://bgreenwell.r-universe.dev/fastshap" class="external-link">r-universe</a> instead of CRAN. Installation instructions in the README have been updated accordingly.</li>
+</ul></div>
+</div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.1.4" id="fastshap-014">fastshap 0.1.4<a class="anchor" aria-label="anchor" href="#fastshap-014"></a></h2>
 <div class="section level3">

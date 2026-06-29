@@ -1,5 +1,59 @@
 # Changelog
 
+## fastshap 0.1.5
+
+### Fixed
+
+- [`explain()`](../reference/explain.md) with `nsim = 1` now returns a
+  correctly shaped matrix for all combinations of `nrow(newdata)` and
+  number of features. Previously, `replicate(1L, ...)` returned a plain
+  vector rather than a matrix, causing
+  [`rowMeans()`](https://rdrr.io/r/base/colSums.html) to dispatch as
+  [`mean.default()`](https://rdrr.io/r/base/mean.html) (wrong results
+  for multiple rows) and a `colnames<-` error for single-row inputs
+  ([\#77](https://github.com/bgreenwell/fastshap/issues/77)).
+
+- [`explain()`](../reference/explain.md) with `adjust = TRUE` and a
+  single feature name (e.g., `feature_names = "wt"`) no longer throws
+  `Error: object 'phis' not found`. When `foreach` iterates over a
+  single element it skips `.combine`, returning a 2-D matrix; the code
+  now promotes it to a 3-D array before the adjustment loop
+  ([\#79](https://github.com/bgreenwell/fastshap/issues/79)).
+
+- `exact = TRUE` for multiclass `xgboost` or `lightgbm` models now stops
+  immediately with an informative error instead of silently producing
+  corrupted output
+  ([\#51](https://github.com/bgreenwell/fastshap/issues/51)).
+
+- Passing `exact` to [`explain()`](../reference/explain.md) for a model
+  type that does not support it (e.g., `ranger`, `cv.glmnet`) no longer
+  silently leaks the argument into `foreach()`. `exact` is now an
+  explicit parameter of [`explain.default()`](../reference/explain.md);
+  `exact = TRUE` issues a warning and falls back to the Monte Carlo
+  approximation
+  ([\#74](https://github.com/bgreenwell/fastshap/issues/74)).
+
+### Documentation
+
+- Updated the vignette parallel example to use `makeCluster()` +
+  `registerDoParallel()` (cross-platform, including Windows) and to pass
+  `.packages = "ranger"` via `...` so worker processes can find
+  `predict.ranger`. The previous `registerDoParallel(cores = N)` pattern
+  failed on Windows with “no applicable method for ‘predict’”
+  ([\#56](https://github.com/bgreenwell/fastshap/issues/56)).
+
+- Clarified the `exact` parameter documentation to note that multiclass
+  `xgboost`/`lightgbm` models are not yet supported and that passing
+  `exact = TRUE` for other model types issues a warning and falls back
+  to Monte Carlo.
+
+### Infrastructure
+
+- Package is now distributed via
+  [r-universe](https://bgreenwell.r-universe.dev/fastshap) instead of
+  CRAN. Installation instructions in the README have been updated
+  accordingly.
+
 ## fastshap 0.1.4
 
 ### Changed
