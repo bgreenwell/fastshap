@@ -17,3 +17,4 @@
 ^vignettes/fastshap\.Rmd\.orig$
 ^AGENTS\.md$
 ^CLAUDE\.md$
+^conductor$

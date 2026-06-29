@@ -5,8 +5,8 @@
 
 <!-- badges: start -->
 
-[![CRAN
-status](https://www.r-pkg.org/badges/version/fastshap)](https://CRAN.R-project.org/package=fastshap)
+[![r-universe
+status](https://bgreenwell.r-universe.dev/badges/fastshap)](https://bgreenwell.r-universe.dev/fastshap)
 [![Codecov test
 coverage](https://codecov.io/gh/bgreenwell/fastshap/branch/master/graph/badge.svg)](https://codecov.io/gh/bgreenwell/fastshap?branch=master)
 [![R-CMD-check](https://github.com/bgreenwell/fastshap/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/bgreenwell/fastshap/actions/workflows/R-CMD-check.yaml)
@@ -22,8 +22,8 @@ learning model.
 ## Installation
 
 ``` r
-# Install the latest stable version from CRAN:
-install.packages("fastshap")
+# Install from r-universe (recommended):
+install.packages("fastshap", repos = c("https://bgreenwell.r-universe.dev", "https://cloud.r-project.org"))
 
 # Install the latest development version from GitHub:
 if (!requireNamespace("remotes")) {

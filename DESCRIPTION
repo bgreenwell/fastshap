@@ -11,7 +11,8 @@ Description: Computes fast (relative to other implementations) approximate
     for details.
 License: GPL (>= 2)
 URL: https://github.com/bgreenwell/fastshap,
-    https://bgreenwell.github.io/fastshap/
+    https://bgreenwell.github.io/fastshap/,
+    https://bgreenwell.r-universe.dev/fastshap
 BugReports: https://github.com/bgreenwell/fastshap/issues
 Imports: 
     foreach,

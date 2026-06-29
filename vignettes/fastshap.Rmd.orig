@@ -127,7 +127,7 @@ Although force plots are cool, waterfall charts seem to be a much more effective
 
 ## Raw Shapley values
 
-By default, `explain()` returns the averaged Shapley values across all Monte Carlo simulations. Setting `raw = TRUE` gives you the full per-simulation results as a 3-D array of dimensions **n × p × nsim** (observations × features × simulations). This is useful for uncertainty quantification: once you have the raw draws, standard errors and confidence intervals are just an `apply()` away.
+By default, `explain()` returns the averaged Shapley values across all Monte Carlo simulations. Setting `raw = TRUE` gives you the full per-simulation results as a 3-D array of dimensions **n × p × nsim** (observations × features × simulations). This is useful for quantifying Monte Carlo (MC) uncertainty: once you have the raw draws, the MC standard error of each Shapley estimate is just an `apply()` away.
 
 ```{r titanic-explain-jack-raw}
 set.seed(2140)  # for reproducibility
@@ -141,7 +141,7 @@ Compute the mean and standard error across the 1000 simulations for each feature
 
 ```{r titanic-explain-jack-raw-se}
 shap.mean <- apply(raw.jack, 1:2, mean)  # same as plain explain() output
-shap.se   <- apply(raw.jack, 1:2, sd)
+shap.se   <- apply(raw.jack, 1:2, sd) / sqrt(dim(raw.jack)[3L])
 
 rbind(mean = shap.mean, se = shap.se)
 ```
@@ -166,7 +166,7 @@ ggplot(df, aes(x = mean, y = reorder(feature, mean))) +
        title = "Jack's feature contributions with uncertainty")
 ```
 
-The `sex` and `pclass` contributions are precisely estimated (narrow intervals) because they dominate Jack's prediction; `age`, `sibsp`, and `parch` show more simulation-to-simulation variability, reflecting their smaller and noisier contributions.
+With 1,000 simulations all five features are estimated precisely — the narrow MC error bars confirm that the algorithm has converged. Features with larger absolute contributions (`sex`, `pclass`) carry proportionally more per-simulation variance, but dividing by $\sqrt{n_{\text{sim}}}$ reduces that to a negligible standard error at this sample size.
 
 
 ## Global explanations
