@@ -391,10 +391,13 @@ explain.default <- function(object, feature_names = NULL, X = NULL, nsim = 1,
     
     # Compute approximate Shapley values
     reps <- foreach(i = feature_names, .options.RNG = seed, ...) %.do% {
-      replicate(nsim, {  # replace later with vapply()
+      r <- replicate(nsim, {  # replace later with vapply()
         explain_column(object, X = X, column = i, pred_wrapper = pred_wrapper,
                        newdata = newdata)
       })
+      # replicate(1L, vector) returns a plain vector, not a matrix; promote so
+      # downstream rowMeans() is always correct regardless of nsim.
+      if (!is.matrix(r)) matrix(r, ncol = nsim) else r
     }
     if (isTRUE(raw)) {
       # Use array(unlist(...)) rather than simplify2array() because
@@ -424,8 +427,10 @@ explain.default <- function(object, feature_names = NULL, X = NULL, nsim = 1,
   
   # Reformat if necessary and fix column names
   if (length(feature_names) == 1L) {
-    phis <- as.matrix(phis) 
-  } 
+    phis <- as.matrix(phis)  # n>1, p=1: vector_n -> n×1 matrix
+  } else if (!is.matrix(phis)) {
+    phis <- matrix(phis, nrow = 1L)  # n=1, p>1: vector_p -> 1×p matrix
+  }
   colnames(phis) <- feature_names
   
   if (isFALSE(shap_only)) {
