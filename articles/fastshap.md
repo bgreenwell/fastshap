@@ -1,7 +1,7 @@
 # fastshap
 
 In this vignette, we’ll cover basic usage of
-[fastshap](https://cran.r-project.org/package=fastshap) for computing
+[fastshap](https://bgreenwell.r-universe.dev/fastshap) for computing
 feature contributions for both local and global explanations, and show
 how to visualize the output using the
 [shapviz](https://cran.r-project.org/package=shapviz) package. To start,
@@ -85,16 +85,16 @@ jack.dawson <- data.frame(
 )
 ```
 
-Note that [fastshap](https://cran.r-project.org/package=fastshap), like
+Note that [fastshap](https://bgreenwell.r-universe.dev/fastshap), like
 many other [machine learning
 interpretability](https://christophm.github.io/interpretable-ml-book/)
 packages (e.g., [iml](https://cran.r-project.org/package=iml)), requires
 a user-specified prediction wrapper; that is, a simple function that
-tells [fastshap](https://cran.r-project.org/package=fastshap) how to
+tells [fastshap](https://bgreenwell.r-universe.dev/fastshap) how to
 extract the appropriate predictions from the fitted model. In this case,
 we want to explain Jack’s likelihood of survival, so our prediction
 wrapper[^1] needs to return the conditional probability of surviving
-from a fitted [ranger](https://cran.r-project.org/package=fastshap)
+from a fitted [ranger](https://cran.r-project.org/package=ranger)
 object; see
 [`?ranger::predict.ranger`](http://imbs-hl.github.io/ranger/reference/predict.ranger.md)
 for details:
@@ -146,7 +146,7 @@ set.seed(2113)  # for reproducibility
 
     ## Error in `colnames<-`(`*tmp*`, value = feature_names): attempt to set 'colnames' on an object with less than two dimensions
 
-The [fastshap](https://cran.r-project.org/package=fastshap) package uses
+The [fastshap](https://bgreenwell.r-universe.dev/fastshap) package uses
 an efficient version of the Monte-Carlo (MC) algorithm described in
 @strumbelj-2014-explaining. Consequently, for stability and accuracy,
 the feature contributions should be computed many times and the results
@@ -170,7 +170,7 @@ set.seed(2129)  # for reproducibility
     ## [1] "explain" "matrix"  "array"
 
 Note that the MC approach used by
-[fastshap](https://cran.r-project.org/package=fastshap) (and other
+[fastshap](https://bgreenwell.r-universe.dev/fastshap) (and other
 packages) will not produce Shapley-based feature contributions that
 satisfy the [efficiency
 property](https://christophm.github.io/interpretable-ml-book/shapley.html#the-shapley-value-in-detail);
@@ -321,7 +321,7 @@ training predictions) into an overall global summary about the model
 (i.e., global explanations). However, computing Shapley values for a
 large number of observations can be quite computationally expensive,
 especially when using the MC approach. However,
-[fastshap](https://cran.r-project.org/package=fastshap) is quite
+[fastshap](https://bgreenwell.r-universe.dev/fastshap) is quite
 efficient compared to alternative implementations[^4]. The code chunk
 below computes Shapley explanations for each passenger in the training
 data using 1000 MC repetitions, and coerces the resulting matrix to a
@@ -354,7 +354,7 @@ tibble::as_tibble(ex.t1$shapley_values)
 Note that I set the optional argument `shap_only = FALSE` here. This is
 a convenience argument when working with
 [shapviz](https://cran.r-project.org/package=shapviz); in short, setting
-this to `FALSE` will return a list containing the Shapely values,
+this to `FALSE` will return a list containing the Shapley values,
 feature values, and baseline (all of which can be used by
 [shapviz](https://cran.r-project.org/package=shapviz)’s plotting
 functions).
@@ -461,13 +461,15 @@ features on 2930 rows!
 For comparison, we’ll run the same computation, but this time in
 parallel using the
 [doParallel](https://cran.r-project.org/package=doParallel) package. We
-use `makeCluster()` + `registerDoParallel()` here because it works on
-all platforms (including Windows). Note the `.packages = "ranger"`
-argument: on socket-based clusters (the default on Windows), worker
-processes don’t inherit packages loaded in the main session, so any
-packages needed by the prediction wrapper must be declared explicitly
-via `...`, which [`explain()`](../reference/explain.md) forwards to
-`foreach()`.
+use [`makeCluster()`](https://rdrr.io/r/parallel/makeCluster.html) +
+[`registerDoParallel()`](https://rdrr.io/pkg/doParallel/man/registerDoParallel.html)
+here because it works on all platforms (including Windows). Note the
+`.packages = "ranger"` argument: on socket-based clusters (the default
+on Windows), worker processes don’t inherit packages loaded in the main
+session, so any packages needed by the prediction wrapper must be
+declared explicitly via `...`, which
+[`explain()`](../reference/explain.md) forwards to
+[`foreach()`](https://rdrr.io/pkg/foreach/man/foreach.html).
 
 ``` r
 
@@ -537,5 +539,5 @@ plot of chunk ames-explain-global-parallel-dependence
     `adjust = TRUE`.
 
 [^4]: For large-ish data sets, you should always run
-    `it`explain()`on a smaller subsample with`nsim = 1\` to gauge how
-    much compute you can afford
+    [`explain()`](../reference/explain.md) on a smaller subsample with
+    `nsim = 1` to gauge how much compute you can afford

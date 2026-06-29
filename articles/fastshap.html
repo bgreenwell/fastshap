@@ -65,7 +65,7 @@
 
     
     
-<p>In this vignette, we’ll cover basic usage of <a href="https://cran.r-project.org/package=fastshap" class="external-link">fastshap</a> for
+<p>In this vignette, we’ll cover basic usage of <a href="https://bgreenwell.r-universe.dev/fastshap" class="external-link">fastshap</a> for
 computing feature contributions for both local and global explanations,
 and show how to visualize the output using the <a href="https://cran.r-project.org/package=shapviz" class="external-link">shapviz</a> package.
 To start, we’ll use the <a href="https://cran.r-project.org/package=ranger" class="external-link">ranger</a> package to
@@ -131,17 +131,18 @@ observation for a new passenger. Everyone, meet Jack:</p>
 <span>  sibsp <span class="op">=</span> <span class="fl">0L</span>,      <span class="co"># no siblings/spouses aboard</span></span>
 <span>  parch <span class="op">=</span> <span class="fl">0L</span>       <span class="co"># no parents/children aboard</span></span>
 <span><span class="op">)</span></span></code></pre></div>
-<p>Note that <a href="https://cran.r-project.org/package=fastshap" class="external-link">fastshap</a>, like
+<p>Note that <a href="https://bgreenwell.r-universe.dev/fastshap" class="external-link">fastshap</a>, like
 many other <a href="https://christophm.github.io/interpretable-ml-book/" class="external-link">machine
 learning interpretability</a> packages (e.g., <a href="https://cran.r-project.org/package=iml" class="external-link">iml</a>), requires a
 user-specified prediction wrapper; that is, a simple function that tells
-<a href="https://cran.r-project.org/package=fastshap" class="external-link">fastshap</a> how
-to extract the appropriate predictions from the fitted model. In this
-case, we want to explain Jack’s likelihood of survival, so our
-prediction wrapper<a class="footnote-ref" tabindex="0" data-bs-toggle="popover" data-bs-content='&lt;p&gt;As described in &lt;code&gt;&lt;a href="../reference/explain.html"&gt;?fastshap::explain&lt;/a&gt;&lt;/code&gt;, the
+<a href="https://bgreenwell.r-universe.dev/fastshap" class="external-link">fastshap</a> how to
+extract the appropriate predictions from the fitted model. In this case,
+we want to explain Jack’s likelihood of survival, so our prediction
+wrapper<a class="footnote-ref" tabindex="0" data-bs-toggle="popover" data-bs-content='&lt;p&gt;As described in &lt;code&gt;&lt;a href="../reference/explain.html"&gt;?fastshap::explain&lt;/a&gt;&lt;/code&gt;, the
 prediction wrapper requires two arguments, &lt;code&gt;object&lt;/code&gt; and
-&lt;code&gt;newdata&lt;/code&gt;.&lt;/p&gt;'><sup>1</sup></a> needs to return the conditional probability
-of surviving from a fitted <a href="https://cran.r-project.org/package=fastshap" class="external-link">ranger</a> object;
+&lt;code&gt;newdata&lt;/code&gt;.&lt;/p&gt;'><sup>1</sup></a>
+needs to return the conditional probability of surviving from a fitted
+<a href="https://cran.r-project.org/package=ranger" class="external-link">ranger</a> object;
 see <code><a href="http://imbs-hl.github.io/ranger/reference/predict.ranger.html" class="external-link">?ranger::predict.ranger</a></code> for details:</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">pfun</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">object</span>, <span class="va">newdata</span><span class="op">)</span> <span class="op">{</span>  <span class="co"># prediction wrapper</span></span>
@@ -175,15 +176,15 @@ difference:</p>
 <span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">2113</span><span class="op">)</span>  <span class="co"># for reproducibility</span></span>
 <span><span class="op">(</span><span class="va">ex.jack</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/explain.html">explain</a></span><span class="op">(</span><span class="va">rfo</span>, X <span class="op">=</span> <span class="va">X</span>, pred_wrapper <span class="op">=</span> <span class="va">pfun</span>, newdata <span class="op">=</span> <span class="va">jack.dawson</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## Error in `colnames&lt;-`(`*tmp*`, value = feature_names): attempt to set 'colnames' on an object with less than two dimensions</span></span></code></pre>
-<p>The <a href="https://cran.r-project.org/package=fastshap" class="external-link">fastshap</a> package
-uses an efficient version of the Monte-Carlo (MC) algorithm described in
-<span class="citation">@strumbelj-2014-explaining</span>. Consequently,
-for stability and accuracy, the feature contributions should be computed
-many times and the results averaged together. To accomplish this, simply
-set the <code>nsim</code> argument to a reasonably high value (i.e., as
-much as you can computationally afford). Below we compute 1000
-Shapley-based feature contributions for Jack and average the
-results:</p>
+<p>The <a href="https://bgreenwell.r-universe.dev/fastshap" class="external-link">fastshap</a>
+package uses an efficient version of the Monte-Carlo (MC) algorithm
+described in <span class="citation">@strumbelj-2014-explaining</span>.
+Consequently, for stability and accuracy, the feature contributions
+should be computed many times and the results averaged together. To
+accomplish this, simply set the <code>nsim</code> argument to a
+reasonably high value (i.e., as much as you can computationally afford).
+Below we compute 1000 Shapley-based feature contributions for Jack and
+average the results:</p>
 <div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">2129</span><span class="op">)</span>  <span class="co"># for reproducibility</span></span>
 <span><span class="op">(</span><span class="va">ex.jack</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/explain.html">explain</a></span><span class="op">(</span><span class="va">rfo</span>, X <span class="op">=</span> <span class="va">X</span>, pred_wrapper <span class="op">=</span> <span class="va">pfun</span>, newdata <span class="op">=</span> <span class="va">jack.dawson</span>,</span>
@@ -194,7 +195,7 @@ results:</p>
 <span><span class="co">## [1] 0</span></span>
 <span><span class="co">## attr(,"class")</span></span>
 <span><span class="co">## [1] "explain" "matrix"  "array"</span></span></code></pre>
-<p>Note that the MC approach used by <a href="https://cran.r-project.org/package=fastshap" class="external-link">fastshap</a> (and
+<p>Note that the MC approach used by <a href="https://bgreenwell.r-universe.dev/fastshap" class="external-link">fastshap</a> (and
 other packages) will not produce Shapley-based feature contributions
 that satisfy the <a href="https://christophm.github.io/interpretable-ml-book/shapley.html#the-shapley-value-in-detail" class="external-link">efficiency
 property</a>; that is, they won’t add up to the difference between the
@@ -313,10 +314,10 @@ explanation</em>), it can be useful to aggregate the results of several
 (i.e., all of the training predictions) into an overall global summary
 about the model (i.e., global explanations). However, computing Shapley
 values for a large number of observations can be quite computationally
-expensive, especially when using the MC approach. However, <a href="https://cran.r-project.org/package=fastshap" class="external-link">fastshap</a> is quite
-efficient compared to alternative implementations<a class="footnote-ref" tabindex="0" data-bs-toggle="popover" data-bs-content="&lt;p&gt;For large-ish data sets, you should always run
-&lt;code&gt;it&lt;/code&gt;explain()&lt;code&gt;on a smaller subsample with&lt;/code&gt;nsim =
-1` to gauge how much compute you can afford&lt;/p&gt;"><sup>4</sup></a>. The code chunk below
+expensive, especially when using the MC approach. However, <a href="https://bgreenwell.r-universe.dev/fastshap" class="external-link">fastshap</a> is quite
+efficient compared to alternative implementations<a class="footnote-ref" tabindex="0" data-bs-toggle="popover" data-bs-content='&lt;p&gt;For large-ish data sets, you should always run
+&lt;code&gt;&lt;a href="../reference/explain.html"&gt;explain()&lt;/a&gt;&lt;/code&gt; on a smaller subsample with &lt;code&gt;nsim = 1&lt;/code&gt;
+to gauge how much compute you can afford&lt;/p&gt;'><sup>4</sup></a>. The code chunk below
 computes Shapley explanations for each passenger in the training data
 using 1000 MC repetitions, and coerces the resulting matrix to a <a href="https://cran.r-project.org/package=tibble" class="external-link">tibble</a> (for nicer
 printing).</p>
@@ -342,7 +343,7 @@ printing).</p>
 <p>Note that I set the optional argument <code>shap_only = FALSE</code>
 here. This is a convenience argument when working with <a href="https://cran.r-project.org/package=shapviz" class="external-link">shapviz</a>; in short,
 setting this to <code>FALSE</code> will return a list containing the
-Shapely values, feature values, and baseline (all of which can be used
+Shapley values, feature values, and baseline (all of which can be used
 by <a href="https://cran.r-project.org/package=shapviz" class="external-link">shapviz</a>’s
 plotting functions).</p>
 <p>A common global measure computed from Shapley values is the
@@ -427,25 +428,25 @@ row in <code>X</code> will be computed):</p>
 features on 2930 rows!</p>
 <p>For comparison, we’ll run the same computation, but this time in
 parallel using the <a href="https://cran.r-project.org/package=doParallel" class="external-link">doParallel</a>
-package. We use <code>makeCluster()</code> +
-<code>registerDoParallel()</code> here because it works on all platforms
+package. We use <code><a href="https://rdrr.io/r/parallel/makeCluster.html" class="external-link">makeCluster()</a></code> +
+<code><a href="https://rdrr.io/pkg/doParallel/man/registerDoParallel.html" class="external-link">registerDoParallel()</a></code> here because it works on all platforms
 (including Windows). Note the <code>.packages = "ranger"</code>
 argument: on socket-based clusters (the default on Windows), worker
 processes don’t inherit packages loaded in the main session, so any
 packages needed by the prediction wrapper must be declared explicitly
 via <code>...</code>, which <code><a href="../reference/explain.html">explain()</a></code> forwards to
-<code>foreach()</code>.</p>
+<code><a href="https://rdrr.io/pkg/foreach/man/foreach.html" class="external-link">foreach()</a></code>.</p>
 <div class="sourceCode" id="cb36"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/RevolutionAnalytics/doparallel" class="external-link">doParallel</a></span><span class="op">)</span></span>
 <span></span>
-<span><span class="va">cl</span> <span class="op">&lt;-</span> <span class="fu">makeCluster</span><span class="op">(</span><span class="fl">4L</span><span class="op">)</span>  <span class="co"># adjust to the number of cores available on your machine</span></span>
-<span><span class="fu">registerDoParallel</span><span class="op">(</span><span class="va">cl</span><span class="op">)</span></span>
+<span><span class="va">cl</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/parallel/makeCluster.html" class="external-link">makeCluster</a></span><span class="op">(</span><span class="fl">4L</span><span class="op">)</span>  <span class="co"># adjust to the number of cores available on your machine</span></span>
+<span><span class="fu"><a href="https://rdrr.io/pkg/doParallel/man/registerDoParallel.html" class="external-link">registerDoParallel</a></span><span class="op">(</span><span class="va">cl</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">5038</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/system.time.html" class="external-link">system.time</a></span><span class="op">(</span><span class="op">{</span>  <span class="co"># estimate run time</span></span>
 <span>  <span class="va">ex.ames.par</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/explain.html">explain</a></span><span class="op">(</span><span class="va">rfo</span>, X <span class="op">=</span> <span class="va">X</span>, pred_wrapper <span class="op">=</span> <span class="va">pfun</span>, nsim <span class="op">=</span> <span class="fl">50</span>,</span>
 <span>                         adjust <span class="op">=</span> <span class="cn">TRUE</span>, parallel <span class="op">=</span> <span class="cn">TRUE</span>, .packages <span class="op">=</span> <span class="st">"ranger"</span><span class="op">)</span></span>
 <span><span class="op">}</span><span class="op">)</span></span>
-<span><span class="fu">stopCluster</span><span class="op">(</span><span class="va">cl</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu"><a href="https://rdrr.io/r/parallel/makeCluster.html" class="external-link">stopCluster</a></span><span class="op">(</span><span class="va">cl</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">##     user   system  elapsed</span></span>
 <span><span class="co">## 3725.689  158.068  440.336</span></span></code></pre>
 <p>Not a bad speedup!</p>

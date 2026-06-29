@@ -27,19 +27,22 @@
 
 - Passing `exact` to [`explain()`](../reference/explain.md) for a model
   type that does not support it (e.g., `ranger`, `cv.glmnet`) no longer
-  silently leaks the argument into `foreach()`. `exact` is now an
-  explicit parameter of [`explain.default()`](../reference/explain.md);
-  `exact = TRUE` issues a warning and falls back to the Monte Carlo
-  approximation
+  silently leaks the argument into
+  [`foreach()`](https://rdrr.io/pkg/foreach/man/foreach.html). `exact`
+  is now an explicit parameter of
+  [`explain.default()`](../reference/explain.md); `exact = TRUE` issues
+  a warning and falls back to the Monte Carlo approximation
   ([\#74](https://github.com/bgreenwell/fastshap/issues/74)).
 
 ### Documentation
 
-- Updated the vignette parallel example to use `makeCluster()` +
-  `registerDoParallel()` (cross-platform, including Windows) and to pass
-  `.packages = "ranger"` via `...` so worker processes can find
-  `predict.ranger`. The previous `registerDoParallel(cores = N)` pattern
-  failed on Windows with “no applicable method for ‘predict’”
+- Updated the vignette parallel example to use
+  [`makeCluster()`](https://rdrr.io/r/parallel/makeCluster.html) +
+  [`registerDoParallel()`](https://rdrr.io/pkg/doParallel/man/registerDoParallel.html)
+  (cross-platform, including Windows) and to pass `.packages = "ranger"`
+  via `...` so worker processes can find `predict.ranger`. The previous
+  `registerDoParallel(cores = N)` pattern failed on Windows with “no
+  applicable method for ‘predict’”
   ([\#56](https://github.com/bgreenwell/fastshap/issues/56)).
 
 - Clarified the `exact` parameter documentation to note that multiclass
@@ -171,8 +174,8 @@ CRAN release: 2023-06-06
     prediction (i.e., the average prediction over `X`.)
 
   - `shap_only`, which defaults to `TRUE`, determines whether to return
-    a matrix of Shapley values (`TRUE`) containing the baseline as
-    aanattribute or a list containing the Shapley values, corresponding
+    a matrix of Shapley values (`TRUE`) containing the baseline as an
+    attribute or a list containing the Shapley values, corresponding
     feature values, and baseline (`FALSE`); setting to `FALSE` is a
     convenience when using the
     [shapviz](https://cran.r-project.org/package=shapviz) package.
