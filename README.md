@@ -8,7 +8,7 @@
 [![r-universe
 status](https://bgreenwell.r-universe.dev/badges/fastshap)](https://bgreenwell.r-universe.dev/fastshap)
 [![Codecov test
-coverage](https://codecov.io/gh/bgreenwell/fastshap/branch/master/graph/badge.svg)](https://codecov.io/gh/bgreenwell/fastshap?branch=master)
+coverage](https://codecov.io/gh/bgreenwell/fastshap/branch/main/graph/badge.svg)](https://codecov.io/gh/bgreenwell/fastshap?branch=main)
 [![R-CMD-check](https://github.com/bgreenwell/fastshap/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/bgreenwell/fastshap/actions/workflows/R-CMD-check.yaml)
 <!-- badges: end -->
 
