@@ -20,6 +20,7 @@ data; see [`?fastshap::titanic_mice`](../reference/titanic_mice.md) for
 details. For now, we’ll just use one of the 11 imputed versions:
 
 ``` r
+
 library(fastshap)
 
 head(t1 <- titanic_mice[[1L]])
@@ -34,6 +35,7 @@ head(t1 <- titanic_mice[[1L]])
     ## 6      yes      1 48.00   male     0     0
 
 ``` r
+
 t1$pclass <- as.ordered(t1$pclass)  # makes more sense as an ordered factor
 ```
 
@@ -42,6 +44,7 @@ forest*](https://doi.org/10.3414/ME00-01-0052) which uses the *Brier
 score* to determine splits.
 
 ``` r
+
 library(ranger)
 
 set.seed(2053)  # for reproducibility
@@ -71,6 +74,7 @@ observation from the training set, we’ll construct an observation for a
 new passenger. Everyone, meet Jack:
 
 ``` r
+
 jack.dawson <- data.frame(
   #survived = 0L,  # in case you haven't seen the movie
   pclass = 3L,     # third-class passenger
@@ -89,13 +93,14 @@ a user-specified prediction wrapper; that is, a simple function that
 tells [fastshap](https://cran.r-project.org/package=fastshap) how to
 extract the appropriate predictions from the fitted model. In this case,
 we want to explain Jack’s likelihood of survival, so our prediction
-wrapper[¹](#fn1) needs to return the conditional probability of
-surviving from a fitted
-[ranger](https://cran.r-project.org/package=fastshap) object; see
+wrapper[^1] needs to return the conditional probability of surviving
+from a fitted [ranger](https://cran.r-project.org/package=fastshap)
+object; see
 [`?ranger::predict.ranger`](http://imbs-hl.github.io/ranger/reference/predict.ranger.md)
 for details:
 
 ``` r
+
 pfun <- function(object, newdata) {  # prediction wrapper
   unname(predict(object, data = newdata)$predictions[, "yes"])
 }
@@ -107,6 +112,7 @@ pfun <- function(object, newdata) {  # prediction wrapper
     ## [1] 0.1330587
 
 ``` r
+
 # Average prediction across all passengers
 (baseline <- mean(pfun(rfo, newdata = t1)))  
 ```
@@ -114,6 +120,7 @@ pfun <- function(object, newdata) {  # prediction wrapper
     ## [1] 0.3815068
 
 ``` r
+
 # Difference between Jack and average
 (difference <- jack.prob - baseline)
 ```
@@ -127,10 +134,11 @@ much smaller than the average? Of course, this is the difference
 Shapley-based feature contributions help to explain.
 
 To illustrate, we’ll use the [`explain()`](../reference/explain.md)
-function to estimate how each of jack features[²](#fn2) (i.e., his age
-and sex) contributed to the difference:
+function to estimate how each of jack features[^2] (i.e., his age and
+sex) contributed to the difference:
 
 ``` r
+
 X <- subset(t1, select = -survived)  # features only
 set.seed(2113)  # for reproducibility
 (ex.jack <- explain(rfo, X = X, pred_wrapper = pfun, newdata = jack.dawson))
@@ -148,6 +156,7 @@ afford). Below we compute 1000 Shapley-based feature contributions for
 Jack and average the results:
 
 ``` r
+
 set.seed(2129)  # for reproducibility
 (ex.jack <- explain(rfo, X = X, pred_wrapper = pfun, newdata = jack.dawson,
                     nsim = 1000))
@@ -171,9 +180,10 @@ borrowing a trick from the popular Python
 [shap](https://github.com/shap/shap) library, we can use a
 regression-based adjustment to correct the sum. To do this, simply set
 `adjust = TRUE` in the call to
-[`explain()`](../reference/explain.md)[³](#fn3):
+[`explain()`](../reference/explain.md)[^3]:
 
 ``` r
+
 set.seed(2133)  # for reproducibility
 (ex.jack.adj <- explain(rfo, X = X, pred_wrapper = pfun, newdata = jack.dawson,
                         nsim = 1000, adjust = TRUE))
@@ -187,6 +197,7 @@ set.seed(2133)  # for reproducibility
     ## [1] "explain" "matrix"  "array"
 
 ``` r
+
 # Sanity check
 sum(ex.jack.adj)  # should be -0.2484481
 ```
@@ -201,6 +212,7 @@ Jack’s features contributed to his relatively low predicted probability
 of surviving:
 
 ``` r
+
 library(shapviz)
 
 shv <- shapviz(ex.jack.adj, X = jack.dawson, baseline = baseline)
@@ -218,6 +230,7 @@ baseline. *Force plots* are another popular way to visualize Shapley
 values for explaining a single prediction:
 
 ``` r
+
 sv_force(shv)
 ```
 
@@ -236,11 +249,12 @@ By default, [`explain()`](../reference/explain.md) returns the averaged
 Shapley values across all Monte Carlo simulations. Setting `raw = TRUE`
 gives you the full per-simulation results as a 3-D array of dimensions
 **n × p × nsim** (observations × features × simulations). This is useful
-for uncertainty quantification: once you have the raw draws, standard
-errors and confidence intervals are just an
+for quantifying Monte Carlo (MC) uncertainty: once you have the raw
+draws, the MC standard error of each Shapley estimate is just an
 [`apply()`](https://rdrr.io/r/base/apply.html) away.
 
 ``` r
+
 set.seed(2140)  # for reproducibility
 raw.jack <- explain(rfo, X = X, pred_wrapper = pfun, newdata = jack.dawson,
                     nsim = 1000, raw = TRUE)
@@ -254,8 +268,9 @@ Compute the mean and standard error across the 1000 simulations for each
 feature:
 
 ``` r
+
 shap.mean <- apply(raw.jack, 1:2, mean)  # same as plain explain() output
-shap.se   <- apply(raw.jack, 1:2, sd)
+shap.se   <- apply(raw.jack, 1:2, sd) / sqrt(dim(raw.jack)[3L])
 
 rbind(mean = shap.mean, se = shap.se)
 ```
@@ -268,6 +283,7 @@ A dot-and-whisker plot (mean ± 2 SE) gives an intuitive sense of how
 stable the SHAP estimates are for each feature:
 
 ``` r
+
 library(ggplot2)
 
 df <- data.frame(
@@ -290,10 +306,12 @@ titanic-explain-jack-raw-plot](figures/titanic-explain-jack-raw-plot-1.png)
 
 plot of chunk titanic-explain-jack-raw-plot
 
-The `sex` and `pclass` contributions are precisely estimated (narrow
-intervals) because they dominate Jack’s prediction; `age`, `sibsp`, and
-`parch` show more simulation-to-simulation variability, reflecting their
-smaller and noisier contributions.
+With 1,000 simulations all five features are estimated precisely — the
+narrow MC error bars confirm that the algorithm has converged. Features
+with larger absolute contributions (`sex`, `pclass`) carry
+proportionally more per-simulation variance, but dividing by
+$`\sqrt{n_{\text{sim}}}`$ reduces that to a negligible standard error at
+this sample size.
 
 ## Global explanations
 
@@ -304,13 +322,14 @@ training predictions) into an overall global summary about the model
 large number of observations can be quite computationally expensive,
 especially when using the MC approach. However,
 [fastshap](https://cran.r-project.org/package=fastshap) is quite
-efficient compared to alternative implementations[⁴](#fn4). The code
-chunk below computes Shapley explanations for each passenger in the
-training data using 1000 MC repetitions, and coerces the resulting
-matrix to a [tibble](https://cran.r-project.org/package=tibble) (for
-nicer printing).
+efficient compared to alternative implementations[^4]. The code chunk
+below computes Shapley explanations for each passenger in the training
+data using 1000 MC repetitions, and coerces the resulting matrix to a
+[tibble](https://cran.r-project.org/package=tibble) (for nicer
+printing).
 
 ``` r
+
 set.seed(2224)  # for reproducibility
 ex.t1 <- explain(rfo, X = X, pred_wrapper = pfun, nsim = 100, adjust = TRUE,
                  shap_only = FALSE)
@@ -345,6 +364,7 @@ Shapley-based feature importance scores, which are nothing more than the
 mean of the absolute value of the features contribution for each column:
 
 ``` r
+
 shv.global <- shapviz(ex.t1)
 sv_importance(shv.global)
 ```
@@ -360,6 +380,7 @@ plot*](https://cran.r-project.org/package=pdp). Here, we’ll look at the
 dependence of the feature contribution of `age` on its input value:
 
 ``` r
+
 sv_dependence(shv.global, v = "age")
 ```
 
@@ -386,6 +407,7 @@ the Ames housing data available in the
 [AmesHousing](https://cran.r-project.org/package=AmesHousing) package:
 
 ``` r
+
 ames <- as.data.frame(AmesHousing::make_ames())
 X <- subset(ames, select = -Sale_Price)  # features only
 
@@ -416,6 +438,7 @@ to `newdata` (i.e., Shapley values for the predictions of every row in
 `X` will be computed):
 
 ``` r
+
 # Prediction wrapper
 pfun <- function(object, newdata) {
   predict(object, data = newdata)$predictions
@@ -441,6 +464,7 @@ parallel using the
 execute across 12 cores:
 
 ``` r
+
 library(doParallel)
 
 # With parallelism
@@ -471,6 +495,7 @@ For instance, to construct a Shapley-based variable importance plot from
 the `ex.ames.par` object, we can simply do the following:
 
 ``` r
+
 baseline <- attr(ex.ames.par, "baseline")
 shv <- shapviz(ex.ames.par, X = X, baseline = baseline)
 sv_importance(shv)
@@ -484,6 +509,7 @@ plot of chunk ames-explain-global-parallel-importance
 Similar for Shapley-based dependence plots:
 
 ``` r
+
 sv_dependence(shv, v = "Gr_Liv_Area", alpha = 0.3)
 ```
 
@@ -492,18 +518,17 @@ ames-explain-global-parallel-dependence](figures/ames-explain-global-parallel-de
 
 plot of chunk ames-explain-global-parallel-dependence
 
-------------------------------------------------------------------------
+[^1]: As described in [`?fastshap::explain`](../reference/explain.md),
+    the prediction wrapper requires two arguments, `object` and
+    `newdata`.
 
-1.  As described in [`?fastshap::explain`](../reference/explain.md), the
-    prediction wrapper requires two arguments, `object` and `newdata`.
-
-2.  Note that we need to supply the training features via the `X`
+[^2]: Note that we need to supply the training features via the `X`
     argument (i.e., no response column) and that `newdata` should also
     only contain columns of feature values.
 
-3.  Note that `nsim` has to be larger than one whenever setting
+[^3]: Note that `nsim` has to be larger than one whenever setting
     `adjust = TRUE`.
 
-4.  For large-ish data sets, you should always run
+[^4]: For large-ish data sets, you should always run
     `it`explain()`on a smaller subsample with`nsim = 1\` to gauge how
     much compute you can afford

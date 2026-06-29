@@ -35,10 +35,9 @@ development. Common tasks are managed as follows:
   the `man/` directory and update the `NAMESPACE` file.
 - **Checking the Package:** Before committing any changes, always run a
   full package check with `devtools::check()`. This command runs
-  `R CMD check`, which is the same process CRAN uses to validate
-  packages. It will run all tests, build vignettes, and check for common
-  problems. Ensure the check completes without any errors, warnings, or
-  notes.
+  `R CMD check`, which validates the package structure, runs all tests,
+  builds vignettes, and checks for common problems. Ensure the check
+  completes without any errors, warnings, or notes.
 
 ### 2. Testing with `tinytest`
 
@@ -77,7 +76,7 @@ The package website and online documentation are built using `pkgdown`.
   - `vignettes/fastshap.Rmd.orig` - The source file with executable code
     chunks that you should edit
   - `vignettes/fastshap.Rmd` - The processed file with pre-computed
-    output for CRAN submission
+    output (avoids re-running expensive computations on every build)
 
   To update the vignette: (1) Edit `fastshap.Rmd.orig`, (2) Run
   `knitr::knit("vignettes/fastshap.Rmd.orig", output = "vignettes/fastshap.Rmd")`

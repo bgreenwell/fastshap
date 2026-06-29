@@ -10,8 +10,9 @@ learning model.
 ## Installation
 
 ``` r
-# Install the latest stable version from CRAN:
-install.packages("fastshap")
+
+# Install from r-universe (recommended):
+install.packages("fastshap", repos = c("https://bgreenwell.r-universe.dev", "https://cloud.r-project.org"))
 
 # Install the latest development version from GitHub:
 if (!requireNamespace("remotes")) {

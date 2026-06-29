@@ -12,8 +12,8 @@
 <link rel="icon" sizes="any" href="../favicon.ico">
 <link rel="manifest" href="../site.webmanifest">
 <script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<link href="../deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet">
-<script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
+<link href="../deps/bootstrap-5.3.8/bootstrap.min.css" rel="stylesheet">
+<script src="../deps/bootstrap-5.3.8/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
 <script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="fastshap">
 </head>
@@ -254,9 +254,9 @@ prediction; especially when there’s a large number of features.</p>
 values across all Monte Carlo simulations. Setting
 <code>raw = TRUE</code> gives you the full per-simulation results as a
 3-D array of dimensions <strong>n × p × nsim</strong> (observations ×
-features × simulations). This is useful for uncertainty quantification:
-once you have the raw draws, standard errors and confidence intervals
-are just an <code><a href="https://rdrr.io/r/base/apply.html" class="external-link">apply()</a></code> away.</p>
+features × simulations). This is useful for quantifying Monte Carlo (MC)
+uncertainty: once you have the raw draws, the MC standard error of each
+Shapley estimate is just an <code><a href="https://rdrr.io/r/base/apply.html" class="external-link">apply()</a></code> away.</p>
 <div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">2140</span><span class="op">)</span>  <span class="co"># for reproducibility</span></span>
 <span><span class="va">raw.jack</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/explain.html">explain</a></span><span class="op">(</span><span class="va">rfo</span>, X <span class="op">=</span> <span class="va">X</span>, pred_wrapper <span class="op">=</span> <span class="va">pfun</span>, newdata <span class="op">=</span> <span class="va">jack.dawson</span>,</span>
@@ -268,7 +268,7 @@ are just an <code><a href="https://rdrr.io/r/base/apply.html" class="external-li
 each feature:</p>
 <div class="sourceCode" id="cb25"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">shap.mean</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/apply.html" class="external-link">apply</a></span><span class="op">(</span><span class="va">raw.jack</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">2</span>, <span class="va">mean</span><span class="op">)</span>  <span class="co"># same as plain explain() output</span></span>
-<span><span class="va">shap.se</span>   <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/apply.html" class="external-link">apply</a></span><span class="op">(</span><span class="va">raw.jack</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">2</span>, <span class="va">sd</span><span class="op">)</span></span>
+<span><span class="va">shap.se</span>   <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/apply.html" class="external-link">apply</a></span><span class="op">(</span><span class="va">raw.jack</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">2</span>, <span class="va">sd</span><span class="op">)</span> <span class="op">/</span> <span class="fu"><a href="https://rdrr.io/r/base/MathFun.html" class="external-link">sqrt</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="va">raw.jack</span><span class="op">)</span><span class="op">[</span><span class="fl">3L</span><span class="op">]</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">rbind</a></span><span class="op">(</span>mean <span class="op">=</span> <span class="va">shap.mean</span>, se <span class="op">=</span> <span class="va">shap.se</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">##        pclass         age        sex       sibsp       parch</span></span>
@@ -297,11 +297,13 @@ stable the SHAP estimates are for each feature:</p>
 plot of chunk titanic-explain-jack-raw-plot
 </p>
 </div>
-<p>The <code>sex</code> and <code>pclass</code> contributions are
-precisely estimated (narrow intervals) because they dominate Jack’s
-prediction; <code>age</code>, <code>sibsp</code>, and <code>parch</code>
-show more simulation-to-simulation variability, reflecting their smaller
-and noisier contributions.</p>
+<p>With 1,000 simulations all five features are estimated precisely —
+the narrow MC error bars confirm that the algorithm has converged.
+Features with larger absolute contributions (<code>sex</code>,
+<code>pclass</code>) carry proportionally more per-simulation variance,
+but dividing by
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msqrt><msub><mi>n</mi><mtext mathvariant="normal">sim</mtext></msub></msqrt><annotation encoding="application/x-tex">\sqrt{n_{\text{sim}}}</annotation></semantics></math>
+reduces that to a negligible standard error at this sample size.</p>
 </div>
 <div class="section level2">
 <h2 id="global-explanations">Global explanations<a class="anchor" aria-label="anchor" href="#global-explanations"></a>
