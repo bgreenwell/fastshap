@@ -8,7 +8,8 @@ trn <- fastshap::gen_friedman(100, seed = 101)
 X <- subset(trn, select = -y)
 
 # Fit a random forest model
-fit <- ranger::ranger(y ~ ., data = trn, num.trees = 100, seed = 101)
+fit <- ranger::ranger(y ~ ., data = trn, num.trees = 100, seed = 101,
+                      num.threads = 1L)
 
 # Prediction wrapper
 pfun <- function(object, newdata) {

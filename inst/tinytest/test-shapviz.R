@@ -15,7 +15,7 @@ newX <- subset(tst, select = -y)
 
 # Fit a default random forest
 set.seed(2222)  # for reproducibility
-rfo <- ranger::ranger(y ~ ., data = trn)
+rfo <- ranger::ranger(y ~ ., data = trn, num.threads = 1L)
 
 # Prediction wrapper
 pfun <- function(object, newdata) {
