@@ -77,10 +77,24 @@
   existing coercion of `X`), instead of triggering a misleading class-mismatch
   error.
 
+## Documentation
+
+* The vignette was rewritten to run in ~20 seconds (previously ~20 minutes,
+  which required a `.Rmd.orig` precompile workaround that has been removed);
+  it now also demonstrates the exact-vs-approximate comparison and
+  `explain_effects()`'s interaction diagnostic on the Friedman 1 benchmark
+  data.
+
+* README and AGENTS.md were rewritten to match current package conventions
+  (branch model, dependency philosophy, architecture map).
+
 ## Internal
 
 * Removed ~350 lines of dead code: the vendored copy of `abind()` and the
   `copy_classes()` helper (superseded by the column-wise construction).
+
+* Dropped **AmesHousing**, **ggplot2**, and **tibble** from Suggests; they
+  were only used by the old vignette.
 
 
 # fastshap 0.1.5

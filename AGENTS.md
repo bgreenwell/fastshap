@@ -1,57 +1,116 @@
-<!--
+# AGENTS.md — fastshap
 
-This file is for AI agents. It describes how to contribute to this repository.
-It's based on the AGENTS.md standard: https://agents.md/
+R package for **fast, approximate Shapley values** explaining the predictions
+of any supervised learning model. Exports: `explain()` (Monte Carlo Shapley
+values, with exact methods for `lm`/`xgb.Booster`/`lgb.Booster` via
+`exact = TRUE`), `explain_effects()` (deterministic main/total/interaction
+effect decomposition), and `gen_friedman()` (benchmark data generator). Core
+sampling/matrix-construction routines are in C++ (Rcpp/RcppArmadillo,
+`src/fastshap.cpp`).
 
--->
+## Branches & releases
 
-# AGENTS.md
+- **`devel`** (default): all development and PRs. Version carries a `.9000`
+  suffix; NEWS.md starts with `# fastshap (development version)`.
+- **`main`**: stable releases only, tagged `vX.Y.Z`. r-universe (pinned to
+  main in bgreenwell/bgreenwell.r-universe.dev) and the pkgdown site both
+  build from main — never push experimental work there.
+- Release: merge devel → main (`--no-ff`), drop the `.9000` suffix and dev
+  NEWS heading, tag, push, `gh release create`; then **merge main back into
+  devel** (else the release merge commit leaves devel "behind" main) and bump
+  devel to the next `.9000`.
+- Shared fixes that main needs immediately (CI, README): commit to **main
+  first, then merge main → devel**. Never cherry-pick devel → main — it
+  duplicates commits and makes main appear "ahead" of devel.
 
-This document provides instructions for AI agents on how to contribute to the `fastshap` R package.
+## Dependency philosophy
 
-## Purpose of the Package
+Keep Imports minimal: `Rcpp, stats, utils` — nothing else without strong
+justification. `foreach` lives in Suggests and is only touched when
+`parallel = TRUE`; the sequential path is a base `for` loop. Use `pkg::fun()`
+for Suggests packages. `earth` has no code/test call site but is declared in
+Suggests because of an `\link[earth]{earth}` Rd cross-reference in
+`?explain` (and is used in the vignette).
 
-`fastshap` is an R package for computing fast, approximate Shapley values for any supervised learning model. Shapley values are a concept from game theory used to explain the output of machine learning models by attributing the prediction to the input features. The package is designed for performance, using C++ via `Rcpp` and `RcppArmadillo` for the core computations, while providing a user-friendly R interface.
+## Commands
 
-## Development Workflow
+```bash
+Rscript -e 'devtools::document()'                                        # after roxygen edits
+R CMD INSTALL --preclean . && Rscript -e 'library(fastshap); tinytest::run_test_dir("inst/tinytest")'  # full test suite
+Rscript -e 'devtools::check()'                                           # before pushing
+```
 
-The development of this package follows the standard, modern R package development workflow, relying heavily on the `devtools`, `tinytest`, and `pkgdown` packages.
+Reinstalling (rather than `devtools::load_all()`) matters here because the
+core estimator lives in compiled C++ — `load_all()` alone won't pick up
+`src/` changes without a recompile step.
 
-### 1. Core Development with `devtools`
+Tests use **tinytest** (not testthat) in `inst/tinytest/`. Model-specific
+tests (lightgbm/xgboost/ranger) are gated behind `at_home()`, which
+`tests/tinytest.R` derives from either a `.9000` dev version *or*
+`NOT_CRAN=true` — CI must set `NOT_CRAN=true` or the gated suite silently
+skips. Always add a NEWS.md entry; never edit `man/` by hand.
 
-The `devtools` package provides the primary workflow for package development. Common tasks are managed as follows:
+## Architecture (R/)
 
--   **Loading Changes:** To load and test new changes during a development session, use `devtools::load_all()`. This simulates installing and loading the package, making new functions and changes available immediately.
--   **Managing Dependencies:** Package dependencies are declared in the `DESCRIPTION` file. Do not add dependencies manually.
--   **Documentation:** The documentation is generated from `roxygen2` comments in the R source files. After adding or updating these comments, run `devtools::document()` to regenerate the `.Rd` files in the `man/` directory and update the `NAMESPACE` file.
--   **Checking the Package:** Before committing any changes, always run a full package check with `devtools::check()`. This command runs `R CMD check`, which validates the package structure, runs all tests, builds vignettes, and checks for common problems. Ensure the check completes without any errors, warnings, or notes.
+- `explain.R` — `explain()` generic + `explain.default()` (Monte Carlo
+  estimator) and the `explain.lm` / `explain.xgb.Booster` / `explain.lgb.Booster`
+  methods (each dispatches to `explain.default()` unless `exact = TRUE`).
+  Internal helpers: `gen_perm_matrix()` (permutation-order logical matrix per
+  feature), `frankenstein_matrix()` / `frankenstein_df()` (build the two
+  hybrid "Frankenstein" data sets whose prediction difference estimates a
+  feature's marginal contribution), `explain_feature()` (stacks all `nsim`
+  replications for one feature into a single pair of batched `pred_wrapper()`
+  calls, chunked by `batch_size`), and `tree_shap_result()` (shared
+  bias-column-stripping logic for the two exact Tree SHAP methods).
+- `explain_effects.R` — `explain_effects()`: same Frankenstein-matrix
+  machinery as `explain()`, but with fixed (empty/full) coalitions instead of
+  random permutations, so `main`/`total`/`interaction`/`shapley_values` are
+  deterministic (or `nsim`-sampled) rather than Monte Carlo estimates.
+  `shapley_values = (main + total) / 2` is exact for models with at most
+  pairwise interactions.
+- `gen_friedman.R` — Friedman 1 benchmark data generator, used throughout the
+  test suite and vignette (`x1:x2` is the only true interaction, which
+  `explain_effects()`'s interaction diagnostic should isolate).
+- `src/fastshap.cpp` — `genOMat()` (random permutation-order sampling) and
+  `genFrankensteinMatrices()` (C++ backend for `frankenstein_matrix()`; builds
+  the second hybrid matrix from the first via a single column swap, since
+  they differ only in the feature of interest).
 
-### 2. Testing with `tinytest`
+## Performance
 
-This package uses the `tinytest` framework for unit testing and follows a test-driven development (TDD) approach. `tinytest` is a lightweight, dependency-free testing framework.
+`explain()`'s Monte Carlo loop batches predictions: all `nsim` replications
+for a feature are stacked into one pair of `pred_wrapper()` calls (bounded by
+the optional `batch_size` argument), not `2 * nsim` separate calls. All
+randomness is drawn up front so results are invariant to `batch_size` for a
+fixed seed. A deferred idea (permutation-walk / `method = "permutation"`
+estimator, ~2x fewer evaluations per permutation with exact local accuracy)
+and the full profiling/benchmarking behind these decisions are documented in
+`.agents/explain-performance.md` — read that before touching the estimator
+again.
 
--   **Test Location:** All test files are located in the `inst/tinytest/` directory. Each test file should be named `test-*.R`.
--   **Running Tests:** You can run all tests using `tinytest::test_all()` or run specific tests using `tinytest::run_test_file("inst/tinytest/test-*.R")`. The tests are also run automatically as part of `devtools::check()`.
--   **Writing Tests:** When adding new functionality or fixing a bug, a corresponding test should be added *before* the new code is written. Use the `expect_*` functions provided by `tinytest` to make assertions. The existing tests in `inst/tinytest/` should be used as a reference for style and structure. A key testing strategy in this package is to compare the approximate Shapley values against exact values for models where this is possible (e.g., `lm`, `xgboost`).
+## Gotchas
 
-### 3. Website and Documentation with `pkgdown`
+- **Seeded results changed in 0.2.0**: the Monte Carlo loop was vectorized,
+  which changes how the RNG stream is consumed. This is expected and
+  documented in NEWS.md; don't try to match pre-0.2.0 seeded output.
+- `explain.lm(exact = TRUE)` still requires `X` (no default) even though the
+  underlying `predict(type = "terms")` call doesn't use it for computation —
+  it's only used for `feature_values` metadata when `shap_only = FALSE`.
+- A `pred_wrapper` that doesn't return one prediction per row of `newdata`
+  (e.g., a multiclass wrapper accidentally returning a probability matrix)
+  errors informatively inside `explain_feature()`/`explain_effects_feature()`
+  — don't remove that length check.
+- `parallel = TRUE` requires `foreach` to be installed (Suggests, not
+  Imports) and an already-registered backend; it errors informatively if
+  `foreach` is missing rather than silently running sequentially.
 
-The package website and online documentation are built using `pkgdown`.
+## CI / site
 
--   **Website Configuration:** The website's appearance and structure are configured in the `_pkgdown.yml` file.
--   **Building the Website:** To build the website locally, run `pkgdown::build_site()`. This will generate the site in the `docs/` directory.
--   **Vignettes:** Long-form documentation and examples are provided as vignettes in the `vignettes/` directory. **IMPORTANT:** Due to computational intensity of Shapley value calculations, the main vignette uses a two-file system:
-    - `vignettes/fastshap.Rmd.orig` - The source file with executable code chunks that you should edit
-    - `vignettes/fastshap.Rmd` - The processed file with pre-computed output (avoids re-running expensive computations on every build)
-    
-    To update the vignette: (1) Edit `fastshap.Rmd.orig`, (2) Run `knitr::knit("vignettes/fastshap.Rmd.orig", output = "vignettes/fastshap.Rmd")` to generate the final version. The vignettes are compiled and included in the website automatically by `pkgdown`.
--   **Deployment:** The website is deployed automatically via a GitHub Actions workflow defined in `.github/workflows/pkgdown.yaml` whenever changes are pushed to the main branch. You do not need to build the website manually for deployment.
-
-## Summary of Contribution Process
-
-1.  Make changes to the R or C++ source code.
-2.  If you add or modify user-facing functions, update the `roxygen2` comments.
-3.  Run `devtools::document()` to update documentation.
-4.  Add or update tests in `inst/tinytest/`.
-5.  Run `devtools::check()` to ensure the package is valid and all tests pass.
-6.  Commit your changes.
+GitHub Actions (r-lib/actions v2): R-CMD-check + test-coverage on pushes/PRs
+to main and devel; pkgdown builds from **main only** and deploys to
+`gh-pages` (served at https://bgreenwell.github.io/fastshap/). The vignette
+(`vignettes/fastshap.Rmd`) is plain Rmd and runs at build time (~20s) — keep
+it that way; it previously used a `.orig`-file precompile workaround because
+an early draft took ~20 minutes to knit (huge `nsim`/background sizes), which
+is no longer necessary now that predictions are batched. Keep chunks small
+(a few hundred `nsim`, a few hundred background rows) so it stays fast.
