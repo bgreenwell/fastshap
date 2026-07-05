@@ -169,7 +169,9 @@ rows to pass to \code{pred_wrapper()} per call. By default (\code{NULL}), all
 \code{nsim} Monte Carlo replications for a feature are stacked and evaluated in
 a single pair of prediction calls, which is fastest but requires
 \code{2 * nrow(newdata) * nsim * ncol(X)} values of working memory per feature;
-set \code{batch_size} to bound the size of each prediction call instead.}
+set \code{batch_size} to bound the size of each prediction call instead. All of
+the randomness is drawn up front, so for a fixed seed the results are
+identical regardless of \code{batch_size}.}
 }
 \value{
 If \code{shap_only = TRUE} (the default), a matrix is returned with one

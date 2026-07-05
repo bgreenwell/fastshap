@@ -1,5 +1,19 @@
 # fastshap (development version)
 
+## New features
+
+* New `explain_effects()` decomposes each feature's contribution into a
+  `main` effect (the feature's effect in isolation; equal to the centered
+  partial dependence of that feature), a `total` effect (main effect plus
+  every interaction the feature participates in), and their gap
+  (`interaction`, an interaction-strength diagnostic that is exactly zero for
+  additive features). `shapley_values` (the average of `main` and `total`)
+  equals the exact background-marginal Shapley value for any model with at
+  most pairwise interactions — with no Monte Carlo simulation at all by
+  default, since it averages over the entire background rather than sampling
+  coalitions. Set `nsim` to sample background rows instead, for large
+  backgrounds where full averaging is too expensive.
+
 ## Performance
 
 * The Monte Carlo estimation loop was rewritten to batch predictions: all
