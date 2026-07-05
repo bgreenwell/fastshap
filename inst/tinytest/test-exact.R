@@ -78,3 +78,34 @@ expect_identical(
   current = class(ex_exact),
   target = c("matrix", "array")
 )
+
+
+################################################################################
+# Regression tests: exact = TRUE, shap_only = FALSE (GH audit)
+################################################################################
+
+# lm: shap_only=FALSE with newdata=NULL should include "baseline" component
+ex_lm_list <- fastshap::explain(fit_lm, X = X, exact = TRUE, shap_only = FALSE)
+expect_true(is.list(ex_lm_list))
+expect_true(all(c("shapley_values", "feature_values", "baseline") %in% names(ex_lm_list)))
+expect_true(is.numeric(ex_lm_list$baseline))
+
+# lm: shap_only=FALSE with explicit newdata
+ex_lm_list2 <- fastshap::explain(fit_lm, X = X, newdata = X[1:3, ],
+                                  exact = TRUE, shap_only = FALSE)
+expect_equal(nrow(ex_lm_list2$shapley_values), 3L)
+
+# xgb: shap_only=FALSE when data supplied via X (newdata=NULL)
+ex_xgb_list <- fastshap::explain(fit_xgb, X = data.matrix(X[1:5, ]),
+                                  exact = TRUE, shap_only = FALSE)
+expect_true(is.list(ex_xgb_list))
+expect_true(all(c("shapley_values", "feature_values", "baseline") %in% names(ex_xgb_list)))
+expect_equal(nrow(ex_xgb_list$shapley_values), 5L)
+expect_equal(ncol(ex_xgb_list$shapley_values), ncol(X))  # no BIAS column
+
+# exact = TRUE warning for unsupported model type
+fit_ppr <- ppr(y ~ ., data = trn, nterms = 5)
+expect_warning(
+  fastshap::explain(fit_ppr, X = X, pred_wrapper = pfun, nsim = 5, exact = TRUE),
+  pattern = "only supported"
+)

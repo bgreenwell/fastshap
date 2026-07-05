@@ -5,12 +5,10 @@
 
 <!-- badges: start -->
 
-[![CRAN
-status](https://www.r-pkg.org/badges/version/fastshap)](https://CRAN.R-project.org/package=fastshap)
+[![r-universe
+status](https://bgreenwell.r-universe.dev/badges/fastshap)](https://bgreenwell.r-universe.dev/fastshap)
 [![Codecov test
-coverage](https://codecov.io/gh/bgreenwell/fastshap/branch/master/graph/badge.svg)](https://codecov.io/gh/bgreenwell/fastshap?branch=master)
-[![Lifecycle:
-experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://www.tidyverse.org/lifecycle/#experimental)
+coverage](https://codecov.io/gh/bgreenwell/fastshap/branch/main/graph/badge.svg)](https://codecov.io/gh/bgreenwell/fastshap?branch=main)
 [![R-CMD-check](https://github.com/bgreenwell/fastshap/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/bgreenwell/fastshap/actions/workflows/R-CMD-check.yaml)
 <!-- badges: end -->
 
@@ -23,13 +21,18 @@ learning model.
 
 ## Installation
 
+**fastshap** is no longer available on CRAN due to CRAN's stringent
+and ever-changing policies. It is now hosted on
+[r-universe](https://bgreenwell.r-universe.dev/fastshap), which
+provides a reliable alternative for distributing R packages.
+
 ``` r
-# Install the latest stable version from CRAN:
-install.packages("fastshap")
+# Install from r-universe (recommended):
+install.packages("fastshap", repos = c("https://bgreenwell.r-universe.dev", "https://cloud.r-project.org"))
 
 # Install the latest development version from GitHub:
-if (!requireNamespace("remotes")) {
-  install.packages("remotes")
+if (!requireNamespace("pak")) {
+  install.packages("pak")
 }
-remotes::install_github("bgreenwell/fastshap")
+pak::pak("bgreenwell/fastshap")
 ```

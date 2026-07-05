@@ -1,7 +1,7 @@
 Package: fastshap
 Type: Package
 Title: Fast Approximate Shapley Values
-Version: 0.1.4
+Version: 0.1.5
 Authors@R: person("Brandon", "Greenwell", email = "greenwell.brandon@gmail.com", role =
          c("aut", "cre"), comment = c(ORCID = "0000-0002-8120-0084"))
 Description: Computes fast (relative to other implementations) approximate 
@@ -11,7 +11,8 @@ Description: Computes fast (relative to other implementations) approximate
     for details.
 License: GPL (>= 2)
 URL: https://github.com/bgreenwell/fastshap,
-    https://bgreenwell.github.io/fastshap/
+    https://bgreenwell.github.io/fastshap/,
+    https://bgreenwell.r-universe.dev/fastshap
 BugReports: https://github.com/bgreenwell/fastshap/issues
 Imports: 
     foreach,
@@ -20,10 +21,12 @@ Imports:
 Enhances:
     lightgbm,
     xgboost
-Suggests: 
+Suggests:
     AmesHousing,
     covr,
+    doParallel,
     earth,
+    ggplot2,
     knitr,
     ranger,
     rmarkdown,

@@ -23,6 +23,7 @@ explain(object, ...)
   parallel = FALSE,
   raw = FALSE,
   seed = NULL,
+  exact = FALSE,
   ...
 )
 
@@ -153,11 +154,12 @@ standard errors for each (observation, feature) pair. Only supported when
 \code{\link[base:Random]{base::set.seed()}}. Default is \code{NULL} (no seed).}
 
 \item{exact}{Logical indicating whether to compute exact Shapley values.
-Currently only available for \code{\link[stats:lm]{stats::lm()}},
-\code{\link[xgboost:xgboost]{xgboost::xgboost()}}, and \code{\link[lightgbm:lightgbm]{lightgbm::lightgbm()}} objects.
-Default is \code{FALSE}. Note that setting \code{exact = TRUE} will return
-explanations for each of the \code{\link[stats:terms]{stats::terms()}} in an
-\code{\link[stats:lm]{stats::lm()}} object. Default is \code{FALSE}.}
+Currently only supported for \code{\link[stats:lm]{stats::lm()}}, \code{\link[xgboost:xgboost]{xgboost::xgboost()}}, and
+\code{\link[lightgbm:lightgbm]{lightgbm::lightgbm()}} objects (binary/regression only — multiclass is not
+yet supported). Passing \code{exact = TRUE} for any other model type issues a
+warning and falls back to the Monte Carlo approximation. Note that
+\code{exact = TRUE} for \code{\link[stats:lm]{stats::lm()}} returns explanations for each of the
+\code{\link[stats:terms]{stats::terms()}} in the model. Default is \code{FALSE}.}
 }
 \value{
 If \code{shap_only = TRUE} (the default), a matrix is returned with one

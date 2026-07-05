@@ -13,6 +13,7 @@ Useful links:
 \itemize{
   \item \url{https://github.com/bgreenwell/fastshap}
   \item \url{https://bgreenwell.github.io/fastshap/}
+  \item \url{https://bgreenwell.r-universe.dev/fastshap}
   \item Report bugs at \url{https://github.com/bgreenwell/fastshap/issues}
 }
 

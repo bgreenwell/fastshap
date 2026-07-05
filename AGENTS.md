@@ -24,7 +24,7 @@ The `devtools` package provides the primary workflow for package development. Co
 -   **Loading Changes:** To load and test new changes during a development session, use `devtools::load_all()`. This simulates installing and loading the package, making new functions and changes available immediately.
 -   **Managing Dependencies:** Package dependencies are declared in the `DESCRIPTION` file. Do not add dependencies manually.
 -   **Documentation:** The documentation is generated from `roxygen2` comments in the R source files. After adding or updating these comments, run `devtools::document()` to regenerate the `.Rd` files in the `man/` directory and update the `NAMESPACE` file.
--   **Checking the Package:** Before committing any changes, always run a full package check with `devtools::check()`. This command runs `R CMD check`, which is the same process CRAN uses to validate packages. It will run all tests, build vignettes, and check for common problems. Ensure the check completes without any errors, warnings, or notes.
+-   **Checking the Package:** Before committing any changes, always run a full package check with `devtools::check()`. This command runs `R CMD check`, which validates the package structure, runs all tests, builds vignettes, and checks for common problems. Ensure the check completes without any errors, warnings, or notes.
 
 ### 2. Testing with `tinytest`
 
@@ -42,7 +42,7 @@ The package website and online documentation are built using `pkgdown`.
 -   **Building the Website:** To build the website locally, run `pkgdown::build_site()`. This will generate the site in the `docs/` directory.
 -   **Vignettes:** Long-form documentation and examples are provided as vignettes in the `vignettes/` directory. **IMPORTANT:** Due to computational intensity of Shapley value calculations, the main vignette uses a two-file system:
     - `vignettes/fastshap.Rmd.orig` - The source file with executable code chunks that you should edit
-    - `vignettes/fastshap.Rmd` - The processed file with pre-computed output for CRAN submission
+    - `vignettes/fastshap.Rmd` - The processed file with pre-computed output (avoids re-running expensive computations on every build)
     
     To update the vignette: (1) Edit `fastshap.Rmd.orig`, (2) Run `knitr::knit("vignettes/fastshap.Rmd.orig", output = "vignettes/fastshap.Rmd")` to generate the final version. The vignettes are compiled and included in the website automatically by `pkgdown`.
 -   **Deployment:** The website is deployed automatically via a GitHub Actions workflow defined in `.github/workflows/pkgdown.yaml` whenever changes are pushed to the main branch. You do not need to build the website manually for deployment.
