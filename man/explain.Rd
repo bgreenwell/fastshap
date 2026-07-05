@@ -24,6 +24,7 @@ explain(object, ...)
   raw = FALSE,
   seed = NULL,
   exact = FALSE,
+  batch_size = NULL,
   ...
 )
 
@@ -78,12 +79,8 @@ explain(object, ...)
 a few).}
 
 \item{...}{Additional optional arguments to be passed on to
-\code{\link[foreach:foreach]{foreach::foreach()}} whenever \code{parallel = TRUE}. For example, you may need
-to supply additional packages that the parallel task depends on via the
-\code{.packages} argument to \code{\link[foreach:foreach]{foreach::foreach()}}. \strong{NOTE:}
-\code{\link[foreach:foreach]{foreach::foreach()}}'s \code{.combine} argument is already set internally by
-\code{explain()}, so passing it via the \code{...} argument would likely result in an
-error.}
+\code{\link[foreach:foreach]{foreach::foreach()}} whenever \code{parallel = TRUE} (e.g., \code{.packages} for
+loading packages on the workers); ignored otherwise.}
 
 \item{feature_names}{Character string giving the names of the predictor
 variables (i.e., features) of interest. If \code{NULL} (default) they will be
@@ -137,10 +134,14 @@ Default is \code{TRUE}.}
 
 \item{parallel}{Logical indicating whether or not to compute the approximate
 Shapley values in parallel across features; default is \code{FALSE}. \strong{NOTE:}
-setting \code{parallel = TRUE} requires setting up an appropriate (i.e.,
-system-specific) \emph{parallel backend} as described in the
-\href{https://cran.r-project.org/package=foreach}{foreach}; for details, see
-\code{vignette("foreach", package = "foreach")} in R.}
+setting \code{parallel = TRUE} requires the
+\href{https://cran.r-project.org/package=foreach}{foreach} package (in
+Suggests) and an appropriate (i.e., system-specific) \emph{parallel backend}
+(e.g., via the doParallel package). For reproducible parallel results, use
+the doRNG package to register the backend. Note that the internal batching
+of predictions (see \code{batch_size}) means models whose \code{predict()} methods
+are already multithreaded (e.g., ranger or xgboost) often gain little from
+\code{parallel = TRUE}.}
 
 \item{raw}{Logical indicating whether or not to return the raw per-simulation
 Shapley values from each Monte Carlo replication. If \code{TRUE}, a 3-D array
@@ -151,7 +152,9 @@ standard errors for each (observation, feature) pair. Only supported when
 \code{adjust = FALSE}. Default is \code{FALSE}.}
 
 \item{seed}{Integer specifying a random seed for reproducibility; passed to
-\code{\link[base:Random]{base::set.seed()}}. Default is \code{NULL} (no seed).}
+\code{\link[base:Random]{base::set.seed()}}. Default is \code{NULL} (no seed). \strong{NOTE:} the Monte Carlo
+loop was restructured (vectorized) in version 0.2.0, so seeded results
+differ from those produced by fastshap (<= 0.1.5).}
 
 \item{exact}{Logical indicating whether to compute exact Shapley values.
 Currently only supported for \code{\link[stats:lm]{stats::lm()}}, \code{\link[xgboost:xgboost]{xgboost::xgboost()}}, and
@@ -160,6 +163,13 @@ yet supported). Passing \code{exact = TRUE} for any other model type issues a
 warning and falls back to the Monte Carlo approximation. Note that
 \code{exact = TRUE} for \code{\link[stats:lm]{stats::lm()}} returns explanations for each of the
 \code{\link[stats:terms]{stats::terms()}} in the model. Default is \code{FALSE}.}
+
+\item{batch_size}{Optional positive integer giving the maximum number of
+rows to pass to \code{pred_wrapper()} per call. By default (\code{NULL}), all
+\code{nsim} Monte Carlo replications for a feature are stacked and evaluated in
+a single pair of prediction calls, which is fastest but requires
+\code{2 * nrow(newdata) * nsim * ncol(X)} values of working memory per feature;
+set \code{batch_size} to bound the size of each prediction call instead.}
 }
 \value{
 If \code{shap_only = TRUE} (the default), a matrix is returned with one
@@ -206,12 +216,12 @@ fit <- ppr(mpg ~ ., data = mtcars, nterms = 5)
 
 # Prediction wrapper
 pfun <- function(object, newdata) {  # needs to return a numeric vector
-  predict(object, newdata = newdata)  
+  predict(object, newdata = newdata)
 }
 
 # Compute approximate Shapley values using 10 Monte Carlo simulations
 set.seed(101)  # for reproducibility
-shap <- explain(fit, X = subset(mtcars, select = -mpg), nsim = 10, 
+shap <- explain(fit, X = subset(mtcars, select = -mpg), nsim = 10,
                 pred_wrapper = pfun)
 head(shap)
 }

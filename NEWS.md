@@ -1,5 +1,73 @@
 # fastshap (development version)
 
+## Performance
+
+* The Monte Carlo estimation loop was rewritten to batch predictions: all
+  `nsim` replications for a feature are now stacked and evaluated in a single
+  pair of `pred_wrapper()` calls (previously `2 * nsim` calls per feature),
+  letting vectorized/multithreaded `predict()` methods do the heavy lifting.
+  Combined with the other changes below, `explain()` is roughly 2.5x faster
+  on a typical ranger example (500 x 10 data frame, `nsim = 10`), with much
+  larger gains for prediction functions with high per-call overhead.
+
+* New `batch_size` argument for `explain()` bounds the number of rows passed
+  to `pred_wrapper()` per call (memory/speed trade-off). All randomness is
+  drawn up front, so seeded results are identical regardless of `batch_size`.
+
+* When `newdata` is supplied, the internal permutation matrix is now generated
+  at `nrow(newdata)` instead of at the (potentially much larger) background
+  size and then subsampled; explaining a few rows against a large background
+  no longer wastes time generating discarded random rows.
+
+* Data frame inputs are now processed column-wise instead of via matrix-style
+  logical indexing of data frames (one of the slowest operations in base R);
+  this also preserves column classes by construction, eliminating two
+  `copy_classes()` calls per Monte Carlo evaluation.
+
+* The C++ routine that assembles the hybrid ("Frankenstein") data sets now
+  passes inputs by reference, skips a no-op assignment, and constructs the
+  second data set from the first via a single column swap (the two differ
+  only in the feature of interest).
+
+## Breaking changes
+
+* Seeded results differ from fastshap (<= 0.1.5): the Monte Carlo loop was
+  vectorized, which changes how the random number stream is consumed. The
+  estimator itself is unchanged.
+
+* **foreach** moved from Imports to Suggests. Sequential execution (the
+  default) no longer touches **foreach**; `parallel = TRUE` requires it to be
+  installed and errors informatively otherwise. The dead `.options.RNG`
+  argument (only honored by `%dorng%`, which fastshap never used) is no longer
+  passed; for reproducible parallel results, register a **doRNG** backend.
+
+* `gen_friedman()`'s deprecated `n_bins` argument was removed.
+
+## Fixed
+
+* `explain()` with `exact = TRUE` and `shap_only = TRUE` (the default) for
+  `xgb.Booster` and `lgb.Booster` objects now correctly retains the
+  `"baseline"` attribute and `"explain"` class; previously both were silently
+  dropped when the bias column was subset out of the result (the baseline
+  attribute was lost for both model types, and the class was also lost for
+  `xgb.Booster`).
+
+* Unknown values in `feature_names` now error informatively instead of
+  failing obscurely downstream.
+
+* A `pred_wrapper` that does not return one prediction per row (e.g., a
+  multiclass probability matrix) now errors informatively instead of
+  producing corrupted output.
+
+* A `tbl_df` passed as `newdata` is now coerced to a data frame (matching the
+  existing coercion of `X`), instead of triggering a misleading class-mismatch
+  error.
+
+## Internal
+
+* Removed ~350 lines of dead code: the vendored copy of `abind()` and the
+  `copy_classes()` helper (superseded by the column-wise construction).
+
 
 # fastshap 0.1.5
 

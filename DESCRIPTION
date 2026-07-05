@@ -14,9 +14,9 @@ URL: https://github.com/bgreenwell/fastshap,
     https://bgreenwell.github.io/fastshap/,
     https://bgreenwell.r-universe.dev/fastshap
 BugReports: https://github.com/bgreenwell/fastshap/issues
-Imports: 
-    foreach,
-    Rcpp (>= 1.0.1), 
+Imports:
+    Rcpp (>= 1.0.1),
+    stats,
     utils
 Enhances:
     lightgbm,
@@ -26,6 +26,7 @@ Suggests:
     covr,
     doParallel,
     earth,
+    foreach,
     ggplot2,
     knitr,
     ranger,

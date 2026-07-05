@@ -24,14 +24,14 @@ BEGIN_RCPP
 END_RCPP
 }
 // genFrankensteinMatrices
-List genFrankensteinMatrices(arma::mat X, arma::mat W, arma::umat O, int feature);
+List genFrankensteinMatrices(const arma::mat& X, const arma::mat& W, const arma::umat& O, int feature);
 RcppExport SEXP _fastshap_genFrankensteinMatrices(SEXP XSEXP, SEXP WSEXP, SEXP OSEXP, SEXP featureSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< arma::mat >::type X(XSEXP);
-    Rcpp::traits::input_parameter< arma::mat >::type W(WSEXP);
-    Rcpp::traits::input_parameter< arma::umat >::type O(OSEXP);
+    Rcpp::traits::input_parameter< const arma::mat& >::type X(XSEXP);
+    Rcpp::traits::input_parameter< const arma::mat& >::type W(WSEXP);
+    Rcpp::traits::input_parameter< const arma::umat& >::type O(OSEXP);
     Rcpp::traits::input_parameter< int >::type feature(featureSEXP);
     rcpp_result_gen = Rcpp::wrap(genFrankensteinMatrices(X, W, O, feature));
     return rcpp_result_gen;
