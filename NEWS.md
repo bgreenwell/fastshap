@@ -59,6 +59,14 @@
 
 ## Fixed
 
+* `explain(..., parallel = TRUE)` on socket-based clusters (the default
+  cluster type on Windows, where workers start with no packages attached)
+  no longer fails with `could not find function "explain_feature"`. The
+  0.2.0 batching rewrite moved the per-feature computation behind an extra
+  layer of internal function calls, which broke `foreach`'s automatic
+  export of the (non-exported) worker function on such clusters; the
+  fastshap namespace is now explicitly added to `.packages`.
+
 * `explain()` with `exact = TRUE` and `shap_only = TRUE` (the default) for
   `xgb.Booster` and `lgb.Booster` objects now correctly retains the
   `"baseline"` attribute and `"explain"` class; previously both were silently

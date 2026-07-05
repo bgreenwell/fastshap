@@ -193,7 +193,10 @@ explain_feature <- function(object, col, X, nsim, pred_wrapper, newdata,
 #' the doRNG package to register the backend. Note that the internal batching
 #' of predictions (see `batch_size`) means models whose `predict()` methods
 #' are already multithreaded (e.g., ranger or xgboost) often gain little from
-#' `parallel = TRUE`.
+#' `parallel = TRUE`. The fastshap namespace is always added to `.packages`
+#' automatically (socket-based clusters, the default on Windows, start with
+#' no packages attached), so any *additional* packages needed by
+#' `pred_wrapper` should be supplied via `.packages` as usual.
 #'
 #' @param seed Integer specifying a random seed for reproducibility; passed to
 #' [base::set.seed()]. Default is `NULL` (no seed). **NOTE:** the Monte Carlo
@@ -419,7 +422,16 @@ explain.default <- function(object, feature_names = NULL, X = NULL, nsim = 1,
     }
     `%dopar%` <- foreach::`%dopar%`
     col.i <- NULL  # avoid R CMD check note about undefined global
-    Ds <- foreach::foreach(col.i = cols, ...) %dopar% {
+    # `compute_D()` is a closure over `explain_feature()`, an internal
+    # (non-exported) function one level removed from the loop body itself.
+    # foreach's automatic export only inspects the loop body's own free
+    # variables (here, just `compute_D`), so on socket-based clusters (the
+    # default on Windows, where workers are fresh R sessions with no
+    # packages attached) `explain_feature()` would not be found unless the
+    # fastshap namespace is explicitly loaded on each worker.
+    dots <- list(...)
+    dots$.packages <- unique(c("fastshap", dots$.packages))
+    Ds <- do.call(foreach::foreach, c(list(col.i = cols), dots)) %dopar% {
       compute_D(col.i)
     }
     for (j in seq_len(nfeat)) {

@@ -141,7 +141,10 @@ Suggests) and an appropriate (i.e., system-specific) \emph{parallel backend}
 the doRNG package to register the backend. Note that the internal batching
 of predictions (see \code{batch_size}) means models whose \code{predict()} methods
 are already multithreaded (e.g., ranger or xgboost) often gain little from
-\code{parallel = TRUE}.}
+\code{parallel = TRUE}. The fastshap namespace is always added to \code{.packages}
+automatically (socket-based clusters, the default on Windows, start with
+no packages attached), so any \emph{additional} packages needed by
+\code{pred_wrapper} should be supplied via \code{.packages} as usual.}
 
 \item{raw}{Logical indicating whether or not to return the raw per-simulation
 Shapley values from each Monte Carlo replication. If \code{TRUE}, a 3-D array
