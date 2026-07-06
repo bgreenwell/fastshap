@@ -1,4 +1,4 @@
-# fastshap (development version)
+# fastshap 0.3.0
 
 ## New features
 
