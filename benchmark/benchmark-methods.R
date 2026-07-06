@@ -1,10 +1,16 @@
-## Benchmark: exact vs. method = "strumbelj" (default) vs. method = "permutation"
+## Benchmark: exact/reference vs. method = "strumbelj" (default) vs.
+## method = "permutation"
 ##
-## Compares accuracy (agreement with exact Shapley values) and wall-clock time
-## across a grid of `nsim` values, for two model types that support exact
-## Shapley values out of the box:
-##   - lm       (exact = Linear SHAP)
-##   - xgboost  (exact = Tree SHAP; skipped if xgboost is not installed)
+## Compares accuracy (agreement with a ground truth) and wall-clock time
+## across a grid of `nsim` values, for three model types:
+##   - lm       (ground truth = exact Linear SHAP)
+##   - xgboost  (ground truth = exact Tree SHAP; skipped if not installed)
+##   - ranger   (no exact method available for random forests, so the ground
+##               truth here is a "reference" value: the default estimator run
+##               at a much larger nsim than anything in the timed grid below.
+##               This is NOT exact -- it's a high-precision MC estimate used
+##               as a stand-in so ranger can still be scored for accuracy;
+##               skipped if ranger is not installed)
 ##
 ## This directory is excluded from the built package via .Rbuildignore; run it
 ## from an interactive session or `Rscript benchmark/benchmark-methods.R` from
@@ -17,11 +23,12 @@
 suppressMessages(library(fastshap))
 
 set.seed(101)
-n_background <- 1000L
-p_features   <- 10L
-n_explain    <- 50L
-nsim_grid    <- c(10L, 25L, 50L, 100L, 250L, 500L)
-timing_reps  <- 3L
+n_background  <- 1000L
+p_features    <- 10L
+n_explain     <- 50L
+nsim_grid     <- c(10L, 25L, 50L, 100L, 250L, 500L)
+timing_reps   <- 3L
+reference_nsim <- 5000L  # for models with no exact method (e.g., ranger)
 
 trn <- gen_friedman(n_background, seed = 101)
 X <- subset(trn, select = -y)
@@ -33,8 +40,12 @@ newdata <- X[seq_len(n_explain), ]
 #' Uses a fixed seed so every repetition is identical (fastshap's batched
 #' estimators are seed-reproducible), so `timing_reps` only reduces timing
 #' noise -- it does not change the result used for the accuracy metrics.
-benchmark_one <- function(fit, pred_wrapper, method, nsim, exact_vals,
-                          model_label) {
+#'
+#' `ground_truth` is either true exact Shapley values or (for models with no
+#' exact method) a high-nsim reference estimate -- `ground_truth_label`
+#' records which, so the printed/saved results stay honest about it.
+benchmark_one <- function(fit, pred_wrapper, method, nsim, ground_truth,
+                          ground_truth_label, model_label) {
   times <- numeric(timing_reps)
   result <- NULL
   for (i in seq_len(timing_reps)) {
@@ -45,24 +56,28 @@ benchmark_one <- function(fit, pred_wrapper, method, nsim, exact_vals,
     })
     times[i] <- t[["elapsed"]]
   }
-  err <- as.numeric(result) - as.numeric(exact_vals)
+  err <- as.numeric(result) - as.numeric(ground_truth)
   data.frame(
     model = model_label,
     method = method,
     nsim = nsim,
     elapsed = median(times),
-    cor = cor(as.numeric(result), as.numeric(exact_vals)),
+    cor = cor(as.numeric(result), as.numeric(ground_truth)),
     rmse = sqrt(mean(err^2)),
-    max_abs_err = max(abs(err))
+    max_abs_err = max(abs(err)),
+    ground_truth = ground_truth_label
   )
 }
 
 
-run_scenario <- function(fit, pred_wrapper, exact_vals, model_label) {
+run_scenario <- function(fit, pred_wrapper, ground_truth, model_label,
+                         ground_truth_label = "exact") {
   do.call(rbind, lapply(nsim_grid, function(nsim) {
     rbind(
-      benchmark_one(fit, pred_wrapper, "strumbelj", nsim, exact_vals, model_label),
-      benchmark_one(fit, pred_wrapper, "permutation", nsim, exact_vals, model_label)
+      benchmark_one(fit, pred_wrapper, "strumbelj", nsim, ground_truth,
+                   ground_truth_label, model_label),
+      benchmark_one(fit, pred_wrapper, "permutation", nsim, ground_truth,
+                   ground_truth_label, model_label)
     )
   }))
 }
@@ -103,6 +118,32 @@ if (requireNamespace("xgboost", quietly = TRUE)) {
 
 
 ################################################################################
+# Scenario 3: ranger (no exact method -- scored against a high-nsim reference)
+################################################################################
+
+if (requireNamespace("ranger", quietly = TRUE)) {
+  cat("Running ranger scenario...\n")
+  set.seed(103)
+  fit_rfo <- ranger::ranger(y ~ ., data = trn, num.trees = 500, num.threads = 1L)
+  pfun_rfo <- function(object, newdata) predict(object, data = newdata)$predictions
+
+  # No exact = TRUE for ranger; use a much larger nsim than the timed grid,
+  # via the established baseline method (not permutation, to avoid any
+  # appearance of circularity in scoring permutation against its own
+  # reference), as a high-precision stand-in instead (labeled as such below,
+  # not "exact")
+  set.seed(2025)
+  reference_rfo <- explain(fit_rfo, X = X, pred_wrapper = pfun_rfo,
+                           newdata = newdata, nsim = reference_nsim,
+                           method = "strumbelj")
+  results$ranger <- run_scenario(fit_rfo, pfun_rfo, reference_rfo, "ranger",
+                                 ground_truth_label = paste0("reference (nsim=", reference_nsim, ")"))
+} else {
+  cat("ranger not installed -- skipping that scenario.\n")
+}
+
+
+################################################################################
 # Combine, print, save
 ################################################################################
 
@@ -115,13 +156,19 @@ res$max_abs_err <- round(res$max_abs_err, 5)
 
 cat("\n")
 print(res)
+cat("\nGround truth by model:\n")
+print(unique(res[, c("model", "ground_truth")]), row.names = FALSE)
 
 write.csv(res, file.path("benchmark", "benchmark-results.csv"), row.names = FALSE)
 cat("\nResults written to benchmark/benchmark-results.csv\n")
 
 
 ################################################################################
-# Plot: accuracy (correlation with exact) and time vs. nsim, per model/method
+# Plot: accuracy (correlation with ground truth) and time vs. nsim, per
+# model/method. Note "ground truth" means true exact Shapley values for lm and
+# xgboost, but a high-nsim reference estimate for ranger (see console output
+# above) -- these are not the same guarantee, and the plot legend/labels below
+# don't distinguish them, so consult the printed table for that distinction.
 ################################################################################
 
 png(file.path("benchmark", "benchmark-plot.png"), width = 900, height = 450, res = 120)
@@ -133,7 +180,7 @@ cols <- c(strumbelj = "#1b9e77", permutation = "#d95f02")
 ltys <- setNames(seq_along(models), models)
 
 plot(range(res$nsim), range(res$cor), type = "n", log = "x",
-    xlab = "nsim", ylab = "cor(estimate, exact)",
+    xlab = "nsim", ylab = "cor(estimate, ground truth)",
     main = "Accuracy vs. nsim")
 for (m in models) {
   for (meth in methods) {
@@ -142,8 +189,9 @@ for (m in models) {
   }
 }
 legend("bottomright", legend = c(methods, models),
-      col = c(cols, "black", "black"),
-      lty = c(1, 1, ltys), pch = c(16, 16, NA, NA), bty = "n", cex = 0.8)
+      col = c(cols, rep("black", length(models))),
+      lty = c(1, 1, ltys), pch = c(16, 16, rep(NA, length(models))),
+      bty = "n", cex = 0.8)
 
 plot(range(res$nsim), range(res$elapsed), type = "n", log = "xy",
     xlab = "nsim", ylab = "elapsed time (s)",
