@@ -23,6 +23,18 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// genPermMat
+IntegerMatrix genPermMat(int N, int p);
+RcppExport SEXP _fastshap_genPermMat(SEXP NSEXP, SEXP pSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< int >::type N(NSEXP);
+    Rcpp::traits::input_parameter< int >::type p(pSEXP);
+    rcpp_result_gen = Rcpp::wrap(genPermMat(N, p));
+    return rcpp_result_gen;
+END_RCPP
+}
 // genFrankensteinMatrices
 List genFrankensteinMatrices(const arma::mat& X, const arma::mat& W, const arma::umat& O, int feature);
 RcppExport SEXP _fastshap_genFrankensteinMatrices(SEXP XSEXP, SEXP WSEXP, SEXP OSEXP, SEXP featureSEXP) {
@@ -40,6 +52,7 @@ END_RCPP
 
 static const R_CallMethodDef CallEntries[] = {
     {"_fastshap_genOMat", (DL_FUNC) &_fastshap_genOMat, 2},
+    {"_fastshap_genPermMat", (DL_FUNC) &_fastshap_genPermMat, 2},
     {"_fastshap_genFrankensteinMatrices", (DL_FUNC) &_fastshap_genFrankensteinMatrices, 4},
     {NULL, NULL, 0}
 };

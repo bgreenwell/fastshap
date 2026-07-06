@@ -71,10 +71,26 @@ skips. Always add a NEWS.md entry; never edit `man/` by hand.
 - `gen_friedman.R` — Friedman 1 benchmark data generator, used throughout the
   test suite and vignette (`x1:x2` is the only true interaction, which
   `explain_effects()`'s interaction diagnostic should isolate).
-- `src/fastshap.cpp` — `genOMat()` (random permutation-order sampling) and
-  `genFrankensteinMatrices()` (C++ backend for `frankenstein_matrix()`; builds
-  the second hybrid matrix from the first via a single column swap, since
-  they differ only in the feature of interest).
+- `explain_permutation.R` — `explain_permutation()`: the `method =
+  "permutation"` estimator (GH #87). Walks a single random permutation
+  through all `p = ncol(X)` features per replication (flip one feature at a
+  time, background → foreground), reading off each feature's contribution as
+  the consecutive prediction difference; ~half the predictions of the
+  default estimator for computing every feature, with exact per-walk local
+  accuracy. Reuses `frankenstein_matrix()`/`frankenstein_df()` unmodified
+  (same fixed-mask pattern as `explain_effects_feature()`) — no new hybrid
+  matrix construction needed, since `B1`'s construction only depends on the
+  mask, not the `col`/`feature` argument (which only affects the discarded
+  `B2`). Chunk-local accumulation only (bounded by `batch_size`), same as
+  `explain_feature()` — does not allocate the full `n x p x nsim` array
+  unless `raw = TRUE`.
+- `src/fastshap.cpp` — `genOMat()` (random permutation-order sampling for the
+  default estimator), `genPermMat()` (samples full random permutations of
+  `1:p` for `explain_permutation()` — a genuinely different primitive from
+  `genOMat()`, which only encodes one feature's relative-order bit, not a
+  full ordering), and `genFrankensteinMatrices()` (C++ backend for
+  `frankenstein_matrix()`; builds the second hybrid matrix from the first via
+  a single column swap, since they differ only in the feature of interest).
 
 ## Performance
 
@@ -82,11 +98,12 @@ skips. Always add a NEWS.md entry; never edit `man/` by hand.
 for a feature are stacked into one pair of `pred_wrapper()` calls (bounded by
 the optional `batch_size` argument), not `2 * nsim` separate calls. All
 randomness is drawn up front so results are invariant to `batch_size` for a
-fixed seed. A deferred idea (permutation-walk / `method = "permutation"`
-estimator, ~2x fewer evaluations per permutation with exact local accuracy)
-and the full profiling/benchmarking behind these decisions are documented in
-`.agents/explain-performance.md` — read that before touching the estimator
-again.
+fixed seed. The permutation-walk estimator (`method = "permutation"`,
+`explain_permutation.R`) landed in 0.2.0.9000 — it is no longer a deferred
+idea. The full profiling/benchmarking behind the batching work, and the
+review of GH #86 that led to both `explain_effects()` and the permutation
+walk, are documented in `.agents/explain-performance.md` (untracked local
+notes, not shipped).
 
 ## Gotchas
 
@@ -103,6 +120,18 @@ again.
 - `parallel = TRUE` requires `foreach` to be installed (Suggests, not
   Imports) and an already-registered backend; it errors informatively if
   `foreach` is missing rather than silently running sequentially.
+- `method = "permutation"`'s local accuracy is an **exact per-walk**
+  identity (each replication's contributions sum exactly to
+  `f(x) - f(background)`, verifiable via `raw = TRUE`) — the finite-`nsim`
+  *averaged* output (`phis`) still carries ordinary Monte Carlo noise, same
+  as the default estimator's unadjusted output. Don't test/assume exact
+  row-sum equality on `phis` itself at finite `nsim`.
+- `method = "permutation"` always walks all `p = ncol(X)` features
+  internally (required for the telescoping property) — `feature_names` only
+  subsets the *output*, unlike `method = "strumbelj"` where it reduces the
+  actual work performed. This is tested explicitly (a call/row-counting
+  `pred_wrapper` in `test-permutation.R`) — don't "optimize" this away
+  without checking that test's reasoning first.
 
 ## CI / site
 

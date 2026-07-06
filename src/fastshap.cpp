@@ -49,6 +49,32 @@ LogicalMatrix genOMat(int num_rows, int num_cols) {
 
 
 // [[Rcpp::export]]
+IntegerMatrix genPermMat(int N, int p) {
+
+  // Parameters
+  // ----------
+  //
+  //   N: Integer specifying the number of independent random permutations to
+  //      draw (one per Monte Carlo "walk")
+  //   p: Integer specifying the number of features (i.e., columns of X)
+  //
+  // Results
+  // -------
+  //
+  //   An N x p integer matrix; each row is an independent random permutation
+  //   of 1:p, giving the order in which features are flipped from background
+  //   to foreground along that walk.
+
+  IntegerMatrix perm(N, p);
+  for (int i = 0; i < N; i++) {
+    perm(i, _) = sample(p, p, false);  // Rcpp sugar; consumes R's RNG stream
+  }
+  return perm;
+
+}
+
+
+// [[Rcpp::export]]
 List genFrankensteinMatrices(const arma::mat& X, const arma::mat& W,
                              const arma::umat& O, int feature) {
 

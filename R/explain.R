@@ -226,6 +226,25 @@ explain_feature <- function(object, col, X, nsim, pred_wrapper, newdata,
 #' the randomness is drawn up front, so for a fixed seed the results are
 #' identical regardless of `batch_size`.
 #'
+#' @param method Character string specifying the Monte Carlo estimator to use
+#' (only relevant when `exact = FALSE`). `"strumbelj"` (the default) is the
+#' Strumbelj and Kononenko (2014) estimator described above: independent
+#' random coalitions per feature, `2 * nsim` predictions per feature
+#' (`2 * nsim * p` total for `p` features), and supports `feature_names`
+#' subsetting (requesting fewer features costs proportionally less) and
+#' `parallel = TRUE`. `"permutation"` walks a single random permutation
+#' through *all* features per replication, flipping one feature at a time
+#' from background to foreground and reading off each feature's contribution
+#' as the consecutive prediction difference; this costs about `nsim * p`
+#' predictions *for all features combined* (roughly half of `"strumbelj"`'s
+#' cost for computing every feature), and each replication's contributions
+#' sum *exactly* to `f(x) - f(background)` (verifiable via `raw = TRUE`),
+#' so `adjust = TRUE` is inapplicable (and an error) for this method. Because
+#' the telescoping property requires walking every feature regardless of
+#' what is requested, `feature_names` only subsets the *output* under
+#' `"permutation"` — it does not reduce the amount of work performed, unlike
+#' `"strumbelj"`. `parallel = TRUE` is not yet supported for `"permutation"`.
+#'
 #' @param ... Additional optional arguments to be passed on to
 #' [foreach::foreach()] whenever `parallel = TRUE` (e.g., `.packages` for
 #' loading packages on the workers); ignored otherwise.
@@ -302,7 +321,10 @@ explain.default <- function(object, feature_names = NULL, X = NULL, nsim = 1,
                             pred_wrapper = NULL, newdata = NULL, adjust = FALSE,
                             baseline = NULL, shap_only = TRUE, parallel = FALSE,
                             raw = FALSE, seed = NULL, exact = FALSE,
-                            batch_size = NULL, ...) {
+                            batch_size = NULL,
+                            method = c("strumbelj", "permutation"), ...) {
+
+  method <- match.arg(method)
 
   # Set seed for reproducibility
   if (!is.null(seed)) {
@@ -323,6 +345,19 @@ explain.default <- function(object, feature_names = NULL, X = NULL, nsim = 1,
   if (!is.null(batch_size) && (!is.numeric(batch_size) ||
       length(batch_size) != 1L || batch_size < 1)) {
     stop("`batch_size` must be a single positive integer.", call. = FALSE)
+  }
+  if (method == "permutation") {
+    if (isTRUE(parallel)) {
+      stop("`parallel = TRUE` is not yet supported when `method = \"permutation\"`; ",
+           "use `method = \"strumbelj\"` (the default) for parallel execution.",
+           call. = FALSE)
+    }
+    if (isTRUE(adjust)) {
+      stop("`adjust = TRUE` is not applicable when `method = \"permutation\"`: ",
+           "local accuracy holds by construction for this estimator (each ",
+           "replication's contributions sum exactly to f(x) - f(background)).",
+           call. = FALSE)
+    }
   }
   if (is.null(X)) {
     stop("Training features required for approximate Shapley values. Please ",
@@ -419,7 +454,25 @@ explain.default <- function(object, feature_names = NULL, X = NULL, nsim = 1,
                     batch_size = batch_size)
   }
 
-  if (isTRUE(parallel)) {
+  if (method == "permutation") {
+    # explain_permutation() always walks all p = ncol(X) features (required
+    # for the telescoping/local-accuracy property); `feature_names` only
+    # subsets the *output* here, unlike the strumbelj path where it reduces
+    # the actual amount of work done.
+    if (isTRUE(raw)) {
+      raw_full <- explain_permutation(object, X = X, nsim = nsim,
+                                      pred_wrapper = pred_wrapper,
+                                      newdata = newdata, raw = TRUE,
+                                      batch_size = batch_size)
+      raw_arr <- raw_full[, cols, , drop = FALSE]
+    } else {
+      phis_full <- explain_permutation(object, X = X, nsim = nsim,
+                                       pred_wrapper = pred_wrapper,
+                                       newdata = newdata, raw = FALSE,
+                                       batch_size = batch_size)
+      phis <- phis_full[, cols, drop = FALSE]
+    }
+  } else if (isTRUE(parallel)) {
     if (!requireNamespace("foreach", quietly = TRUE)) {
       stop("Package \"foreach\" is required whenever `parallel = TRUE`. ",
            "Install it and register a parallel backend (e.g., via the ",

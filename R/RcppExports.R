@@ -5,6 +5,10 @@ genOMat <- function(num_rows, num_cols) {
     .Call(`_fastshap_genOMat`, num_rows, num_cols)
 }
 
+genPermMat <- function(N, p) {
+    .Call(`_fastshap_genPermMat`, N, p)
+}
+
 genFrankensteinMatrices <- function(X, W, O, feature) {
     .Call(`_fastshap_genFrankensteinMatrices`, X, W, O, feature)
 }
