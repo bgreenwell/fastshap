@@ -1,5 +1,22 @@
 # fastshap (development version)
 
+## New features
+
+* New `method = "permutation"` argument to `explain()` (GH #87): an
+  alternative Monte Carlo estimator that walks a single random permutation
+  through all features per replication instead of drawing independent
+  coalitions per feature. This computes every feature's contribution from
+  roughly half as many predictions as the default (`method = "strumbelj"`)
+  estimator, and each replication's contributions sum *exactly* to
+  `f(x) - f(background)` by construction, so `adjust = TRUE` (which corrects
+  for the lack of that property under the default estimator) is not
+  applicable and errors informatively if requested together with
+  `method = "permutation"`. `parallel = TRUE` is not yet supported for this
+  method. Because the telescoping property requires walking every feature
+  regardless of what's requested, `feature_names` only subsets the *output*
+  under `method = "permutation"` (unlike the default estimator, whose cost
+  scales down with fewer requested features) — see `?explain` for details.
+
 
 # fastshap 0.2.0
 
