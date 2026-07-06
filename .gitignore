@@ -17,3 +17,5 @@ rjarticle/*_cache/
 rjarticle/*_files/
 conductor/
 .agents/
+benchmark/benchmark-results.csv
+benchmark/benchmark-plot.png

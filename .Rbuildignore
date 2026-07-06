@@ -10,6 +10,7 @@
 ^pkgdown$
 ^rjarticle$
 ^tools$
+^benchmark$
 ^AGENTS\.md$
 ^CLAUDE\.md$
 ^conductor$
