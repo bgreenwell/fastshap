@@ -73,11 +73,14 @@ expect_identical(
   target = colnames(X)
 )
 
-# Check class 
+# Check class; prior to version 0.2.0 the "explain" class (and the "baseline"
+# attribute) were silently dropped by subsetting out the bias column AFTER
+# attaching them
 expect_identical(
   current = class(ex_exact),
-  target = c("matrix", "array")
+  target = c("explain", "matrix", "array")
 )
+expect_true(!is.null(attr(ex_exact, which = "baseline")))
 
 
 ################################################################################

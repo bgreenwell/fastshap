@@ -8,7 +8,8 @@ trn <- fastshap::gen_friedman(100, seed = 101)
 X <- subset(trn, select = -y)
 
 # Fit a random forest model
-fit <- ranger::ranger(y ~ ., data = trn, num.trees = 100, seed = 101)
+fit <- ranger::ranger(y ~ ., data = trn, num.trees = 100, seed = 101,
+                      num.threads = 1L)
 
 # Prediction wrapper
 pfun <- function(object, newdata) {
@@ -41,8 +42,12 @@ expect_equal(dim(shap_raw_1), c(1L, ncol(X), nsim))
 # It should also work with parallel execution
 if (requireNamespace("foreach", quietly = TRUE) &&
     requireNamespace("doParallel", quietly = TRUE)) {
-  # Use makeCluster so PSOCK workers on Windows also get the ranger package
+  # Use makeCluster so PSOCK workers on Windows also get the ranger package.
+  # Propagate .libPaths() so workers can find packages installed to a
+  # non-default library (e.g., the ephemeral check library used by R CMD
+  # check), which fresh PSOCK workers don't inherit automatically.
   cl <- parallel::makeCluster(2L)
+  invisible(parallel::clusterCall(cl, function(lp) .libPaths(lp), .libPaths()))
   doParallel::registerDoParallel(cl)
   shap_raw_parallel <- fastshap::explain(fit, X = X, pred_wrapper = pfun,
                                          nsim = nsim, newdata = X[1:3, ],

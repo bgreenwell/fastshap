@@ -16,3 +16,4 @@ rjarticle/*.rds
 rjarticle/*_cache/
 rjarticle/*_files/
 conductor/
+.agents/

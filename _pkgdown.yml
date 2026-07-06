@@ -1,4 +1,26 @@
-devtoolsurl: https://bgreenwell.github.io/fastshap/
+url: https://bgreenwell.github.io/fastshap/
+
 template:
   bootstrap: 5
 
+home:
+  title: fastshap — Fast Approximate Shapley Values in R
+
+navbar:
+  structure:
+    left: [intro, reference, articles, news]
+    right: [search, github]
+
+reference:
+- title: Explain predictions
+  desc: >
+    Compute (approximate) Shapley values and related effect decompositions
+    for the predictions of any supervised learning model.
+  contents:
+  - explain
+- title: Data
+  desc: Example data sets and generators used in examples and tests.
+  contents:
+  - gen_friedman
+  - titanic
+  - titanic_mice

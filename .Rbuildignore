@@ -1,5 +1,6 @@
 ^.*\.Rproj$
 ^\.Rproj\.user$
+^\.claude$
 ^\.github$
 ^_pkgdown\.yml$
 ^codecov\.yml$
@@ -7,14 +8,9 @@
 ^docs$
 ^lightgbm\.model$
 ^pkgdown$
-^README\.Rmd$
-^README\.md$
-^README_cache$
 ^rjarticle$
-^slowtests$
 ^tools$
-^TODO\.md$
-^vignettes/fastshap\.Rmd\.orig$
 ^AGENTS\.md$
 ^CLAUDE\.md$
 ^conductor$
+^\.agents$

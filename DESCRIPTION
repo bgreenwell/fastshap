@@ -1,37 +1,35 @@
 Package: fastshap
 Type: Package
 Title: Fast Approximate Shapley Values
-Version: 0.1.5
+Version: 0.2.0
 Authors@R: person("Brandon", "Greenwell", email = "greenwell.brandon@gmail.com", role =
          c("aut", "cre"), comment = c(ORCID = "0000-0002-8120-0084"))
-Description: Computes fast (relative to other implementations) approximate 
-    Shapley values for any supervised learning model. Shapley values help to 
-    explain the predictions from any black box model using ideas from game 
-    theory; see Strumbel and Kononenko (2014) <doi:10.1007/s10115-013-0679-x> 
+Description: Computes fast (relative to other implementations) approximate
+    Shapley values for any supervised learning model. Shapley values help to
+    explain the predictions from any black box model using ideas from game
+    theory; see Strumbelj and Kononenko (2014) <doi:10.1007/s10115-013-0679-x>
     for details.
 License: GPL (>= 2)
 URL: https://github.com/bgreenwell/fastshap,
     https://bgreenwell.github.io/fastshap/,
     https://bgreenwell.r-universe.dev/fastshap
 BugReports: https://github.com/bgreenwell/fastshap/issues
-Imports: 
-    foreach,
-    Rcpp (>= 1.0.1), 
+Imports:
+    Rcpp (>= 1.0.1),
+    stats,
     utils
 Enhances:
     lightgbm,
     xgboost
 Suggests:
-    AmesHousing,
     covr,
     doParallel,
     earth,
-    ggplot2,
+    foreach,
     knitr,
     ranger,
     rmarkdown,
     shapviz (>= 0.8.0),
-    tibble,
     tinytest (>= 1.4.1)
 LinkingTo: 
     Rcpp,

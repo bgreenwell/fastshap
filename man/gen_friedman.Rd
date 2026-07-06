@@ -4,13 +4,7 @@
 \alias{gen_friedman}
 \title{Friedman benchmark data}
 \usage{
-gen_friedman(
-  n_samples = 100,
-  n_features = 10,
-  n_bins = NULL,
-  sigma = 0.1,
-  seed = NULL
-)
+gen_friedman(n_samples = 100, n_features = 10, sigma = 0.1, seed = NULL)
 }
 \arguments{
 \item{n_samples}{Integer specifying the number of samples (i.e., rows) to
@@ -18,11 +12,6 @@ generate. Default is 100.}
 
 \item{n_features}{Integer specifying the number of features to generate.
 Default is 10.}
-
-\item{n_bins}{Integer specifying the number of (roughly) equal sized bins to
-split the response into. Default is \code{NULL} for no binning. Setting to
-a positive integer > 1 effectively turns this into a classification problem
-where \code{n_bins} gives the number of classes.}
 
 \item{sigma}{Numeric specifying the standard deviation of the noise.}
 

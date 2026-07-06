@@ -1,3 +1,114 @@
+# fastshap 0.2.0
+
+## New features
+
+* New `explain_effects()` decomposes each feature's contribution into a
+  `main` effect (the feature's effect in isolation; equal to the centered
+  partial dependence of that feature), a `total` effect (main effect plus
+  every interaction the feature participates in), and their gap
+  (`interaction`, an interaction-strength diagnostic that is exactly zero for
+  additive features). `shapley_values` (the average of `main` and `total`)
+  equals the exact background-marginal Shapley value for any model with at
+  most pairwise interactions — with no Monte Carlo simulation at all by
+  default, since it averages over the entire background rather than sampling
+  coalitions. Set `nsim` to sample background rows instead, for large
+  backgrounds where full averaging is too expensive.
+
+## Performance
+
+* The Monte Carlo estimation loop was rewritten to batch predictions: all
+  `nsim` replications for a feature are now stacked and evaluated in a single
+  pair of `pred_wrapper()` calls (previously `2 * nsim` calls per feature),
+  letting vectorized/multithreaded `predict()` methods do the heavy lifting.
+  Combined with the other changes below, `explain()` is roughly 2.5x faster
+  on a typical ranger example (500 x 10 data frame, `nsim = 10`), with much
+  larger gains for prediction functions with high per-call overhead.
+
+* New `batch_size` argument for `explain()` bounds the number of rows passed
+  to `pred_wrapper()` per call (memory/speed trade-off). All randomness is
+  drawn up front, so seeded results are identical regardless of `batch_size`.
+
+* When `newdata` is supplied, the internal permutation matrix is now generated
+  at `nrow(newdata)` instead of at the (potentially much larger) background
+  size and then subsampled; explaining a few rows against a large background
+  no longer wastes time generating discarded random rows.
+
+* Data frame inputs are now processed column-wise instead of via matrix-style
+  logical indexing of data frames (one of the slowest operations in base R);
+  this also preserves column classes by construction, eliminating two
+  `copy_classes()` calls per Monte Carlo evaluation.
+
+* The C++ routine that assembles the hybrid ("Frankenstein") data sets now
+  passes inputs by reference, skips a no-op assignment, and constructs the
+  second data set from the first via a single column swap (the two differ
+  only in the feature of interest).
+
+## Breaking changes
+
+* Seeded results differ from fastshap (<= 0.1.5): the Monte Carlo loop was
+  vectorized, which changes how the random number stream is consumed. The
+  estimator itself is unchanged.
+
+* **foreach** moved from Imports to Suggests. Sequential execution (the
+  default) no longer touches **foreach**; `parallel = TRUE` requires it to be
+  installed and errors informatively otherwise. The dead `.options.RNG`
+  argument (only honored by `%dorng%`, which fastshap never used) is no longer
+  passed; for reproducible parallel results, register a **doRNG** backend.
+
+* `gen_friedman()`'s deprecated `n_bins` argument was removed.
+
+## Fixed
+
+* `explain(..., parallel = TRUE)` on socket-based clusters (the default
+  cluster type on Windows, where workers start with no packages attached)
+  no longer fails with `could not find function "explain_feature"`. The
+  0.2.0 batching rewrite moved the per-feature computation behind an extra
+  layer of internal function calls, which broke `foreach`'s automatic
+  export of the (non-exported) worker function on such clusters; the
+  fastshap namespace is now explicitly added to `.packages`. If fastshap is
+  installed to a non-default library path (a development checkout, an
+  `renv`/`pak` project library, or `R CMD check`'s ephemeral install), also
+  propagate `.libPaths()` to the cluster before registering it — see
+  `?explain`'s `parallel` argument for the one-liner.
+
+* `explain()` with `exact = TRUE` and `shap_only = TRUE` (the default) for
+  `xgb.Booster` and `lgb.Booster` objects now correctly retains the
+  `"baseline"` attribute and `"explain"` class; previously both were silently
+  dropped when the bias column was subset out of the result (the baseline
+  attribute was lost for both model types, and the class was also lost for
+  `xgb.Booster`).
+
+* Unknown values in `feature_names` now error informatively instead of
+  failing obscurely downstream.
+
+* A `pred_wrapper` that does not return one prediction per row (e.g., a
+  multiclass probability matrix) now errors informatively instead of
+  producing corrupted output.
+
+* A `tbl_df` passed as `newdata` is now coerced to a data frame (matching the
+  existing coercion of `X`), instead of triggering a misleading class-mismatch
+  error.
+
+## Documentation
+
+* The vignette was rewritten to run in ~20 seconds (previously ~20 minutes,
+  which required a `.Rmd.orig` precompile workaround that has been removed);
+  it now also demonstrates the exact-vs-approximate comparison and
+  `explain_effects()`'s interaction diagnostic on the Friedman 1 benchmark
+  data.
+
+* README and AGENTS.md were rewritten to match current package conventions
+  (branch model, dependency philosophy, architecture map).
+
+## Internal
+
+* Removed ~350 lines of dead code: the vendored copy of `abind()` and the
+  `copy_classes()` helper (superseded by the column-wise construction).
+
+* Dropped **AmesHousing**, **ggplot2**, and **tibble** from Suggests; they
+  were only used by the old vignette.
+
+
 # fastshap 0.1.5
 
 ## Fixed
