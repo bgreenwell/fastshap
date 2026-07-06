@@ -17,7 +17,7 @@
 suppressMessages(library(fastshap))
 
 set.seed(101)
-n_background <- 500L
+n_background <- 1000L
 p_features   <- 10L
 n_explain    <- 50L
 nsim_grid    <- c(10L, 25L, 50L, 100L, 250L, 500L)
