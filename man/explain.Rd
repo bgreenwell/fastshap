@@ -144,7 +144,13 @@ are already multithreaded (e.g., ranger or xgboost) often gain little from
 \code{parallel = TRUE}. The fastshap namespace is always added to \code{.packages}
 automatically (socket-based clusters, the default on Windows, start with
 no packages attached), so any \emph{additional} packages needed by
-\code{pred_wrapper} should be supplied via \code{.packages} as usual.}
+\code{pred_wrapper} should be supplied via \code{.packages} as usual. If fastshap (or
+a dependency) is installed somewhere other than the default library path
+(e.g., a development checkout, \code{renv}/\code{pak} project library, or during
+\verb{R CMD check}, which installs the package under test into an ephemeral
+library), fresh workers won't see it either; propagate the current
+session's library path to the cluster before registering it, e.g.
+\code{parallel::clusterCall(cl, function(lp) .libPaths(lp), .libPaths())}.}
 
 \item{raw}{Logical indicating whether or not to return the raw per-simulation
 Shapley values from each Monte Carlo replication. If \code{TRUE}, a 3-D array

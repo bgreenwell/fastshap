@@ -4,7 +4,6 @@
 [![r-universe version](https://bgreenwell.r-universe.dev/badges/fastshap)](https://bgreenwell.r-universe.dev/fastshap)
 [![R-CMD-check](https://github.com/bgreenwell/fastshap/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/bgreenwell/fastshap/actions/workflows/R-CMD-check.yaml)
 [![Codecov test coverage](https://codecov.io/gh/bgreenwell/fastshap/branch/main/graph/badge.svg)](https://codecov.io/gh/bgreenwell/fastshap?branch=main)
-[![CRAN/METACRAN Total Downloads](https://cranlogs.r-pkg.org/badges/grand-total/fastshap)](https://cran.r-project.org/package=fastshap)
 <!-- badges: end -->
 
 **fastshap** computes fast, approximate Shapley values for any supervised

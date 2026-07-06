@@ -234,12 +234,13 @@ The interaction diagnostic correctly flags `x1` and `x2` as the only features wi
 
 The `explain()` function computes Shapley values one feature at a time, batching all Monte Carlo repetitions for that feature into a couple of prediction calls. If you have a lot of features and an expensive `pred_wrapper`, it may still be beneficial to run `explain()` in parallel across features. Setting `parallel = TRUE` uses [foreach](https://cran.r-project.org/package=foreach) to loop through features, so you can use any parallel backend it supports (this requires the foreach package to be installed).
 
-We use `makeCluster()` + `registerDoParallel()` here because it works on all platforms (including Windows). Note the `.packages = "ranger"` argument: on socket-based clusters (the default on Windows), worker processes don't inherit packages loaded in the main session, so any packages needed by the prediction wrapper must be declared explicitly via `...`, which `explain()` forwards to `foreach()`.
+We use `makeCluster()` + `registerDoParallel()` here because it works on all platforms (including Windows). Note the `.packages = "ranger"` argument: on socket-based clusters (the default on Windows), worker processes don't inherit packages loaded in the main session, so any packages needed by the prediction wrapper must be declared explicitly via `...`, which `explain()` forwards to `foreach()` (fastshap's own namespace is always added to `.packages` automatically). If fastshap (or ranger) is installed somewhere other than the default library path — as happens, for instance, when building this vignette from a development checkout — the workers also need to be told where to look via `.libPaths()`:
 
 ```{r titanic-explain-parallel}
 library(doParallel)
 
 cl <- makeCluster(2L)  # adjust to the number of cores available on your machine
+invisible(clusterCall(cl, function(lp) .libPaths(lp), .libPaths()))
 registerDoParallel(cl)
 set.seed(5038)
 ex.par <- explain(rfo, X = X, pred_wrapper = pfun, nsim = 30,

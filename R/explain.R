@@ -196,7 +196,13 @@ explain_feature <- function(object, col, X, nsim, pred_wrapper, newdata,
 #' `parallel = TRUE`. The fastshap namespace is always added to `.packages`
 #' automatically (socket-based clusters, the default on Windows, start with
 #' no packages attached), so any *additional* packages needed by
-#' `pred_wrapper` should be supplied via `.packages` as usual.
+#' `pred_wrapper` should be supplied via `.packages` as usual. If fastshap (or
+#' a dependency) is installed somewhere other than the default library path
+#' (e.g., a development checkout, `renv`/`pak` project library, or during
+#' `R CMD check`, which installs the package under test into an ephemeral
+#' library), fresh workers won't see it either; propagate the current
+#' session's library path to the cluster before registering it, e.g.
+#' `parallel::clusterCall(cl, function(lp) .libPaths(lp), .libPaths())`.
 #'
 #' @param seed Integer specifying a random seed for reproducibility; passed to
 #' [base::set.seed()]. Default is `NULL` (no seed). **NOTE:** the Monte Carlo

@@ -65,7 +65,11 @@
   0.2.0 batching rewrite moved the per-feature computation behind an extra
   layer of internal function calls, which broke `foreach`'s automatic
   export of the (non-exported) worker function on such clusters; the
-  fastshap namespace is now explicitly added to `.packages`.
+  fastshap namespace is now explicitly added to `.packages`. If fastshap is
+  installed to a non-default library path (a development checkout, an
+  `renv`/`pak` project library, or `R CMD check`'s ephemeral install), also
+  propagate `.libPaths()` to the cluster before registering it — see
+  `?explain`'s `parallel` argument for the one-liner.
 
 * `explain()` with `exact = TRUE` and `shap_only = TRUE` (the default) for
   `xgb.Booster` and `lgb.Booster` objects now correctly retains the
