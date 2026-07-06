@@ -2,4 +2,4 @@
 
 ### All vignettes
 
-- [fastshap](fastshap.md):
+- [fastshap](https://bgreenwell.github.io/fastshap/articles/fastshap.md):

@@ -51,4 +51,5 @@ A data frame with 1309 observations on the following 6 variables:
 
 As mentioned in the column description, `age` contains 263 `NA`s (or
 missing values). For a complete version (or versions) of the data set,
-see [titanic_mice](titanic_mice.md).
+see
+[titanic_mice](https://bgreenwell.github.io/fastshap/reference/titanic_mice.md).

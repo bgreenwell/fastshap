@@ -1,17 +1,16 @@
 <urlset xmlns = 'http://www.sitemaps.org/schemas/sitemap/0.9'>
-<url><loc>/404.html</loc></url>
-<url><loc>/AGENTS.html</loc></url>
-<url><loc>/CLAUDE.html</loc></url>
-<url><loc>/articles/fastshap.html</loc></url>
-<url><loc>/articles/index.html</loc></url>
-<url><loc>/authors.html</loc></url>
-<url><loc>/index.html</loc></url>
-<url><loc>/news/index.html</loc></url>
-<url><loc>/reference/explain.html</loc></url>
-<url><loc>/reference/fastshap-package.html</loc></url>
-<url><loc>/reference/gen_friedman.html</loc></url>
-<url><loc>/reference/index.html</loc></url>
-<url><loc>/reference/titanic.html</loc></url>
-<url><loc>/reference/titanic_mice.html</loc></url>
+<url><loc>https://bgreenwell.github.io/fastshap/404.html</loc></url>
+<url><loc>https://bgreenwell.github.io/fastshap/articles/fastshap.html</loc></url>
+<url><loc>https://bgreenwell.github.io/fastshap/articles/index.html</loc></url>
+<url><loc>https://bgreenwell.github.io/fastshap/authors.html</loc></url>
+<url><loc>https://bgreenwell.github.io/fastshap/index.html</loc></url>
+<url><loc>https://bgreenwell.github.io/fastshap/news/index.html</loc></url>
+<url><loc>https://bgreenwell.github.io/fastshap/reference/explain.html</loc></url>
+<url><loc>https://bgreenwell.github.io/fastshap/reference/explain_effects.html</loc></url>
+<url><loc>https://bgreenwell.github.io/fastshap/reference/fastshap-package.html</loc></url>
+<url><loc>https://bgreenwell.github.io/fastshap/reference/gen_friedman.html</loc></url>
+<url><loc>https://bgreenwell.github.io/fastshap/reference/index.html</loc></url>
+<url><loc>https://bgreenwell.github.io/fastshap/reference/titanic.html</loc></url>
+<url><loc>https://bgreenwell.github.io/fastshap/reference/titanic_mice.html</loc></url>
 </urlset>
 

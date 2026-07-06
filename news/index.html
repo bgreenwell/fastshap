@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">fastshap</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.5</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -33,6 +33,45 @@
       <small>Source: <a href="https://github.com/bgreenwell/fastshap/blob/main/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
     </div>
 
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="0.2.0" id="fastshap-020">fastshap 0.2.0<a class="anchor" aria-label="anchor" href="#fastshap-020"></a></h2>
+<div class="section level3">
+<h3 id="new-features-0-2-0">New features<a class="anchor" aria-label="anchor" href="#new-features-0-2-0"></a></h3>
+<ul><li>New <code><a href="../reference/explain_effects.html">explain_effects()</a></code> decomposes each feature’s contribution into a <code>main</code> effect (the feature’s effect in isolation; equal to the centered partial dependence of that feature), a <code>total</code> effect (main effect plus every interaction the feature participates in), and their gap (<code>interaction</code>, an interaction-strength diagnostic that is exactly zero for additive features). <code>shapley_values</code> (the average of <code>main</code> and <code>total</code>) equals the exact background-marginal Shapley value for any model with at most pairwise interactions — with no Monte Carlo simulation at all by default, since it averages over the entire background rather than sampling coalitions. Set <code>nsim</code> to sample background rows instead, for large backgrounds where full averaging is too expensive.</li>
+</ul></div>
+<div class="section level3">
+<h3 id="performance-0-2-0">Performance<a class="anchor" aria-label="anchor" href="#performance-0-2-0"></a></h3>
+<ul><li><p>The Monte Carlo estimation loop was rewritten to batch predictions: all <code>nsim</code> replications for a feature are now stacked and evaluated in a single pair of <code>pred_wrapper()</code> calls (previously <code>2 * nsim</code> calls per feature), letting vectorized/multithreaded <code><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict()</a></code> methods do the heavy lifting. Combined with the other changes below, <code><a href="../reference/explain.html">explain()</a></code> is roughly 2.5x faster on a typical ranger example (500 x 10 data frame, <code>nsim = 10</code>), with much larger gains for prediction functions with high per-call overhead.</p></li>
+<li><p>New <code>batch_size</code> argument for <code><a href="../reference/explain.html">explain()</a></code> bounds the number of rows passed to <code>pred_wrapper()</code> per call (memory/speed trade-off). All randomness is drawn up front, so seeded results are identical regardless of <code>batch_size</code>.</p></li>
+<li><p>When <code>newdata</code> is supplied, the internal permutation matrix is now generated at <code>nrow(newdata)</code> instead of at the (potentially much larger) background size and then subsampled; explaining a few rows against a large background no longer wastes time generating discarded random rows.</p></li>
+<li><p>Data frame inputs are now processed column-wise instead of via matrix-style logical indexing of data frames (one of the slowest operations in base R); this also preserves column classes by construction, eliminating two <code>copy_classes()</code> calls per Monte Carlo evaluation.</p></li>
+<li><p>The C++ routine that assembles the hybrid (“Frankenstein”) data sets now passes inputs by reference, skips a no-op assignment, and constructs the second data set from the first via a single column swap (the two differ only in the feature of interest).</p></li>
+</ul></div>
+<div class="section level3">
+<h3 id="breaking-changes-0-2-0">Breaking changes<a class="anchor" aria-label="anchor" href="#breaking-changes-0-2-0"></a></h3>
+<ul><li><p>Seeded results differ from fastshap (&lt;= 0.1.5): the Monte Carlo loop was vectorized, which changes how the random number stream is consumed. The estimator itself is unchanged.</p></li>
+<li><p><strong>foreach</strong> moved from Imports to Suggests. Sequential execution (the default) no longer touches <strong>foreach</strong>; <code>parallel = TRUE</code> requires it to be installed and errors informatively otherwise. The dead <code>.options.RNG</code> argument (only honored by <code>%dorng%</code>, which fastshap never used) is no longer passed; for reproducible parallel results, register a <strong>doRNG</strong> backend.</p></li>
+<li><p><code><a href="../reference/gen_friedman.html">gen_friedman()</a></code>’s deprecated <code>n_bins</code> argument was removed.</p></li>
+</ul></div>
+<div class="section level3">
+<h3 id="fixed-0-2-0">Fixed<a class="anchor" aria-label="anchor" href="#fixed-0-2-0"></a></h3>
+<ul><li><p><code>explain(..., parallel = TRUE)</code> on socket-based clusters (the default cluster type on Windows, where workers start with no packages attached) no longer fails with <code>could not find function "explain_feature"</code>. The 0.2.0 batching rewrite moved the per-feature computation behind an extra layer of internal function calls, which broke <code>foreach</code>’s automatic export of the (non-exported) worker function on such clusters; the fastshap namespace is now explicitly added to <code>.packages</code>. If fastshap is installed to a non-default library path (a development checkout, an <code>renv</code>/<code>pak</code> project library, or <code>R CMD check</code>’s ephemeral install), also propagate <code><a href="https://rdrr.io/r/base/libPaths.html" class="external-link">.libPaths()</a></code> to the cluster before registering it — see <code><a href="../reference/explain.html">?explain</a></code>’s <code>parallel</code> argument for the one-liner.</p></li>
+<li><p><code><a href="../reference/explain.html">explain()</a></code> with <code>exact = TRUE</code> and <code>shap_only = TRUE</code> (the default) for <code>xgb.Booster</code> and <code>lgb.Booster</code> objects now correctly retains the <code>"baseline"</code> attribute and <code>"explain"</code> class; previously both were silently dropped when the bias column was subset out of the result (the baseline attribute was lost for both model types, and the class was also lost for <code>xgb.Booster</code>).</p></li>
+<li><p>Unknown values in <code>feature_names</code> now error informatively instead of failing obscurely downstream.</p></li>
+<li><p>A <code>pred_wrapper</code> that does not return one prediction per row (e.g., a multiclass probability matrix) now errors informatively instead of producing corrupted output.</p></li>
+<li><p>A <code>tbl_df</code> passed as <code>newdata</code> is now coerced to a data frame (matching the existing coercion of <code>X</code>), instead of triggering a misleading class-mismatch error.</p></li>
+</ul></div>
+<div class="section level3">
+<h3 id="documentation-0-2-0">Documentation<a class="anchor" aria-label="anchor" href="#documentation-0-2-0"></a></h3>
+<ul><li><p>The vignette was rewritten to run in ~20 seconds (previously ~20 minutes, which required a <code>.Rmd.orig</code> precompile workaround that has been removed); it now also demonstrates the exact-vs-approximate comparison and <code><a href="../reference/explain_effects.html">explain_effects()</a></code>’s interaction diagnostic on the Friedman 1 benchmark data.</p></li>
+<li><p>README and AGENTS.md were rewritten to match current package conventions (branch model, dependency philosophy, architecture map).</p></li>
+</ul></div>
+<div class="section level3">
+<h3 id="internal-0-2-0">Internal<a class="anchor" aria-label="anchor" href="#internal-0-2-0"></a></h3>
+<ul><li><p>Removed ~350 lines of dead code: the vendored copy of <code>abind()</code> and the <code>copy_classes()</code> helper (superseded by the column-wise construction).</p></li>
+<li><p>Dropped <strong>AmesHousing</strong>, <strong>ggplot2</strong>, and <strong>tibble</strong> from Suggests; they were only used by the old vignette.</p></li>
+</ul></div>
+</div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.1.5" id="fastshap-015">fastshap 0.1.5<a class="anchor" aria-label="anchor" href="#fastshap-015"></a></h2>
 <div class="section level3">
@@ -192,7 +231,7 @@
 <p><code>autoplot.fastshap()</code> gained some useful new arguments:</p>
 <ul><li><p><code>color_by</code> for specifying an additional feature to color by for dependence plots (i.e., whenever <code>type = "dependence"</code>);</p></li>
 <li><p><code>smooth</code>, <code>smooth_color</code>, <code>smooth_linetype</code>, <code>smooth_size</code>, and <code>smooth_alpha</code> for adding/controlling a smoother in dependence plots (i.e., whenever <code>type = "dependence"</code>).</p></li>
-<li><p><code>...</code> which can be used to pass on additional parameters to <code><a href="https://ggplot2.tidyverse.org/reference/geom_bar.html" class="external-link">geom_col()</a></code> (when <code>type = "importance"</code>) or <code><a href="https://ggplot2.tidyverse.org/reference/geom_point.html" class="external-link">geom_point()</a></code> (when <code>type = "dependence"</code>).</p></li>
+<li><p><code>...</code> which can be used to pass on additional parameters to <code>geom_col()</code> (when <code>type = "importance"</code>) or <code>geom_point()</code> (when <code>type = "dependence"</code>).</p></li>
 </ul></li>
 </ul></div>
 <div class="section level3">

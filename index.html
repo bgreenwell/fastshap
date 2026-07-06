@@ -5,7 +5,7 @@
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<title>Fast Approximate Shapley Values • fastshap</title>
+<title>fastshap — Fast Approximate Shapley Values in R • fastshap</title>
 <!-- favicons --><link rel="icon" type="image/png" sizes="96x96" href="favicon-96x96.png">
 <link rel="icon" type="”image/svg+xml”" href="favicon.svg">
 <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
@@ -15,9 +15,9 @@
 <link href="deps/bootstrap-5.3.8/bootstrap.min.css" rel="stylesheet">
 <script src="deps/bootstrap-5.3.8/bootstrap.bundle.min.js"></script><link href="deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
-<script src="deps/headroom-0.11.0/headroom.min.js"></script><script src="deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="deps/search-1.0.0/fuse.min.js"></script><script src="deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="pkgdown.js"></script><meta property="og:title" content="Fast Approximate Shapley Values">
-<meta name="description" content="Computes fast (relative to other implementations) approximate Shapley values for any supervised learning model. Shapley values help to explain the predictions from any black box model using ideas from game theory; see Strumbel and Kononenko (2014) &lt;doi:10.1007/s10115-013-0679-x&gt; for details.">
-<meta property="og:description" content="Computes fast (relative to other implementations) approximate Shapley values for any supervised learning model. Shapley values help to explain the predictions from any black box model using ideas from game theory; see Strumbel and Kononenko (2014) &lt;doi:10.1007/s10115-013-0679-x&gt; for details.">
+<script src="deps/headroom-0.11.0/headroom.min.js"></script><script src="deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="deps/search-1.0.0/fuse.min.js"></script><script src="deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="pkgdown.js"></script><meta property="og:title" content="fastshap — Fast Approximate Shapley Values in R">
+<meta name="description" content="Computes fast (relative to other implementations) approximate Shapley values for any supervised learning model. Shapley values help to explain the predictions from any black box model using ideas from game theory; see Strumbelj and Kononenko (2014) &lt;doi:10.1007/s10115-013-0679-x&gt; for details.">
+<meta property="og:description" content="Computes fast (relative to other implementations) approximate Shapley values for any supervised learning model. Shapley values help to explain the predictions from any black box model using ideas from game theory; see Strumbelj and Kononenko (2014) &lt;doi:10.1007/s10115-013-0679-x&gt; for details.">
 </head>
 <body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
@@ -27,7 +27,7 @@
 
     <a class="navbar-brand me-2" href="index.html">fastshap</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.5</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -57,21 +57,69 @@
 </h1></div>
 <!-- badges: start -->
 
-<p>The goal of <strong>fastshap</strong> is to provide an efficient and speedy approach (at least relative to other implementations) for computing approximate Shapley values, which help explain the predictions from any machine learning model.</p>
-<p><img src="https://media.giphy.com/media/26AHLNr8en8J3ovOo/giphy.gif"></p>
+<p><strong>fastshap</strong> computes fast, approximate Shapley values for any supervised learning model in R, using ideas from game theory to attribute a prediction to its input features.</p>
+<ul>
+<li>
+<strong>Model-agnostic</strong> — works with any fitted model via a user-supplied prediction function (<code>pred_wrapper</code>)</li>
+<li>
+<strong>Exact Shapley values</strong> for linear models (<code><a href="https://rdrr.io/r/stats/lm.html" class="external-link">lm()</a></code>), and Tree SHAP for <a href="https://cran.r-project.org/package=xgboost" class="external-link">xgboost</a> and <a href="https://cran.r-project.org/package=lightgbm" class="external-link">lightgbm</a> (<code>exact = TRUE</code>)</li>
+<li>
+<strong>Main/total/interaction effect decomposition</strong> (<code><a href="reference/explain_effects.html">explain_effects()</a></code>) — a deterministic, Monte-Carlo-free diagnostic that is exact for models with at most pairwise interactions</li>
+<li>
+<strong>Fast</strong>: batched predictions (few large <code>pred_wrapper()</code> calls rather than many small ones), an efficient C++ (Rcpp/RcppArmadillo) core, and optional parallel execution across features via <a href="https://cran.r-project.org/package=foreach" class="external-link">foreach</a>
+</li>
+<li>Plays nicely with <a href="https://cran.r-project.org/package=shapviz" class="external-link">shapviz</a> for waterfall, force, importance, and dependence plots</li>
+</ul>
 <div class="section level2">
 <h2 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
 </h2>
 <p><strong>fastshap</strong> is no longer available on CRAN due to CRAN’s stringent and ever-changing policies. It is now hosted on <a href="https://bgreenwell.r-universe.dev/fastshap" class="external-link">r-universe</a>, which provides a reliable alternative for distributing R packages.</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Install from r-universe (recommended):</span></span>
+<code class="sourceCode R"><span><span class="co"># Latest stable release (recommended)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"fastshap"</span>, repos <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"https://bgreenwell.r-universe.dev"</span>, <span class="st">"https://cloud.r-project.org"</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Install the latest development version from GitHub:</span></span>
-<span><span class="kw">if</span> <span class="op">(</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/ns-load.html" class="external-link">requireNamespace</a></span><span class="op">(</span><span class="st">"pak"</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
-<span>  <span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"pak"</span><span class="op">)</span></span>
-<span><span class="op">}</span></span>
-<span><span class="fu">pak</span><span class="fu">::</span><span class="fu"><a href="https://pak.r-lib.org/reference/pak.html" class="external-link">pak</a></span><span class="op">(</span><span class="st">"bgreenwell/fastshap"</span><span class="op">)</span></span></code></pre></div>
+<span><span class="co"># Or with pak</span></span>
+<span><span class="fu">pak</span><span class="fu">::</span><span class="fu"><a href="https://pak.r-lib.org/reference/pak.html" class="external-link">pak</a></span><span class="op">(</span><span class="st">"bgreenwell/fastshap@main"</span><span class="op">)</span>  <span class="co"># latest stable release</span></span>
+<span><span class="fu">pak</span><span class="fu">::</span><span class="fu"><a href="https://pak.r-lib.org/reference/pak.html" class="external-link">pak</a></span><span class="op">(</span><span class="st">"bgreenwell/fastshap"</span><span class="op">)</span>       <span class="co"># development version (devel branch)</span></span></code></pre></div>
+</div>
+<div class="section level2">
+<h2 id="quick-start">Quick start<a class="anchor" aria-label="anchor" href="#quick-start"></a>
+</h2>
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/bgreenwell/fastshap" class="external-link">fastshap</a></span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Fit a projection pursuit regression model</span></span>
+<span><span class="va">fit</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/ppr.html" class="external-link">ppr</a></span><span class="op">(</span><span class="va">mpg</span> <span class="op">~</span> <span class="va">.</span>, data <span class="op">=</span> <span class="va">mtcars</span>, nterms <span class="op">=</span> <span class="fl">5</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Prediction wrapper: takes `object` and `newdata`, returns a numeric vector</span></span>
+<span><span class="va">pfun</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">object</span>, <span class="va">newdata</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict</a></span><span class="op">(</span><span class="va">object</span>, newdata <span class="op">=</span> <span class="va">newdata</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Approximate Shapley values via Monte Carlo simulation</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">101</span><span class="op">)</span></span>
+<span><span class="va">shap</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/explain.html">explain</a></span><span class="op">(</span><span class="va">fit</span>, X <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/subset.html" class="external-link">subset</a></span><span class="op">(</span><span class="va">mtcars</span>, select <span class="op">=</span> <span class="op">-</span><span class="va">mpg</span><span class="op">)</span>, nsim <span class="op">=</span> <span class="fl">50</span>,</span>
+<span>                pred_wrapper <span class="op">=</span> <span class="va">pfun</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">shap</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Deterministic main/total/interaction effect decomposition (no simulation)</span></span>
+<span><span class="va">eff</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/explain_effects.html">explain_effects</a></span><span class="op">(</span><span class="va">fit</span>, X <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/subset.html" class="external-link">subset</a></span><span class="op">(</span><span class="va">mtcars</span>, select <span class="op">=</span> <span class="op">-</span><span class="va">mpg</span><span class="op">)</span>,</span>
+<span>                       pred_wrapper <span class="op">=</span> <span class="va">pfun</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">eff</span><span class="op">$</span><span class="va">shapley_values</span><span class="op">)</span></span></code></pre></div>
+</div>
+<div class="section level2">
+<h2 id="documentation">Documentation<a class="anchor" aria-label="anchor" href="#documentation"></a>
+</h2>
+<ul>
+<li>
+<a href="https://bgreenwell.github.io/fastshap/">Package website</a> — function reference and the <a href="https://bgreenwell.github.io/fastshap/articles/fastshap.html">introductory vignette</a>
+</li>
+<li>Štrumbelj, E., and Kononenko, I. (2014). “Explaining prediction models and individual predictions with feature contributions.” <em>Knowledge and Information Systems</em>, 41(3), 647–665.</li>
+<li>Lundberg, S. M., et al. (2020). “From local explanations to global understanding with explainable AI for trees.” <em>Nature Machine Intelligence</em>, 2(1), 56–67.</li>
+</ul>
+</div>
+<div class="section level2">
+<h2 id="development">Development<a class="anchor" aria-label="anchor" href="#development"></a>
+</h2>
+<p>Development happens on the <a href="https://github.com/bgreenwell/fastshap/tree/devel" class="external-link"><code>devel</code></a> branch (the repository default); <code>main</code> holds stable releases, which is what r-universe builds and the website documents. Please open pull requests against <code>devel</code> and report bugs via the <a href="https://github.com/bgreenwell/fastshap/issues" class="external-link">issue tracker</a>.</p>
 </div>
 </div>
   </main><aside class="col-md-3"><div class="links">
@@ -108,9 +156,9 @@
 <div class="dev-status">
 <h2 data-toc-skip>Dev status</h2>
 <ul class="list-unstyled">
-<li><a href="https://bgreenwell.r-universe.dev/fastshap" class="external-link"><img src="https://bgreenwell.r-universe.dev/badges/fastshap" alt="r-universe status"></a></li>
-<li><a href="https://codecov.io/gh/bgreenwell/fastshap?branch=main" class="external-link"><img src="https://codecov.io/gh/bgreenwell/fastshap/branch/main/graph/badge.svg" alt="Codecov test coverage"></a></li>
+<li><a href="https://bgreenwell.r-universe.dev/fastshap" class="external-link"><img src="https://bgreenwell.r-universe.dev/badges/fastshap" alt="r-universe version"></a></li>
 <li><a href="https://github.com/bgreenwell/fastshap/actions/workflows/R-CMD-check.yaml" class="external-link"><img src="https://github.com/bgreenwell/fastshap/actions/workflows/R-CMD-check.yaml/badge.svg" alt="R-CMD-check"></a></li>
+<li><a href="https://codecov.io/gh/bgreenwell/fastshap?branch=main" class="external-link"><img src="https://codecov.io/gh/bgreenwell/fastshap/branch/main/graph/badge.svg" alt="Codecov test coverage"></a></li>
 </ul>
 </div>
 

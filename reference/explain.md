@@ -28,6 +28,7 @@ explain(
   raw = FALSE,
   seed = NULL,
   exact = FALSE,
+  batch_size = NULL,
   ...
 )
 
@@ -94,14 +95,8 @@ explain(
 
   Additional optional arguments to be passed on to
   [`foreach::foreach()`](https://rdrr.io/pkg/foreach/man/foreach.html)
-  whenever `parallel = TRUE`. For example, you may need to supply
-  additional packages that the parallel task depends on via the
-  `.packages` argument to
-  [`foreach::foreach()`](https://rdrr.io/pkg/foreach/man/foreach.html).
-  **NOTE:**
-  [`foreach::foreach()`](https://rdrr.io/pkg/foreach/man/foreach.html)'s
-  `.combine` argument is already set internally by `explain()`, so
-  passing it via the `...` argument would likely result in an error.
+  whenever `parallel = TRUE` (e.g., `.packages` for loading packages on
+  the workers); ignored otherwise.
 
 - feature_names:
 
@@ -180,12 +175,25 @@ explain(
 
   Logical indicating whether or not to compute the approximate Shapley
   values in parallel across features; default is `FALSE`. **NOTE:**
-  setting `parallel = TRUE` requires setting up an appropriate (i.e.,
-  system-specific) *parallel backend* as described in the
-  [foreach](https://cran.r-project.org/package=foreach); for details,
-  see
-  [`vignette("foreach", package = "foreach")`](https://cran.rstudio.com/web/packages/foreach/vignettes/foreach.html)
-  in R.
+  setting `parallel = TRUE` requires the
+  [foreach](https://cran.r-project.org/package=foreach) package (in
+  Suggests) and an appropriate (i.e., system-specific) *parallel
+  backend* (e.g., via the doParallel package). For reproducible parallel
+  results, use the doRNG package to register the backend. Note that the
+  internal batching of predictions (see `batch_size`) means models whose
+  [`predict()`](https://rdrr.io/r/stats/predict.html) methods are
+  already multithreaded (e.g., ranger or xgboost) often gain little from
+  `parallel = TRUE`. The fastshap namespace is always added to
+  `.packages` automatically (socket-based clusters, the default on
+  Windows, start with no packages attached), so any *additional*
+  packages needed by `pred_wrapper` should be supplied via `.packages`
+  as usual. If fastshap (or a dependency) is installed somewhere other
+  than the default library path (e.g., a development checkout,
+  `renv`/`pak` project library, or during `R CMD check`, which installs
+  the package under test into an ephemeral library), fresh workers won't
+  see it either; propagate the current session's library path to the
+  cluster before registering it, e.g.
+  `parallel::clusterCall(cl, function(lp) .libPaths(lp), .libPaths())`.
 
 - raw:
 
@@ -202,7 +210,9 @@ explain(
 
   Integer specifying a random seed for reproducibility; passed to
   [`base::set.seed()`](https://rdrr.io/r/base/Random.html). Default is
-  `NULL` (no seed).
+  `NULL` (no seed). **NOTE:** the Monte Carlo loop was restructured
+  (vectorized) in version 0.2.0, so seeded results differ from those
+  produced by fastshap (\<= 0.1.5).
 
 - exact:
 
@@ -218,6 +228,17 @@ explain(
   explanations for each of the
   [`stats::terms()`](https://rdrr.io/r/stats/terms.html) in the model.
   Default is `FALSE`.
+
+- batch_size:
+
+  Optional positive integer giving the maximum number of rows to pass to
+  `pred_wrapper()` per call. By default (`NULL`), all `nsim` Monte Carlo
+  replications for a feature are stacked and evaluated in a single pair
+  of prediction calls, which is fastest but requires
+  `2 * nrow(newdata) * nsim * ncol(X)` values of working memory per
+  feature; set `batch_size` to bound the size of each prediction call
+  instead. All of the randomness is drawn up front, so for a fixed seed
+  the results are identical regardless of `batch_size`.
 
 ## Value
 
@@ -279,26 +300,26 @@ fit <- ppr(mpg ~ ., data = mtcars, nterms = 5)
 
 # Prediction wrapper
 pfun <- function(object, newdata) {  # needs to return a numeric vector
-  predict(object, newdata = newdata)  
+  predict(object, newdata = newdata)
 }
 
 # Compute approximate Shapley values using 10 Monte Carlo simulations
 set.seed(101)  # for reproducibility
-shap <- explain(fit, X = subset(mtcars, select = -mpg), nsim = 10, 
+shap <- explain(fit, X = subset(mtcars, select = -mpg), nsim = 10,
                 pred_wrapper = pfun)
 head(shap)
-#>                          cyl       disp        hp        drat         wt
-#> Mazda RX4         -1.0903775 -0.6274969 3.0832317 -0.07256155  0.1959452
-#> Mazda RX4 Wag     -1.0458065  0.2582914 0.9277668  1.17899813  1.6484232
-#> Datsun 710         0.3088864 -0.9026665 0.7188540  1.85702718  2.4110529
-#> Hornet 4 Drive     0.5242879  0.4007763 0.2824977  1.97033461 -1.9194076
-#> Hornet Sportabout  0.7715692  1.6525963 0.4231664  0.41508036  0.3124217
-#> Valiant           -0.6537243  0.1031461 0.8710020 -0.16422768 -2.4402055
-#>                          qsec         vs          am       gear        carb
-#> Mazda RX4         -1.46160496  0.2213145 -0.68947599 -0.3840636  0.95078654
-#> Mazda RX4 Wag      0.04892765  0.3310340  0.54495885 -0.5194436 -0.28010809
-#> Datsun 710         0.03171852 -0.2160763  1.01495061  0.7111122 -0.06651041
-#> Hornet 4 Drive    -0.25539764  1.5820107 -0.97231505 -1.7708919  1.10185304
-#> Hornet Sportabout -0.29810781 -0.2203552  0.05188098 -1.3600599  0.95575680
-#> Valiant            0.50059940  0.3920500 -1.35786957 -2.2330062  0.01932869
+#>              cyl       disp           hp       drat         wt          qsec
+#> [1,] -0.97509243 -1.0947377 -0.007900566 -0.3593698  0.1239639 -0.8898017829
+#> [2,] -1.78889380  1.6534578 -1.643102230  1.0991704 -0.1044265  0.0001145306
+#> [3,]  0.02128044 -1.5145031  3.056046948 -0.1843992  2.0956560  1.4708352050
+#> [4,]  0.20294720 -0.5665266  2.673123253  0.1170155 -3.3047768  0.9908682708
+#> [5,] -0.34441168  2.2236638 -2.401822557  0.9820953  0.2729297  0.3153070648
+#> [6,]  0.36095745  1.1078770 -0.112842677 -0.7187627 -0.6142340  0.0857486015
+#>                vs          am       gear        carb
+#> [1,] -0.527763170  0.07486571 -0.9789857 -0.22132538
+#> [2,]  0.643074719 -0.80416125 -0.1585971 -0.91990224
+#> [3,] -1.431546936  1.74951003  0.3225059 -1.16966138
+#> [4,]  0.795329172 -0.48489827 -0.1622227  0.68253354
+#> [5,]  0.005215444 -0.29994990 -0.5858764  0.08557275
+#> [6,] -0.172783523 -0.33312229 -1.5871195  0.74716858
 ```

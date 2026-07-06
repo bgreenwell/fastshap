@@ -3,7 +3,7 @@
 Computes fast (relative to other implementations) approximate Shapley
 values for any supervised learning model. Shapley values help to explain
 the predictions from any black box model using ideas from game theory;
-see Strumbel and Kononenko (2014)
+see Strumbelj and Kononenko (2014)
 [doi:10.1007/s10115-013-0679-x](https://doi.org/10.1007/s10115-013-0679-x)
 for details.
 
