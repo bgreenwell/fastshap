@@ -519,7 +519,7 @@ stopCluster(cl)
 cor(as.numeric(ex.par), as.numeric(ex.t1$shapley_values))
 ```
 
-    ## [1] 0.9656705
+    ## [1] 0.9653541
 
 ## References
 

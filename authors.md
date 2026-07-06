@@ -8,7 +8,7 @@
 ## Citation
 
 Source:
-[`DESCRIPTION`](https://github.com/bgreenwell/fastshap/blob/main/DESCRIPTION)
+[`DESCRIPTION`](https://github.com/bgreenwell/fastshap/blob/v0.3.0/DESCRIPTION)
 
 Greenwell B (2026). *fastshap: Fast Approximate Shapley Values*. R
 package version 0.3.0, <https://github.com/bgreenwell/fastshap>.
