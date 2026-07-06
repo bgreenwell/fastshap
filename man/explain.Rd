@@ -25,6 +25,7 @@ explain(object, ...)
   seed = NULL,
   exact = FALSE,
   batch_size = NULL,
+  method = c("strumbelj", "permutation"),
   ...
 )
 
@@ -181,6 +182,25 @@ a single pair of prediction calls, which is fastest but requires
 set \code{batch_size} to bound the size of each prediction call instead. All of
 the randomness is drawn up front, so for a fixed seed the results are
 identical regardless of \code{batch_size}.}
+
+\item{method}{Character string specifying the Monte Carlo estimator to use
+(only relevant when \code{exact = FALSE}). \code{"strumbelj"} (the default) is the
+Strumbelj and Kononenko (2014) estimator described above: independent
+random coalitions per feature, \code{2 * nsim} predictions per feature
+(\code{2 * nsim * p} total for \code{p} features), and supports \code{feature_names}
+subsetting (requesting fewer features costs proportionally less) and
+\code{parallel = TRUE}. \code{"permutation"} walks a single random permutation
+through \emph{all} features per replication, flipping one feature at a time
+from background to foreground and reading off each feature's contribution
+as the consecutive prediction difference; this costs about \code{nsim * p}
+predictions \emph{for all features combined} (roughly half of \code{"strumbelj"}'s
+cost for computing every feature), and each replication's contributions
+sum \emph{exactly} to \code{f(x) - f(background)} (verifiable via \code{raw = TRUE}),
+so \code{adjust = TRUE} is inapplicable (and an error) for this method. Because
+the telescoping property requires walking every feature regardless of
+what is requested, \code{feature_names} only subsets the \emph{output} under
+\code{"permutation"} — it does not reduce the amount of work performed, unlike
+\code{"strumbelj"}. \code{parallel = TRUE} is not yet supported for \code{"permutation"}.}
 }
 \value{
 If \code{shap_only = TRUE} (the default), a matrix is returned with one

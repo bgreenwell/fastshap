@@ -4,7 +4,7 @@
 #' permutations from a fully-background state to the fully-foreground
 #' (instance) state, flipping one feature at a time, and reading off each
 #' feature's contribution as the difference between consecutive predictions
-#' along the walk. Unlike [explain_feature()], which draws independent
+#' along the walk. Unlike `explain_feature()`, which draws independent
 #' coalitions per feature, this computes every feature's contribution from
 #' the same walk: `p` prediction calls (plus one, cached, up-front call for
 #' the all-instance endpoint) per replication yield contributions for all `p`
