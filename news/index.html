@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">fastshap</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -33,6 +33,13 @@
       <small>Source: <a href="https://github.com/bgreenwell/fastshap/blob/main/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
     </div>
 
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="0.3.0" id="fastshap-030">fastshap 0.3.0<a class="anchor" aria-label="anchor" href="#fastshap-030"></a></h2>
+<div class="section level3">
+<h3 id="new-features-0-3-0">New features<a class="anchor" aria-label="anchor" href="#new-features-0-3-0"></a></h3>
+<ul><li>New <code>method = "permutation"</code> argument to <code><a href="../reference/explain.html">explain()</a></code> (GH <a href="https://github.com/bgreenwell/fastshap/issues/87" class="external-link">#87</a>): an alternative Monte Carlo estimator that walks a single random permutation through all features per replication instead of drawing independent coalitions per feature. This computes every feature’s contribution from roughly half as many predictions as the default (<code>method = "strumbelj"</code>) estimator, and each replication’s contributions sum <em>exactly</em> to <code>f(x) - f(background)</code> by construction, so <code>adjust = TRUE</code> (which corrects for the lack of that property under the default estimator) is not applicable and errors informatively if requested together with <code>method = "permutation"</code>. <code>parallel = TRUE</code> is not yet supported for this method. Because the telescoping property requires walking every feature regardless of what’s requested, <code>feature_names</code> only subsets the <em>output</em> under <code>method = "permutation"</code> (unlike the default estimator, whose cost scales down with fewer requested features) — see <code><a href="../reference/explain.html">?explain</a></code> for details.</li>
+</ul></div>
+</div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.2.0" id="fastshap-020">fastshap 0.2.0<a class="anchor" aria-label="anchor" href="#fastshap-020"></a></h2>
 <div class="section level3">

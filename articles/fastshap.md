@@ -393,6 +393,47 @@ cor(as.numeric(ex.exact), as.numeric(ex.approx))
 As expected, the Monte Carlo approximation tracks the exact Shapley
 values closely.
 
+## An alternative Monte Carlo estimator: permutation walks
+
+By default,
+[`explain()`](https://bgreenwell.github.io/fastshap/reference/explain.md)
+uses the Strumbelj and Kononenko (2014) estimator described above, which
+draws independent random coalitions for each feature. Setting
+`method = "permutation"` switches to a different (also unbiased)
+estimator that walks a single random permutation through *all* features
+per replication, flipping one feature at a time from background to
+foreground and reading off each feature’s contribution as the difference
+between consecutive predictions. This computes every feature’s
+contribution from roughly half as many predictions as the default
+estimator, and each replication’s contributions sum *exactly* to the
+difference between the prediction and the background average (so
+`adjust = TRUE`, which corrects for the lack of that property under the
+default estimator, is not applicable here).
+
+Reusing the linear model and background data from above:
+
+``` r
+
+set.seed(103)
+ex.perm <- explain(fit.lm, X = X.friedman, pred_wrapper = pfun.lm, nsim = 300,
+                   method = "permutation")
+
+cor(as.numeric(ex.exact), as.numeric(ex.perm))
+```
+
+    ## [1] 0.998355
+
+The two Monte Carlo estimators agree with each other (and with the exact
+values) up to simulation noise. One practical difference:
+`method = "permutation"` always computes contributions for *every*
+feature internally (the telescoping property requires walking the full
+permutation), so unlike the default estimator, requesting a subset via
+`feature_names` only trims the *output* — it doesn’t reduce the amount
+of work performed. The default estimator remains the better choice when
+only a handful of features are of interest; the permutation-walk
+estimator is the better choice when explaining all (or most) features at
+once.
+
 ## Main, total, and interaction effects
 
 The Friedman 1 benchmark also bakes in a real pairwise interaction
@@ -478,7 +519,7 @@ stopCluster(cl)
 cor(as.numeric(ex.par), as.numeric(ex.t1$shapley_values))
 ```
 
-    ## [1] 0.9670876
+    ## [1] 0.9656705
 
 ## References
 

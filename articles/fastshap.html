@@ -25,7 +25,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">fastshap</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -359,6 +359,41 @@ whose features are independent by construction:</p>
 values closely.</p>
 </div>
 <div class="section level2">
+<h2 id="an-alternative-monte-carlo-estimator-permutation-walks">An alternative Monte Carlo estimator: permutation walks<a class="anchor" aria-label="anchor" href="#an-alternative-monte-carlo-estimator-permutation-walks"></a>
+</h2>
+<p>By default, <code><a href="../reference/explain.html">explain()</a></code> uses the Strumbelj and Kononenko
+(2014) estimator described above, which draws independent random
+coalitions for each feature. Setting <code>method = "permutation"</code>
+switches to a different (also unbiased) estimator that walks a single
+random permutation through <em>all</em> features per replication,
+flipping one feature at a time from background to foreground and reading
+off each feature’s contribution as the difference between consecutive
+predictions. This computes every feature’s contribution from roughly
+half as many predictions as the default estimator, and each
+replication’s contributions sum <em>exactly</em> to the difference
+between the prediction and the background average (so
+<code>adjust = TRUE</code>, which corrects for the lack of that property
+under the default estimator, is not applicable here).</p>
+<p>Reusing the linear model and background data from above:</p>
+<div class="sourceCode" id="cb33"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">103</span><span class="op">)</span></span>
+<span><span class="va">ex.perm</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/explain.html">explain</a></span><span class="op">(</span><span class="va">fit.lm</span>, X <span class="op">=</span> <span class="va">X.friedman</span>, pred_wrapper <span class="op">=</span> <span class="va">pfun.lm</span>, nsim <span class="op">=</span> <span class="fl">300</span>,</span>
+<span>                   method <span class="op">=</span> <span class="st">"permutation"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/stats/cor.html" class="external-link">cor</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/numeric.html" class="external-link">as.numeric</a></span><span class="op">(</span><span class="va">ex.exact</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/numeric.html" class="external-link">as.numeric</a></span><span class="op">(</span><span class="va">ex.perm</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<pre><code><span><span class="co">## [1] 0.998355</span></span></code></pre>
+<p>The two Monte Carlo estimators agree with each other (and with the
+exact values) up to simulation noise. One practical difference:
+<code>method = "permutation"</code> always computes contributions for
+<em>every</em> feature internally (the telescoping property requires
+walking the full permutation), so unlike the default estimator,
+requesting a subset via <code>feature_names</code> only trims the
+<em>output</em> — it doesn’t reduce the amount of work performed. The
+default estimator remains the better choice when only a handful of
+features are of interest; the permutation-walk estimator is the better
+choice when explaining all (or most) features at once.</p>
+</div>
+<div class="section level2">
 <h2 id="main-total-and-interaction-effects">Main, total, and interaction effects<a class="anchor" aria-label="anchor" href="#main-total-and-interaction-effects"></a>
 </h2>
 <p>The Friedman 1 benchmark also bakes in a real pairwise interaction
@@ -376,7 +411,7 @@ data set.</p>
 <p>We’ll fit a multivariate adaptive regression spline (<a href="https://cran.r-project.org/package=earth" class="external-link">earth</a>) with
 <code>degree = 2</code> so the fitted model can actually capture the
 <code>x1:x2</code> interaction:</p>
-<div class="sourceCode" id="cb33"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb35"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="http://www.milbo.users.sonic.net/earth/" class="external-link">earth</a></span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">fit.mars</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/earth/man/earth.html" class="external-link">earth</a></span><span class="op">(</span><span class="va">y</span> <span class="op">~</span> <span class="va">.</span>, data <span class="op">=</span> <span class="va">trn</span>, degree <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span>
@@ -416,7 +451,7 @@ If fastshap (or ranger) is installed somewhere other than the default
 library path — as happens, for instance, when building this vignette
 from a development checkout — the workers also need to be told where to
 look via <code><a href="https://rdrr.io/r/base/libPaths.html" class="external-link">.libPaths()</a></code>:</p>
-<div class="sourceCode" id="cb35"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb37"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/RevolutionAnalytics/doparallel" class="external-link">doParallel</a></span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">cl</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/parallel/makeCluster.html" class="external-link">makeCluster</a></span><span class="op">(</span><span class="fl">2L</span><span class="op">)</span>  <span class="co"># adjust to the number of cores available on your machine</span></span>
@@ -429,7 +464,7 @@ look via <code><a href="https://rdrr.io/r/base/libPaths.html" class="external-li
 <span></span>
 <span><span class="co"># Results are consistent with the sequential run above</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/stats/cor.html" class="external-link">cor</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/numeric.html" class="external-link">as.numeric</a></span><span class="op">(</span><span class="va">ex.par</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/numeric.html" class="external-link">as.numeric</a></span><span class="op">(</span><span class="va">ex.t1</span><span class="op">$</span><span class="va">shapley_values</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## [1] 0.9670876</span></span></code></pre>
+<pre><code><span><span class="co">## [1] 0.9656705</span></span></code></pre>
 </div>
 <div class="section level2">
 <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a>

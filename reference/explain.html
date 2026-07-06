@@ -17,7 +17,7 @@ et. al. (2020) for details."></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">fastshap</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -73,6 +73,7 @@ et. al. (2020) for details.</p>
 <span>  seed <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  exact <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  batch_size <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  method <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"strumbelj"</span>, <span class="st">"permutation"</span><span class="op">)</span>,</span>
 <span>  <span class="va">...</span></span>
 <span><span class="op">)</span></span>
 <span></span>
@@ -270,6 +271,27 @@ a single pair of prediction calls, which is fastest but requires
 set <code>batch_size</code> to bound the size of each prediction call instead. All of
 the randomness is drawn up front, so for a fixed seed the results are
 identical regardless of <code>batch_size</code>.</p></dd>
+
+
+<dt id="arg-method">method<a class="anchor" aria-label="anchor" href="#arg-method"></a></dt>
+<dd><p>Character string specifying the Monte Carlo estimator to use
+(only relevant when <code>exact = FALSE</code>). <code>"strumbelj"</code> (the default) is the
+Strumbelj and Kononenko (2014) estimator described above: independent
+random coalitions per feature, <code>2 * nsim</code> predictions per feature
+(<code>2 * nsim * p</code> total for <code>p</code> features), and supports <code>feature_names</code>
+subsetting (requesting fewer features costs proportionally less) and
+<code>parallel = TRUE</code>. <code>"permutation"</code> walks a single random permutation
+through <em>all</em> features per replication, flipping one feature at a time
+from background to foreground and reading off each feature's contribution
+as the consecutive prediction difference; this costs about <code>nsim * p</code>
+predictions <em>for all features combined</em> (roughly half of <code>"strumbelj"</code>'s
+cost for computing every feature), and each replication's contributions
+sum <em>exactly</em> to <code>f(x) - f(background)</code> (verifiable via <code>raw = TRUE</code>),
+so <code>adjust = TRUE</code> is inapplicable (and an error) for this method. Because
+the telescoping property requires walking every feature regardless of
+what is requested, <code>feature_names</code> only subsets the <em>output</em> under
+<code>"permutation"</code> — it does not reduce the amount of work performed, unlike
+<code>"strumbelj"</code>. <code>parallel = TRUE</code> is not yet supported for <code>"permutation"</code>.</p></dd>
 
 </dl></div>
     <div class="section level2">

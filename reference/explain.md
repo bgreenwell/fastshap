@@ -29,6 +29,7 @@ explain(
   seed = NULL,
   exact = FALSE,
   batch_size = NULL,
+  method = c("strumbelj", "permutation"),
   ...
 )
 
@@ -239,6 +240,28 @@ explain(
   feature; set `batch_size` to bound the size of each prediction call
   instead. All of the randomness is drawn up front, so for a fixed seed
   the results are identical regardless of `batch_size`.
+
+- method:
+
+  Character string specifying the Monte Carlo estimator to use (only
+  relevant when `exact = FALSE`). `"strumbelj"` (the default) is the
+  Strumbelj and Kononenko (2014) estimator described above: independent
+  random coalitions per feature, `2 * nsim` predictions per feature
+  (`2 * nsim * p` total for `p` features), and supports `feature_names`
+  subsetting (requesting fewer features costs proportionally less) and
+  `parallel = TRUE`. `"permutation"` walks a single random permutation
+  through *all* features per replication, flipping one feature at a time
+  from background to foreground and reading off each feature's
+  contribution as the consecutive prediction difference; this costs
+  about `nsim * p` predictions *for all features combined* (roughly half
+  of `"strumbelj"`'s cost for computing every feature), and each
+  replication's contributions sum *exactly* to `f(x) - f(background)`
+  (verifiable via `raw = TRUE`), so `adjust = TRUE` is inapplicable (and
+  an error) for this method. Because the telescoping property requires
+  walking every feature regardless of what is requested, `feature_names`
+  only subsets the *output* under `"permutation"` — it does not reduce
+  the amount of work performed, unlike `"strumbelj"`. `parallel = TRUE`
+  is not yet supported for `"permutation"`.
 
 ## Value
 
